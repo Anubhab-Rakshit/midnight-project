@@ -1,0 +1,74 @@
+pragma language_version >= 0.22;
+
+import CompactStandardLibrary;
+
+// ============================================================
+// Omen — Cryptographic Premonition Registry
+// Level 2: Observable Privacy Behavior
+// ============================================================
+// Users seal a secret prediction on-chain. Only a commitment
+// hash is stored publicly. The actual premonition text and
+// its random salt remain entirely in the user's local state.
+//
+// Observable privacy: anyone can verify a premonition exists
+// (the hash is on-chain), but no one can read the prediction
+// without the owner's private state.
+// ============================================================
+
+// Public ledger state — visible on the blockchain
+export ledger premonitionHash: Bytes<32>;
+export ledger sealedCount: Counter;
+
+// Private witnesses — never leave the client machine
+witness localPremonition(): Bytes<32>;
+witness localSalt(): Bytes<32>;
+
+// ============================================================
+// Helper: domain-separated commitment hash
+// ============================================================
+circuit commitPremonition(premonition: Bytes<32>, salt: Bytes<32>): Bytes<32> {
+    return persistentHash<Vector<3, Bytes<32>>>([
+        pad(32, "omen:v1:premonition:"),
+        premonition,
+        salt
+    ]);
+}
+
+// ============================================================
+// Constructor — initializes the contract at deploy time
+// ============================================================
+constructor() {
+    const p = localPremonition();
+    const s = localSalt();
+    // Commit the hash on-chain; premonition and salt stay private
+    premonitionHash = disclose(commitPremonition(p, s));
+}
+
+// ============================================================
+// seal — store a new premonition commitment
+// Proves the caller knows (premonition, salt) without revealing them
+// ============================================================
+export circuit seal(): [] {
+    const p = localPremonition();
+    const s = localSalt();
+
+    // Verify against on-chain state
+    assert(premonitionHash == commitPremonition(p, s), "Premonition mismatch");
+
+    sealedCount.increment(1);
+
+    // Re-commit (allows rotation — user can update salt later)
+    premonitionHash = disclose(commitPremonition(p, s));
+}
+
+// ============================================================
+// verify — pure proof of knowledge, zero disclosure
+// Observers see a valid ZK proof was submitted but learn nothing
+// ============================================================
+export circuit verify(): [] {
+    const p = localPremonition();
+    const s = localSalt();
+
+    // Proves knowledge without revealing anything
+    assert(premonitionHash == commitPremonition(p, s), "Cannot verify premonition");
+}

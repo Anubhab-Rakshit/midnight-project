@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../../",
+  "sources": ["premonition.compact", "compiler/standard-library.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAuCA;;;;;;;;;;;;;;;;MAWA,AAAA,IAWC;;;;;;;;;;;;;;;;;;;;;;OAAA;MAMD,AAAA,MAMC;;;;;;;;;;;;;;;;;;;;;;OAAA;;;;;;;;;;GA7BA;EALD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IArBA;;;;;;;;;yEAAyC;IACzC;;;;;;;;;yEAAmC;UAqBzB,GAAsB;UACtB,GAAe;UAErB,KAAe,6BAA8B,GAAC,EAAE,GAAC;IAAjD;;;;;;;2HAAA,KAAe;;yEAAA;;;;;;;GAClB;EC5CD,AAAA,kBAAA;oEAAA;;;EDsBA,AAAA,mBAAsC;;0DAAtC,gBAAsC;;;;;;;;;;;;;;GAAA;EACtC,AAAA,YAA+B;;0DAA/B,SAA+B;;;;;;;;;;;;;;GAAA;EAK/B,AAAA,oBAMC,CANyB,aAAsB,EAAE,MAAe;;mCAGzD,aAAW;mCACX,MAAI;GAEX;EAgBD,AAAA,OAWC;UAVS,GAAsB;UACtB,GAAe;kEAGd;;;;;;;;;;;uIAAe;oEAAsB,GAAC,EAAE,GAAC;;UAEhD,KAAW;IAAX;;;;;;;;;;6FAAA,KAAW;;;;wEAAA;UAGX,KAAe,6BAA8B,GAAC,EAAE,GAAC;IAAjD;;;;;;;2HAAA,KAAe;;yEAAA;;GAClB;EAMD,AAAA,SAMC;UALS,GAAsB;UACtB,GAAe;kEAGd;;;;;;;;;;;uIAAe;oEAAsB,GAAC,EAAE,GAAC;;;GACnD;;;;;;;;;;;;;;;;;;;;;;;;IAvDD;qCAAA;;;;;;;;;;;0GAAyC;KAAA;IACzC;qCAAA;;;;;;;;;;;0GAAmC;KAAA;;;;;;;;;;;;"
+}
