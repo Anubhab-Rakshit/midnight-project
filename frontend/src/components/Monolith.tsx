@@ -4,14 +4,21 @@ import { Fingerprint, Check, Loader2 } from 'lucide-react';
 import { Magnetic } from './Magnetic';
 
 interface MonolithProps {
-  onProve: () => Promise<void>;
+  onProve: (premonition: string) => Promise<void>;
   isProving: boolean;
   hasProven: boolean;
+  /** Commitment hash to display after sealing */
+  commitmentHash?: string | null;
 }
 
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
 
-export const Monolith: React.FC<MonolithProps> = ({ onProve, isProving, hasProven }) => {
+export const Monolith: React.FC<MonolithProps> = ({ 
+  onProve, 
+  isProving, 
+  hasProven, 
+  commitmentHash 
+}) => {
   const [premonition, setPremonition] = useState('');
   const [displayPremonition, setDisplayPremonition] = useState('');
   
@@ -97,7 +104,7 @@ export const Monolith: React.FC<MonolithProps> = ({ onProve, isProving, hasProve
           <Magnetic pull={0.2}>
             <button 
               className="omen-btn" 
-              onClick={onProve}
+              onClick={() => onProve(premonition)}
               disabled={isProving || hasProven || !premonition}
             >
               {isProving ? (
@@ -142,7 +149,7 @@ export const Monolith: React.FC<MonolithProps> = ({ onProve, isProving, hasProve
             <h3 className="monolith-title" style={{ fontSize: '2rem', marginBottom: '1rem' }}>Sealed Forever</h3>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '280px' }}>
               Your premonition is cryptographically bound to the Midnight Preprod ledger.<br/><br/>
-              <span className="text-gold">hash: 0xe3b0c44298fc1...b855</span>
+              <span className="text-gold">hash: {commitmentHash ? commitmentHash.slice(0, 16) + '...' + commitmentHash.slice(-4) : '0xe3b0c44298fc1...b855'}</span>
             </p>
           </motion.div>
         )}

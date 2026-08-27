@@ -9,12 +9,19 @@ import { CustomCursor } from './components/CustomCursor';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { LiquidAura } from './components/LiquidAura';
+import { MidnightWalletProvider, useMidnightWallet } from './context/MidnightWalletContext';
+import { useOmenContract } from './hooks/useOmenContract';
 
-function App() {
+function AppContent() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [view, setView] = useState<'oracle' | 'chronicles'>('oracle');
   const [isProving, setIsProving] = useState(false);
   const [hasProven, setHasProven] = useState(false);
+  const [commitmentHash, setCommitmentHash] = useState<string | null>(null);
+  const [sealError, setSealError] = useState<string | null>(null);
+
+  const { isConnected, connect, isConnecting, address } = useMidnightWallet();
+  const { sealPremonition, isExecuting } = useOmenContract();
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -38,12 +45,35 @@ function App() {
     };
   }, []);
 
-  const handleProve = async () => {
+  const handleProve = async (premonition: string) => {
+    if (!premonition.trim()) {
+      return;
+    }
+
     setIsProving(true);
-    setTimeout(() => {
-      setIsProving(false);
+    setSealError(null);
+
+    try {
+      // Generate random salt for this premonition
+      const salt = Array.from({ length: 32 }, () =>
+        Math.floor(Math.random() * 16).toString(16)
+      ).join('');
+
+      // Execute the real ZK seal circuit
+      const result = await sealPremonition(premonition, salt);
+
+      // Store the commitment hash
+      setCommitmentHash(result.commitmentHash);
       setHasProven(true);
-    }, 4500);
+
+      console.log('[App] Premonition sealed successfully');
+      console.log('[App] Commitment hash:', result.commitmentHash);
+    } catch (err) {
+      console.error('[App] Seal failed:', err);
+      setSealError(err instanceof Error ? err.message : 'Failed to seal premonition');
+    } finally {
+      setIsProving(false);
+    }
   };
 
   return (
@@ -69,6 +99,58 @@ function App() {
               <AnimatePresence mode="wait">
                 {view === 'oracle' ? (
                   <motion.div key="oracle-view" style={{ width: '100%' }}>
+                    {/* Wallet Connection Status */}
+                    {!isConnected && (
+                      <motion.div
+                        style={{ 
+                          textAlign: 'center', 
+                          marginBottom: '2rem',
+                          padding: '1rem',
+                          border: '1px solid rgba(212, 175, 55, 0.3)',
+                          borderRadius: '8px',
+                          background: 'rgba(212, 175, 55, 0.05)',
+                        }}
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                          Connect your Midnight wallet to inscribe premonitions
+                        </p>
+                        <button
+                          onClick={connect}
+                          disabled={isConnecting}
+                          style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '11px',
+                            padding: '0.5rem 1.5rem',
+                            background: 'transparent',
+                            border: '1px solid var(--accent-gold)',
+                            color: 'var(--accent-gold)',
+                            cursor: 'pointer',
+                            letterSpacing: '0.1em',
+                          }}
+                        >
+                          {isConnecting ? 'CONNECTING...' : 'CONNECT WALLET'}
+                        </button>
+                      </motion.div>
+                    )}
+
+                    {isConnected && address && (
+                      <motion.div
+                        style={{ 
+                          textAlign: 'center', 
+                          marginBottom: '2rem',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '10px',
+                          color: 'var(--text-muted)',
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        Connected: {address.slice(0, 12)}...{address.slice(-8)}
+                      </motion.div>
+                    )}
+
                     {!hasProven && (
                       <motion.div 
                         style={{ textAlign: 'center', marginBottom: '4rem' }}
@@ -82,10 +164,32 @@ function App() {
                         </h1>
                       </motion.div>
                     )}
+
+                    {/* Error Display */}
+                    {sealError && (
+                      <motion.div
+                        style={{
+                          textAlign: 'center',
+                          marginBottom: '2rem',
+                          padding: '1rem',
+                          border: '1px solid rgba(255, 80, 80, 0.3)',
+                          borderRadius: '8px',
+                          background: 'rgba(255, 80, 80, 0.05)',
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#ff5050' }}>
+                          {sealError}
+                        </p>
+                      </motion.div>
+                    )}
+
                     <Monolith 
                       onProve={handleProve} 
-                      isProving={isProving} 
-                      hasProven={hasProven} 
+                      isProving={isProving || isExecuting} 
+                      hasProven={hasProven}
+                      commitmentHash={commitmentHash}
                     />
                   </motion.div>
                 ) : (
@@ -99,6 +203,14 @@ function App() {
         </motion.div>
       )}
     </>
+  );
+}
+
+function App() {
+  return (
+    <MidnightWalletProvider>
+      <AppContent />
+    </MidnightWalletProvider>
   );
 }
 
