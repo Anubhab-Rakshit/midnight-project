@@ -1,0 +1,58 @@
+{
+  "manifest-version": "1",
+  "compiler-version": "0.34.0",
+  "language-version": "0.26.0",
+  "runtime-version": "0.19.0",
+  "compiler": {
+    "type": "directory",
+    "contract-info.json": {
+      "type": "file",
+      "size": 725,
+      "hash": "67153e2ec2ab92c5b685276549a2087282bb370941d853286e709e84bebcfbf6"
+    }
+  },
+  "contract": {
+    "type": "directory",
+    "index.d.ts": {
+      "type": "file",
+      "size": 1452,
+      "hash": "1fb8aebaa5890e12760831c1f9460f24fa2608f88185517d459478eb2f10b3ed"
+    },
+    "index.js": {
+      "type": "file",
+      "size": 10641,
+      "hash": "d5e7d067f4d817a067a33fbb40798afd2eb4ac9fd2a63358779a9bb6c22f74f7"
+    },
+    "index.js.map": {
+      "type": "file",
+      "size": 510,
+      "hash": "6b5ef92fe57570eedc8f21af60c5ecd9f93e239a4a1a34de4f02d416b298c5ff"
+    }
+  },
+  "zkir": {
+    "type": "directory",
+    "storeMessage.bzkir": {
+      "type": "file",
+      "size": 105,
+      "hash": "3c1c10784262ce458d20855ec5f8c8c67a8a5001833da16be3e7a0c3d0cdb104"
+    },
+    "storeMessage.zkir": {
+      "type": "file",
+      "size": 1004,
+      "hash": "420b39a2ee06bd9503999548eccf3dd5a6bbbfa79d8fde52d824a8af2e868744"
+    }
+  },
+  "keys": {
+    "type": "directory",
+    "storeMessage.prover": {
+      "type": "file",
+      "size": 22439,
+      "hash": "e5b6feb4be2ef6833a71d389d7c14e025dcf01f1e3ba44c70b86df680e767c7a"
+    },
+    "storeMessage.verifier": {
+      "type": "file",
+      "size": 1351,
+      "hash": "2bd62634361cb66476dfab1cc3ff204ef5bbf3b2230652f5951a09a5cccc8d42"
+    }
+  }
+}
