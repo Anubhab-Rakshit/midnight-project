@@ -123,6 +123,57 @@ Compiling 1 circuits:
   circuit "storeMessage" (k=6, rows=26)
 ```
 
+### Screenshots
+
+#### Toolchain Verification
+```
+🌙 Midnight Toolchain Verification
+==================================
+
+1. Checking Node.js...
+   ✅ Node.js: v22.15.1
+   ✅ Version 22+ confirmed
+
+2. Checking Docker...
+   ✅ Docker: 29.4.0
+   ✅ Docker Compose v2: v5.1.1
+
+3. Checking Compact compiler...
+   ✅ Compact CLI: compact 0.5.2
+   ✅ Compiler: 0.34.0
+
+4. Checking contract compilation...
+   ✅ Contract compiled
+   📁 Output: contracts/managed/hello-world/
+
+==================================
+Verification complete!
+```
+
+#### Successful Compile Output
+```
+$ compact compile hello-world.compact managed/hello-world
+Compiling 1 circuits:
+```
+
+#### Compiled Contract Structure
+```
+contracts/managed/hello-world/
+├── compiler/
+│   ├── contract-info.json
+│   └── contract-manifest.json
+├── contract/
+│   ├── index.d.ts
+│   ├── index.js
+│   └── index.js.map
+├── keys/
+│   ├── storeMessage.prover
+│   └── storeMessage.verifier
+└── zkir/
+    ├── storeMessage.bzkir
+    └── storeMessage.zkir
+```
+
 ## Network Configuration
 
 | Network | Purpose | Faucet |
