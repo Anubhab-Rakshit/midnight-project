@@ -83,6 +83,8 @@ function AppContent() {
             walletAddress: address,
             premonitionText: premonition,
             commitmentHash: result.commitmentHash,
+            txHash: result.txHash,
+            blockHeight: result.blockHeight,
           });
           console.log('[App] Premonition saved to Supabase');
         } catch (saveErr) {
