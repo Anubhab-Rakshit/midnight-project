@@ -1,6 +1,7 @@
 
 import { motion } from 'framer-motion';
 import { Magnetic } from './Magnetic';
+import { useMidnightWallet } from '../context/MidnightWalletContext';
 
 interface NavbarProps {
   view: 'oracle' | 'chronicles';
@@ -8,6 +9,8 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
+  const { isConnected, isConnecting, address, connect, disconnect } = useMidnightWallet();
+
   return (
     <motion.nav 
       className="floating-nav"
@@ -29,8 +32,14 @@ export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
             <span className="text-mono text-muted" style={{ fontSize: '9px' }}>SYS.ONLINE</span>
           </div>
           <Magnetic pull={0.2}>
-            <button className="connect-btn">
-              <span className="btn-text">CONNECT LACE</span>
+            <button 
+              className="connect-btn"
+              onClick={isConnected ? disconnect : connect}
+              disabled={isConnecting}
+            >
+              <span className="btn-text">
+                {isConnecting ? 'CONNECTING...' : isConnected ? `${address?.slice(0, 12)}...` : 'CONNECT LACE'}
+              </span>
               <div className="btn-glare"></div>
             </button>
           </Magnetic>
