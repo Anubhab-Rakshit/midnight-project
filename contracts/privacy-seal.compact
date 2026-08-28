@@ -1,0 +1,80 @@
+pragma language_version >= 0.22;
+
+import CompactStandardLibrary;
+
+// ============================================================
+// Level 2 — Observable Privacy Behavior Contract
+// ============================================================
+// This contract demonstrates:
+// 1. Private witnesses (secret key, message count) that never leave the client
+// 2. Commitment scheme: hash of secret stored on-chain, secret stays private
+// 3. Observable privacy: verifySecret() proves knowledge without revealing anything
+// 4. Selective disclosure: sealMessage() discloses only the message, not the secret
+// ============================================================
+
+// Public ledger state - visible on blockchain
+export ledger secretCommitment: Bytes<32>;
+export ledger messageCount: Counter;
+export ledger lastDisclosedMessage: Opaque<"string">;
+
+// Private witness - NEVER disclosed on chain
+// These values are provided by the TypeScript driver and stay local
+witness localSecretKey(): Bytes<32>;
+witness localMessageCount(): Uint<64>;
+
+// ============================================================
+// Helper circuit: compute commitment from secret
+// Domain separator ensures this commitment is unique to this contract
+// ============================================================
+circuit commitment(sk: Bytes<32>): Bytes<32> {
+    return persistentHash<Vector<2, Bytes<32>>>(
+        [pad(32, "midnight-level2:v1:commitment:"), sk]
+    );
+}
+
+// ============================================================
+// Constructor: initialize with secret commitment
+// Runs once at deployment - only the hash is stored on-chain
+// ============================================================
+constructor() {
+    const sk = localSecretKey();
+    // Only the commitment hash is stored on-chain
+    // The secret itself never leaves the client machine
+    secretCommitment = disclose(commitment(sk));
+    lastDisclosedMessage = disclose("initialized");
+}
+
+// ============================================================
+// Circuit: seal a secret message
+// Proves knowledge of secret AND stores a public message
+// The secret key is verified but never revealed
+// ============================================================
+export circuit sealMessage(message: Opaque<"string">): [] {
+    const sk = localSecretKey();
+
+    // Verify the secret key matches the on-chain commitment
+    // This proves we know the secret without revealing it
+    assert(secretCommitment == commitment(sk), "Invalid secret key");
+
+    // Increment the message counter (public)
+    messageCount.increment(1);
+
+    // Disclose only the message content (not the secret)
+    lastDisclosedMessage = disclose(message);
+}
+
+// ============================================================
+// Circuit: verify secret without disclosing anything
+// This is the CORE "observable privacy behavior" —
+// proves knowledge of the secret without revealing ANY data
+// ============================================================
+export circuit verifySecret(): [] {
+    const sk = localSecretKey();
+
+    // This assertion proves we know the secret
+    // The ZK proof verifies this without the secret ever appearing on-chain
+    assert(secretCommitment == commitment(sk), "Cannot verify: invalid secret");
+
+    // No disclosure - purely a proof of knowledge
+    // Observers can see a valid proof was submitted, but learn nothing new
+}
