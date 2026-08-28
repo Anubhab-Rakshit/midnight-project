@@ -37,6 +37,26 @@ async function queryIndexer<T>(query: string, variables: Record<string, unknown>
   return json.data as T;
 }
 
+/** Binary search for the latest block height */
+async function findLatestBlockHeight(): Promise<number> {
+  let low = 0;
+  let high = 3_000_000;
+
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2);
+    const data = await queryIndexer<{ block: { height: number } | null }>(
+      `query { block(offset: { height: ${mid} }) { height } }`,
+    );
+    if (data.block) {
+      low = mid;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return low;
+}
+
 interface ContractActionResponse {
   contractAction: {
     __typename: string;
@@ -65,13 +85,6 @@ interface BlockTransactionsResponse {
         address?: string;
       }>;
     }>;
-  } | null;
-}
-
-interface LatestBlockResponse {
-  block: {
-    height: number;
-    timestamp: number;
   } | null;
 }
 
@@ -114,16 +127,12 @@ export function usePremonitions() {
         });
       }
 
-      // 2. Scan recent blocks for contract interactions
-      const latestData = await queryIndexer<LatestBlockResponse>(
-        `query { block(offset: {}) { height timestamp } }`,
-      );
+      // 2. Find latest block, then scan backwards for contract interactions
+      const latestHeight = await findLatestBlockHeight();
+      const deployHeight = deployData.contractAction?.transaction.block.height ?? 0;
+      const scanStart = Math.max(deployHeight, latestHeight - 50);
 
-      const latestHeight = latestData.block?.height ?? 0;
-      const scanRange = Math.min(100, latestHeight);
-      const startHeight = Math.max(0, latestHeight - scanRange);
-
-      for (let h = latestHeight; h >= startHeight; h--) {
+      for (let h = latestHeight; h >= scanStart; h--) {
         try {
           const blockData = await queryIndexer<BlockTransactionsResponse>(
             `query GetBlock($height: Int!) {
@@ -163,7 +172,6 @@ export function usePremonitions() {
         }
       }
 
-      // Sort by block height descending
       records.sort((a, b) => b.blockHeight - a.blockHeight);
       setPremonitions(records);
     } catch (err) {
