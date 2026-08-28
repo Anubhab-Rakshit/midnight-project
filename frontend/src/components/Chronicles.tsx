@@ -2,10 +2,7 @@ import { motion } from 'framer-motion';
 import { usePremonitions } from '../hooks/usePremonitions';
 
 export const Chronicles = () => {
-  const { premonitions, contractState, isLoading, error, refetch, contractAddress } = usePremonitions();
-
-  const premonitionHash = contractState.find((f) => f.name === 'premonitionHash')?.value;
-  const sealedCount = contractState.find((f) => f.name === 'sealedCount')?.value;
+  const { premonitions, isLoading, error, refetch, contractAddress } = usePremonitions();
 
   return (
     <motion.div
@@ -34,16 +31,14 @@ export const Chronicles = () => {
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '0.5rem', wordBreak: 'break-all' }}>
           {contractAddress}
         </div>
-        {premonitionHash && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
-            Current hash: <span className="text-gold">{premonitionHash.slice(0, 20)}...{premonitionHash.slice(-8)}</span>
-          </div>
-        )}
-        {sealedCount !== undefined && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-            Sealed: <span className="text-gold">{sealedCount}</span>
-          </div>
-        )}
+        <a
+          href={`https://explorer.preprod.midnight.network/address/${contractAddress}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent-gold)', textDecoration: 'none', opacity: 0.7 }}
+        >
+          VIEW ON EXPLORER
+        </a>
       </div>
 
       {/* Status */}
@@ -104,15 +99,15 @@ export const Chronicles = () => {
                   fontSize: '9px',
                   padding: '0.2rem 0.5rem',
                   borderRadius: '100px',
-                  background: tx.status === 'finalized' ? 'rgba(52,211,153,0.1)' : 'rgba(251,191,36,0.1)',
-                  color: tx.status === 'finalized' ? '#34d399' : '#fbbf24',
-                  border: `1px solid ${tx.status === 'finalized' ? 'rgba(52,211,153,0.2)' : 'rgba(251,191,36,0.2)'}`,
+                  background: tx.actionType === 'Contract Deploy' ? 'rgba(139,92,246,0.1)' : 'rgba(52,211,153,0.1)',
+                  color: tx.actionType === 'Contract Deploy' ? '#a78bfa' : '#34d399',
+                  border: `1px solid ${tx.actionType === 'Contract Deploy' ? 'rgba(139,92,246,0.2)' : 'rgba(52,211,153,0.2)'}`,
                 }}>
-                  {tx.status}
+                  {tx.actionType}
                 </div>
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
-                tx: {tx.txHash.slice(0, 20)}...
+                tx: {tx.txHash}
               </div>
             </div>
           ))}

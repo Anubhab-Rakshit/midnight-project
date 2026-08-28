@@ -12,39 +12,13 @@ const CONTRACT_ADDRESS = '5b7dcd349113b6dc0a11caa89b9245dc701d43e1cf114fc99bd10a
 
 export interface PremonitionRecord {
   id: string;
-  commitmentHash: string;
+  txHash: string;
   timestamp: string;
   blockHeight: number;
-  txHash: string;
-  status: string;
+  actionType: string;
 }
 
-interface LedgerField {
-  name: string;
-  value: string;
-}
-
-interface ContractStateResponse {
-  ledgerState: {
-    fields: LedgerField[];
-  } | null;
-}
-
-interface Transaction {
-  id: string;
-  block: {
-    height: number;
-    hash: string;
-    timestamp: string;
-  };
-  status: string;
-}
-
-interface TransactionsResponse {
-  transactions: Transaction[];
-}
-
-async function queryIndexer<T>(query: string, variables: Record<string, unknown>): Promise<T> {
+async function queryIndexer<T>(query: string, variables: Record<string, unknown> = {}): Promise<T> {
   const response = await fetch(PREPROD_INDEXER_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -57,61 +31,140 @@ async function queryIndexer<T>(query: string, variables: Record<string, unknown>
 
   const json = await response.json();
   if (json.errors?.length > 0) {
-    throw new Error(`GraphQL errors: ${JSON.stringify(json.errors)}`);
+    throw new Error(`GraphQL: ${json.errors[0].message}`);
   }
 
   return json.data as T;
+}
+
+interface ContractActionResponse {
+  contractAction: {
+    __typename: string;
+    address: string;
+    transaction: {
+      hash: string;
+      id: number;
+      block: {
+        height: number;
+        timestamp: number;
+      };
+    };
+  } | null;
+}
+
+interface BlockTransactionsResponse {
+  block: {
+    hash: string;
+    height: number;
+    timestamp: number;
+    transactions: Array<{
+      id: number;
+      hash: string;
+      contractActions: Array<{
+        __typename: string;
+        address?: string;
+      }>;
+    }>;
+  } | null;
+}
+
+interface LatestBlockResponse {
+  block: {
+    height: number;
+    timestamp: number;
+  } | null;
 }
 
 export function usePremonitions() {
   const [premonitions, setPremonitions] = useState<PremonitionRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [contractState, setContractState] = useState<LedgerField[]>([]);
 
   const fetchPremonitions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Fetch contract ledger state (premonitionHash, sealedCount)
-      const stateData = await queryIndexer<ContractStateResponse>(
-        `query GetContractState($addr: String!) {
-          ledgerState(contractAddress: $addr) {
-            fields { name value }
+      const records: PremonitionRecord[] = [];
+
+      // 1. Get the contract deploy action
+      const deployData = await queryIndexer<ContractActionResponse>(
+        `query GetContractAction($addr: String!) {
+          contractAction(address: $addr) {
+            __typename
+            address
+            transaction {
+              hash
+              id
+              block { height timestamp }
+            }
           }
         }`,
         { addr: CONTRACT_ADDRESS },
       );
 
-      const fields = stateData.ledgerState?.fields ?? [];
-      setContractState(fields);
+      if (deployData.contractAction?.transaction) {
+        const tx = deployData.contractAction.transaction;
+        records.push({
+          id: `deploy-${tx.id}`,
+          txHash: tx.hash,
+          timestamp: new Date(tx.block.timestamp).toISOString(),
+          blockHeight: tx.block.height,
+          actionType: 'Contract Deploy',
+        });
+      }
 
-      // Fetch transactions for this contract
-      const txData = await queryIndexer<TransactionsResponse>(
-        `query GetTxs($addr: String!, $limit: Int) {
-          transactions(
-            where: { contractAddress: { equals: $addr } }
-            orderBy: { block: { height: desc } }
-            limit: $limit
-          ) {
-            id
-            block { height hash timestamp }
-            status
-          }
-        }`,
-        { addr: CONTRACT_ADDRESS, limit: 20 },
+      // 2. Scan recent blocks for contract interactions
+      const latestData = await queryIndexer<LatestBlockResponse>(
+        `query { block(offset: {}) { height timestamp } }`,
       );
 
-      const records: PremonitionRecord[] = (txData.transactions || []).map((tx) => ({
-        id: tx.id,
-        commitmentHash: fields.find((f) => f.name === 'premonitionHash')?.value || '0x...',
-        timestamp: tx.block.timestamp,
-        blockHeight: tx.block.height,
-        txHash: tx.id,
-        status: tx.status,
-      }));
+      const latestHeight = latestData.block?.height ?? 0;
+      const scanRange = Math.min(100, latestHeight);
+      const startHeight = Math.max(0, latestHeight - scanRange);
 
+      for (let h = latestHeight; h >= startHeight; h--) {
+        try {
+          const blockData = await queryIndexer<BlockTransactionsResponse>(
+            `query GetBlock($height: Int!) {
+              block(offset: { height: $height }) {
+                height timestamp
+                transactions {
+                  id hash
+                  contractActions {
+                    __typename
+                    ... on ContractCall { address }
+                    ... on ContractUpdate { address }
+                  }
+                }
+              }
+            }`,
+            { height: h },
+          );
+
+          if (blockData.block?.transactions) {
+            for (const tx of blockData.block.transactions) {
+              const hasContractAction = tx.contractActions.some(
+                (a) => a.address === CONTRACT_ADDRESS && a.__typename !== 'ContractDeploy',
+              );
+              if (hasContractAction) {
+                records.push({
+                  id: `call-${tx.id}`,
+                  txHash: tx.hash,
+                  timestamp: new Date(blockData.block.timestamp).toISOString(),
+                  blockHeight: h,
+                  actionType: 'Contract Call',
+                });
+              }
+            }
+          }
+        } catch {
+          // Skip blocks that fail to load
+        }
+      }
+
+      // Sort by block height descending
+      records.sort((a, b) => b.blockHeight - a.blockHeight);
       setPremonitions(records);
     } catch (err) {
       console.warn('[usePremonitions] Indexer query failed:', err);
@@ -127,7 +180,6 @@ export function usePremonitions() {
 
   return {
     premonitions,
-    contractState,
     isLoading,
     error,
     refetch: fetchPremonitions,
