@@ -86,6 +86,34 @@ const bytesToBase64 = (bytes: Uint8Array) => {
   return btoa(binary);
 };
 
+const bytesToHex = (bytes: Uint8Array) =>
+  Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+
+/**
+ * Normalize the wallet's raw public key into a hex string. The wallet API
+ * type claims a string, but in practice may hand us hex, bech32, or bytes —
+ * and the SDK's parse helper throws "input: string expected" on non-strings,
+ * so bytes must be hex-encoded first.
+ */
+function normalizeKeyToHex(value: unknown, label: string): string {
+  if (typeof value === 'string') {
+    const v = value.replace(/^0x/, '');
+    // 64 hex chars = 32-byte key. If bech32 form, let the SDK decode it.
+    return /^[0-9a-fA-F]{64}$/.test(v) ? v.toLowerCase() : value;
+  }
+  if (value instanceof Uint8Array) {
+    console.log(`[Omen] ${label} was a byte array (${value.length} bytes) — encoding to hex`);
+    return bytesToHex(value);
+  }
+  if (value && typeof (value as any).toBytes === 'function') {
+    return bytesToHex(new Uint8Array((value as any).toBytes()));
+  }
+  console.warn(`[Omen] ${label} was unexpected type:`, typeof value);
+  throw new Error(`${label} returned an unexpected value from the wallet`);
+}
+
 /**
  * WalletProvider + MidnightProvider that route balances and submissions
  * through the Lace wallet's ConnectedAPI.
@@ -114,24 +142,16 @@ export class BrowserWalletProvider {
   indexerUri = async (): Promise<string> => (await this.configuration()).indexerUri;
   indexerWsUri = async (): Promise<string> => (await this.configuration()).indexerWsUri;
 
-  /** Best-effort coin public key from the wallet (hex string). */
+  /** Best-effort coin public key from the wallet, normalized to hex. */
   getCoinPublicKey = async (): Promise<unknown> => {
-    try {
-      const addrs = await this.connectedApi.getShieldedAddresses();
-      return addrs.shieldedCoinPublicKey;
-    } catch {
-      return '';
-    }
+    const addrs = await this.connectedApi.getShieldedAddresses();
+    return normalizeKeyToHex(addrs.shieldedCoinPublicKey, 'coin public key');
   };
 
-  /** Best-effort encryption public key from the wallet (hex string). */
+  /** Best-effort encryption public key from the wallet, normalized to hex. */
   getEncryptionPublicKey = async (): Promise<unknown> => {
-    try {
-      const addrs = await this.connectedApi.getShieldedAddresses();
-      return addrs.shieldedEncryptionPublicKey;
-    } catch {
-      return '';
-    }
+    const addrs = await this.connectedApi.getShieldedAddresses();
+    return normalizeKeyToHex(addrs.shieldedEncryptionPublicKey, 'encryption public key');
   };
 
   async balanceTx(tx: any): Promise<any> {
