@@ -23,9 +23,8 @@ import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-j
 // @ts-expect-error Required for wallet sync
 globalThis.WebSocket = WebSocket;
 
-// Identifier under which this contract's private state is stored. The
-// hello-world contract has no witnesses, so its private state is empty ({}).
-const PRIVATE_STATE_ID = 'helloWorldPrivateState';
+// Identifier under which this contract's private state is stored.
+const PRIVATE_STATE_ID = 'premonitionPrivateState';
 
 // ─── Network configuration ─────────────────────────────────────────────────────
 //
@@ -71,20 +70,24 @@ async function waitForProofServer(maxAttempts = 60, delayMs = 2000): Promise<boo
 // ─── Compiled contract loading ─────────────────────────────────────────────────
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const zkConfigPath = path.resolve(__dirname, '..', 'contracts', 'managed', 'hello-world');
+const zkConfigPath = path.resolve(__dirname, '..', 'contracts', 'managed', 'premonition');
 const contractPath = path.join(zkConfigPath, 'contract', 'index.js');
 
 if (!fs.existsSync(contractPath)) {
-  console.error('\n❌ Contract not compiled! Run: npm run compile\n');
+  console.error('\n❌ Contract not compiled! Run: compact compile contracts/premonition.compact contracts/managed/premonition\n');
   process.exit(1);
 }
 
-const HelloWorld = await import(pathToFileURL(contractPath).href);
+const Premonition = await import(pathToFileURL(contractPath).href);
 
-const compiledContract = CompiledContract.make('hello-world', HelloWorld.Contract).pipe(
-  CompiledContract.withVacantWitnesses,
-  CompiledContract.withCompiledFileAssets(zkConfigPath),
-);
+let compiledContract: any = CompiledContract.make('premonition', Premonition.Contract);
+// @ts-expect-error SDK generic types don't infer through union — runtime is correct
+compiledContract = CompiledContract.withWitnesses(compiledContract, {
+  localPremonition: (ctx: any) => [ctx.privateState, crypto.getRandomValues(new Uint8Array(32))],
+  localSalt: (ctx: any) => [ctx.privateState, crypto.getRandomValues(new Uint8Array(32))],
+});
+// @ts-expect-error Same generic inference issue
+compiledContract = CompiledContract.withCompiledFileAssets(compiledContract, zkConfigPath);
 
 // ─── Providers ─────────────────────────────────────────────────────────────────
 
@@ -117,7 +120,7 @@ async function createProviders(walletCtx: WalletContext) {
 
   return {
     privateStateProvider: levelPrivateStateProvider({
-      privateStateStoreName: 'hello-world-state',
+      privateStateStoreName: 'premonition-state',
       accountId,
       privateStoragePasswordProvider: () => privateStatePassword,
     }),
@@ -289,11 +292,9 @@ async function main() {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       // Midnight.js 4.1.x supplies private state via privateStateId +
-      // initialPrivateState (empty here — the hello-world contract has no
-      // witnesses). args is the contract constructor's arguments: empty for
-      // hello-world's no-arg constructor. (Statically-typed contracts can omit
-      // args entirely; this script loads the contract dynamically, so the
-      // conditional args type widens to any[] and an explicit [] is required.)
+      // initialPrivateState. The premonition contract has witnesses, so we
+      // provide initial values. args is the contract constructor's arguments:
+      // empty for premonition's no-arg constructor.
       deployed = await deployContract(providers, {
         compiledContract: compiledContract as any,
         args: [],

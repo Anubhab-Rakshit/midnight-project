@@ -94,15 +94,17 @@ export async function sealPremonition(
   );
   const HelloWorld = await loadContractModule();
 
-  const compiledContract = CompiledContract.make(
+  let compiledContract: any = CompiledContract.make(
     'premonition',
     HelloWorld.Contract,
-  )
-    .withWitnesses({
-      localPremonition: () => premonitionText,
-      localSalt: () => crypto.getRandomValues(new Uint8Array(32)),
-    })
-    .withCompiledFileAssets(ZK_CONFIG_PATH);
+  );
+  // @ts-expect-error SDK generic types don't infer through union — runtime is correct
+  compiledContract = CompiledContract.withWitnesses(compiledContract, {
+    localPremonition: (ctx: any) => [ctx.privateState, new TextEncoder().encode(premonitionText).slice(0, 32)],
+    localSalt: (ctx: any) => [ctx.privateState, crypto.getRandomValues(new Uint8Array(32))],
+  });
+  // @ts-expect-error Same generic inference issue
+  compiledContract = CompiledContract.withCompiledFileAssets(compiledContract, ZK_CONFIG_PATH);
 
   const { deployContract } = await import(
     '@midnight-ntwrk/midnight-js-contracts'
