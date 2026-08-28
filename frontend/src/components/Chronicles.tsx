@@ -128,14 +128,22 @@ export const Chronicles = () => {
                     )}
                     {p.txHash && (
                       <div>
-                        tx: {p.txHash.slice(0, 20)}...
+                        <span style={{ color: 'var(--text-muted)' }}>Tx: </span>
                         <a
                           href={`https://explorer.preprod.midnight.network/tx/${p.txHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: 'var(--accent-gold)', textDecoration: 'none', marginLeft: '0.5rem' }}
+                          title="Click to validate on the Midnight Explorer"
+                          style={{
+                            color: 'var(--accent-gold)',
+                            textDecoration: 'underline',
+                            textUnderlineOffset: '3px',
+                            wordBreak: 'break-all',
+                            cursor: 'pointer',
+                          }}
                         >
-                          validate ↗
+                          {p.txHash.slice(0, 16)}...{p.txHash.slice(-8)}
+                          <span style={{ marginLeft: '0.4rem', fontSize: '9px', whiteSpace: 'nowrap' }}>validate ↗</span>
                         </a>
                       </div>
                     )}
