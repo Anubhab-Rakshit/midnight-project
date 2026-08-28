@@ -11,6 +11,7 @@ import { Footer } from './components/Footer';
 import { LiquidAura } from './components/LiquidAura';
 import { MidnightWalletProvider, useMidnightWallet } from './context/MidnightWalletContext';
 import { useOmenContract } from './hooks/useOmenContract';
+import { savePremonition } from './hooks/usePremonitionsStore';
 
 function AppContent() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -74,6 +75,20 @@ function AppContent() {
 
       console.log('[App] Premonition sealed successfully');
       console.log('[App] Commitment hash:', result.commitmentHash);
+
+      // Persist to Supabase (cross-device storage keyed by wallet)
+      if (address) {
+        try {
+          await savePremonition({
+            walletAddress: address,
+            premonitionText: premonition,
+            commitmentHash: result.commitmentHash,
+          });
+          console.log('[App] Premonition saved to Supabase');
+        } catch (saveErr) {
+          console.warn('[App] Failed to save to Supabase:', saveErr);
+        }
+      }
     } catch (err) {
       console.error('[App] Seal failed:', err);
       setSealError(err instanceof Error ? err.message : 'Failed to seal premonition');
