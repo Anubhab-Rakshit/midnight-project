@@ -14,7 +14,7 @@
 
 <br/>
 
-**[Live Demo](https://omen-midnight.vercel.app/)** · **[Contract on Preprod](#)** · **[Video Demo](#)**
+**[Live Demo](https://omen-midnight.vercel.app/)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/contract/5b7dcd349113b6dc0a11caa89b9245dc701d43e1cf114fc99bd10acf8e930f6c)** · **[Video Demo](#)**
 
 <br/>
 
@@ -327,11 +327,12 @@ cp frontend/.env.example frontend/.env
 - [x] Circuit called successfully from frontend
 - [x] Observable privacy behavior (premonition hash on-chain, text stays private)
 - [x] Contract deployed to Preprod with verifiable address
-- [x] Minimum 8 meaningful commits (11 total)
+- [x] Minimum 8 meaningful commits (13 total)
 - [x] Public GitHub repository with README
 - [x] Live demo link: [omen-midnight.vercel.app](https://omen-midnight.vercel.app/)
 - [ ] Demo video (wallet connect + circuit call)
 - [x] README documenting privacy claim
+- [x] Contract deployed to Preprod: `5b7dcd349113b6dc0a11caa89b9245dc701d43e1cf114fc99bd10acf8e930f6c`
 
 ---
 
