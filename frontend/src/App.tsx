@@ -20,8 +20,14 @@ function AppContent() {
   const [commitmentHash, setCommitmentHash] = useState<string | null>(null);
   const [sealError, setSealError] = useState<string | null>(null);
 
-  const { isConnected, connect, isConnecting, address } = useMidnightWallet();
+  const { isConnected, connect, disconnect, isConnecting, address } = useMidnightWallet();
   const { sealPremonition, isExecuting } = useOmenContract();
+
+  const handleReset = () => {
+    setHasProven(false);
+    setCommitmentHash(null);
+    setSealError(null);
+  };
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -137,17 +143,37 @@ function AppContent() {
 
                     {isConnected && address && (
                       <motion.div
-                        style={{ 
-                          textAlign: 'center', 
+                        style={{
+                          textAlign: 'center',
                           marginBottom: '2rem',
                           fontFamily: 'var(--font-mono)',
                           fontSize: '10px',
                           color: 'var(--text-muted)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '1rem',
                         }}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                       >
-                        Connected: {address.slice(0, 12)}...{address.slice(-8)}
+                        <span>Connected: {address.slice(0, 12)}...{address.slice(-8)}</span>
+                        <button
+                          onClick={disconnect}
+                          style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '9px',
+                            padding: '0.25rem 0.75rem',
+                            background: 'transparent',
+                            border: '1px solid rgba(255, 80, 80, 0.4)',
+                            color: '#ff5050',
+                            cursor: 'pointer',
+                            letterSpacing: '0.1em',
+                            borderRadius: '100px',
+                          }}
+                        >
+                          DISCONNECT
+                        </button>
                       </motion.div>
                     )}
 
@@ -185,9 +211,10 @@ function AppContent() {
                       </motion.div>
                     )}
 
-                    <Monolith 
-                      onProve={handleProve} 
-                      isProving={isProving || isExecuting} 
+                    <Monolith
+                      onProve={handleProve}
+                      onReset={handleReset}
+                      isProving={isProving || isExecuting}
                       hasProven={hasProven}
                       commitmentHash={commitmentHash}
                     />

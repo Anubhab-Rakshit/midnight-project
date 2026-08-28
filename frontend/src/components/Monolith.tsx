@@ -5,6 +5,7 @@ import { Magnetic } from './Magnetic';
 
 interface MonolithProps {
   onProve: (premonition: string) => Promise<void>;
+  onReset: () => void;
   isProving: boolean;
   hasProven: boolean;
   commitmentHash?: string | null;
@@ -12,6 +13,7 @@ interface MonolithProps {
 
 export const Monolith: React.FC<MonolithProps> = ({
   onProve,
+  onReset,
   isProving,
   hasProven,
   commitmentHash
@@ -114,6 +116,15 @@ export const Monolith: React.FC<MonolithProps> = ({
               Your premonition is cryptographically bound to the Midnight Preprod ledger.<br/><br/>
               <span className="text-gold">hash: {commitmentHash ? commitmentHash.slice(0, 16) + '...' + commitmentHash.slice(-4) : '0xe3b0c44298fc1...b855'}</span>
             </p>
+            <Magnetic pull={0.2}>
+              <button
+                className="omen-btn"
+                onClick={onReset}
+                style={{ marginTop: '1.5rem' }}
+              >
+                <Fingerprint size={14} className="text-gold" /> NEW PREMONITION
+              </button>
+            </Magnetic>
           </motion.div>
         )}
       </motion.div>
