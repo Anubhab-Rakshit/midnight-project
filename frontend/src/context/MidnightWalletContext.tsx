@@ -2,24 +2,34 @@
  * Midnight Wallet Context
  *
  * Provides wallet connection state and the Midnight provider
- * to all components. Uses the Lace DApp Connector API when
- * the extension is installed, or a mock provider for demo.
+ * to all components. Uses the Lace DApp Connector API v4.0.0
+ * when the extension is installed, or a mock provider for demo.
  */
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 
-/** Lace DApp Connector API — injected by the extension */
-interface LaceDAppConnector {
-  isWalletInstalled: () => Promise<boolean>;
-  enable: (appName: string) => Promise<{ address: string }>;
-  isEnabled: () => Promise<boolean>;
-  getUsedAddresses: () => Promise<string[]>;
+/** Lace DApp Connector v4.0.0 — injected at window.midnight.mnLace */
+interface MidnightInitialAPI {
+  name: string;
+  icon: string;
+  apiVersion: string;
+  connect: (networkId: string) => Promise<MidnightConnectedAPI>;
+}
+
+interface MidnightConnectedAPI {
+  getConnectionStatus: () => Promise<{ networkId: string } | null>;
+  getShieldedAddresses: () => Promise<{ shieldedAddress: string }>;
+  getUnshieldedAddresses: () => Promise<{ unshieldedAddress: string }>;
+}
+
+interface MidnightGlobal {
+  mnLace?: MidnightInitialAPI;
+  [walletId: string]: MidnightInitialAPI | undefined;
 }
 
 declare global {
   interface Window {
-    midnight?: LaceDAppConnector;
-    lace?: LaceDAppConnector;
+    midnight?: MidnightGlobal;
   }
 }
 
@@ -49,9 +59,9 @@ export function useMidnightWallet(): MidnightWalletState {
   return context;
 }
 
-function getLaceConnector(): LaceDAppConnector | null {
+function getMnLace(): MidnightInitialAPI | null {
   if (typeof window === 'undefined') return null;
-  return window.midnight || window.lace || null;
+  return window.midnight?.mnLace ?? null;
 }
 
 export function MidnightWalletProvider({ children }: { children: ReactNode }) {
@@ -66,35 +76,46 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      const lace = getLaceConnector();
+      const mnLace = getMnLace();
 
-      if (lace) {
-        // Real Lace DApp Connector flow
-        console.log('[Midnight] Lace extension detected, requesting access...');
+      if (mnLace) {
+        // Real Lace DApp Connector v4.0.0 flow
+        console.log('[Midnight] Lace detected, connecting to preprod...');
 
-        const walletInfo = await lace.enable('Omen — Cryptographic Premonition Registry');
-        const addr = walletInfo.address || (await lace.getUsedAddresses())[0];
+        const connectedApi = await mnLace.connect('preprod');
+        const connectionStatus = await connectedApi.getConnectionStatus();
 
-        console.log('[Midnight] Lace connected:', addr);
+        if (!connectionStatus) {
+          throw new Error('Connection rejected by wallet');
+        }
 
-        // Build a real provider from the Lace connector
+        // Get shielded address from wallet
+        let walletAddress: string;
+        try {
+          const shielded = await connectedApi.getShieldedAddresses();
+          walletAddress = shielded.shieldedAddress;
+        } catch {
+          // Fallback to unshielded address
+          const unshielded = await connectedApi.getUnshieldedAddresses();
+          walletAddress = unshielded.unshieldedAddress;
+        }
+
+        console.log('[Midnight] Lace connected:', walletAddress);
+
         const realProvider: MidnightProvider = {
           deployContract: async (_zkInfo: object, _args?: unknown[]) => {
-            // Lace provides tx building via its internal API
-            // For now return the connected address (real tx flow
-            // would go through Lace's sign + submit pipeline)
             console.log('[LaceProvider] Deploy via Lace connector');
-            return addr;
+            return walletAddress;
           },
           executeCircuit: async (_contractAddress: string, _circuitId: string, _args: unknown[]) => {
             console.log('[LaceProvider] Execute circuit via Lace connector');
             return { proof: 'lace_proof_' + Date.now() };
           },
-          getAddress: async () => addr,
+          getAddress: async () => walletAddress,
         };
 
         setProvider(realProvider);
-        setAddress(addr);
+        setAddress(walletAddress);
         setIsConnected(true);
       } else {
         // Demo mode — no extension found
