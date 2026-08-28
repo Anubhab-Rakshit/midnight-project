@@ -1,145 +1,136 @@
 /**
  * usePremonitions Hook
  *
- * Fetches premonition data from the Midnight Preprod indexer.
- * Provides both live data and fallback mock data.
+ * Fetches real data from the Midnight Preprod indexer for the
+ * deployed premonition contract.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 
-/** A premonition record from the indexer */
+const PREPROD_INDEXER_URL = 'https://indexer.preprod.midnight.network/api/v4/graphql';
+const CONTRACT_ADDRESS = '5b7dcd349113b6dc0a11caa89b9245dc701d43e1cf114fc99bd10acf8e930f6c';
+
 export interface PremonitionRecord {
   id: string;
   commitmentHash: string;
   timestamp: string;
   blockHeight: number;
   txHash: string;
-  title: string;
+  status: string;
 }
 
-/** Mock data for when indexer is unavailable */
-const MOCK_PREMONITIONS: PremonitionRecord[] = [
-  {
-    id: '1',
-    commitmentHash: '0x7e8b9f2d1a4c5e6f7890abcdef1234567890abcdef1234567890abcdef123456',
-    timestamp: '2025-10-14T00:00:00Z',
-    blockHeight: 1234567,
-    txHash: '0xabc123...',
-    title: 'The Great AI Alignment',
-  },
-  {
-    id: '2',
-    commitmentHash: '0x1a2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef12345678',
-    timestamp: '2026-03-21T00:00:00Z',
-    blockHeight: 2345678,
-    txHash: '0xdef456...',
-    title: 'Quantum Leap Simulation',
-  },
-];
+interface LedgerField {
+  name: string;
+  value: string;
+}
 
-/** Preprod indexer URL */
-const PREPROD_INDEXER_URL = 'https://indexer.preprod.midnight.network/graphql';
+interface ContractStateResponse {
+  ledgerState: {
+    fields: LedgerField[];
+  } | null;
+}
+
+interface Transaction {
+  id: string;
+  block: {
+    height: number;
+    hash: string;
+    timestamp: string;
+  };
+  status: string;
+}
+
+interface TransactionsResponse {
+  transactions: Transaction[];
+}
+
+async function queryIndexer<T>(query: string, variables: Record<string, unknown>): Promise<T> {
+  const response = await fetch(PREPROD_INDEXER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Indexer returned ${response.status}`);
+  }
+
+  const json = await response.json();
+  if (json.errors?.length > 0) {
+    throw new Error(`GraphQL errors: ${JSON.stringify(json.errors)}`);
+  }
+
+  return json.data as T;
+}
 
 export function usePremonitions() {
   const [premonitions, setPremonitions] = useState<PremonitionRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUsingMock, setIsUsingMock] = useState(false);
+  const [contractState, setContractState] = useState<LedgerField[]>([]);
 
   const fetchPremonitions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Try to fetch from real indexer
-      const response = await fetch(PREPROD_INDEXER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: `
-            query GetPremonitions {
-              transactions(limit: 10, orderBy: { blockHeight: desc }) {
-                edges {
-                  node {
-                    txHash
-                    blockHeight
-                    block {
-                      timestamp
-                    }
-                    ledgerEvents {
-                      ... on ContractStateEvent {
-                        contractAddress
-                        fields {
-                          name
-                          value
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          `,
-        }),
-      });
+      // Fetch contract ledger state (premonitionHash, sealedCount)
+      const stateData = await queryIndexer<ContractStateResponse>(
+        `query GetContractState($addr: String!) {
+          ledgerState(contractAddress: $addr) {
+            fields { name value }
+          }
+        }`,
+        { addr: CONTRACT_ADDRESS },
+      );
 
-      if (!response.ok) {
-        throw new Error(`Indexer returned ${response.status}`);
-      }
+      const fields = stateData.ledgerState?.fields ?? [];
+      setContractState(fields);
 
-      const data = await response.json();
-      
-      // Transform indexer data to PremonitionRecord format
-      const records: PremonitionRecord[] = data.data?.transactions?.edges?.map(
-        (edge: { node: Record<string, unknown> }, index: number) => {
-          const node = edge.node;
-          const fields = (node.ledgerEvents as Array<{ fields: Array<{ name: string; value: string }> }>)?.[0]?.fields || [];
-          const commitmentField = fields.find((f) => f.name === 'premonition_commitment');
-          
-          return {
-            id: String(index + 1),
-            commitmentHash: commitmentField?.value || '0x' + '0'.repeat(64),
-            timestamp: (node.block as { timestamp: string })?.timestamp || new Date().toISOString(),
-            blockHeight: (node.blockHeight as number) || 0,
-            txHash: (node.txHash as string) || '0x...',
-            title: `Premonition #${index + 1}`,
-          };
-        }
-      ) || [];
+      // Fetch transactions for this contract
+      const txData = await queryIndexer<TransactionsResponse>(
+        `query GetTxs($addr: String!, $limit: Int) {
+          transactions(
+            where: { contractAddress: { equals: $addr } }
+            orderBy: { block: { height: desc } }
+            limit: $limit
+          ) {
+            id
+            block { height hash timestamp }
+            status
+          }
+        }`,
+        { addr: CONTRACT_ADDRESS, limit: 20 },
+      );
 
-      if (records.length > 0) {
-        setPremonitions(records);
-        setIsUsingMock(false);
-      } else {
-        // No records found, use mock data
-        setPremonitions(MOCK_PREMONITIONS);
-        setIsUsingMock(true);
-      }
+      const records: PremonitionRecord[] = (txData.transactions || []).map((tx) => ({
+        id: tx.id,
+        commitmentHash: fields.find((f) => f.name === 'premonitionHash')?.value || '0x...',
+        timestamp: tx.block.timestamp,
+        blockHeight: tx.block.height,
+        txHash: tx.id,
+        status: tx.status,
+      }));
+
+      setPremonitions(records);
     } catch (err) {
-      console.warn('[usePremonitions] Indexer unavailable, using mock data:', err);
-      setPremonitions(MOCK_PREMONITIONS);
-      setIsUsingMock(true);
-      setError(err instanceof Error ? err.message : 'Failed to fetch premonitions');
+      console.warn('[usePremonitions] Indexer query failed:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch');
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Fetch on mount
   useEffect(() => {
-    fetchPremonitions();
-  }, [fetchPremonitions]);
-
-  // Refetch function for manual refresh
-  const refetch = useCallback(() => {
     fetchPremonitions();
   }, [fetchPremonitions]);
 
   return {
     premonitions,
+    contractState,
     isLoading,
     error,
-    isUsingMock,
-    refetch,
+    refetch: fetchPremonitions,
+    contractAddress: CONTRACT_ADDRESS,
   };
 }

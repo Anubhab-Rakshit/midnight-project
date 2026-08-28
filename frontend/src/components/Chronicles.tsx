@@ -1,43 +1,72 @@
 import { motion } from 'framer-motion';
-import { LiquidImage } from './LiquidImage';
 import { usePremonitions } from '../hooks/usePremonitions';
 
 export const Chronicles = () => {
-  const { premonitions, isLoading, isUsingMock, refetch } = usePremonitions();
+  const { premonitions, contractState, isLoading, error, refetch, contractAddress } = usePremonitions();
+
+  const premonitionHash = contractState.find((f) => f.name === 'premonitionHash')?.value;
+  const sealedCount = contractState.find((f) => f.name === 'sealedCount')?.value;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -30 }}
       transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
       style={{ width: '100%', maxWidth: '1000px', margin: '0 auto', padding: '0 2rem' }}
     >
-      <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '5rem', fontStyle: 'italic', marginBottom: '4rem', textAlign: 'center', background: 'linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.3) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+      <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '5rem', fontStyle: 'italic', marginBottom: '2rem', textAlign: 'center', background: 'linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.3) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
         The Chronicles
       </h2>
 
-      {/* Data Source Indicator */}
-      <div style={{ 
-        textAlign: 'center', 
+      {/* Contract Info */}
+      <div style={{
+        textAlign: 'center',
+        marginBottom: '3rem',
+        padding: '1.5rem',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '8px',
+        background: 'rgba(255,255,255,0.02)',
+      }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent-gold)', letterSpacing: '0.2em', marginBottom: '0.75rem' }}>
+          PREMONITION CONTRACT — PREPROD
+        </div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '0.5rem', wordBreak: 'break-all' }}>
+          {contractAddress}
+        </div>
+        {premonitionHash && (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
+            Current hash: <span className="text-gold">{premonitionHash.slice(0, 20)}...{premonitionHash.slice(-8)}</span>
+          </div>
+        )}
+        {sealedCount !== undefined && (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+            Sealed: <span className="text-gold">{sealedCount}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Status */}
+      <div style={{
+        textAlign: 'center',
         marginBottom: '2rem',
         fontFamily: 'var(--font-mono)',
         fontSize: '10px',
         color: 'var(--text-muted)',
       }}>
         {isLoading ? (
-          <span>Loading from Midnight Indexer...</span>
-        ) : isUsingMock ? (
-          <span style={{ opacity: 0.6 }}>
-            Demo Mode — Using mock data
-            <button 
+          <span>Querying Midnight Indexer...</span>
+        ) : error ? (
+          <span style={{ color: '#ff5050' }}>
+            {error}
+            <button
               onClick={refetch}
               style={{
                 marginLeft: '1rem',
                 padding: '0.25rem 0.5rem',
                 background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.2)',
-                color: 'var(--accent-gold)',
+                border: '1px solid rgba(255,80,80,0.3)',
+                color: '#ff5050',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-mono)',
                 fontSize: '10px',
@@ -47,32 +76,59 @@ export const Chronicles = () => {
             </button>
           </span>
         ) : (
-          <span>Live from Midnight Preprod</span>
+          <span>Live from Midnight Preprod · {premonitions.length} transaction{premonitions.length !== 1 ? 's' : ''}</span>
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem' }}>
-        {premonitions.map((item) => (
-          <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
-              <div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-gold)', letterSpacing: '0.2em', marginBottom: '0.5rem' }}>
-                  REVEALED: {new Date(item.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+      {/* Transactions */}
+      {premonitions.length > 0 ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+          {premonitions.map((tx) => (
+            <div key={tx.id} style={{
+              padding: '1.5rem',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '8px',
+              background: 'rgba(255,255,255,0.02)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.75rem' }}>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent-gold)', letterSpacing: '0.15em', marginBottom: '0.25rem' }}>
+                    BLOCK #{tx.blockHeight}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>
+                    {new Date(tx.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </div>
                 </div>
-                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', fontStyle: 'italic', fontWeight: 300 }}>{item.title}</h3>
+                <div style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '9px',
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '100px',
+                  background: tx.status === 'finalized' ? 'rgba(52,211,153,0.1)' : 'rgba(251,191,36,0.1)',
+                  color: tx.status === 'finalized' ? '#34d399' : '#fbbf24',
+                  border: `1px solid ${tx.status === 'finalized' ? 'rgba(52,211,153,0.2)' : 'rgba(251,191,36,0.2)'}`,
+                }}>
+                  {tx.status}
+                </div>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--text-muted)', textAlign: 'right' }}>
-                <div>{item.commitmentHash.slice(0, 10)}...{item.commitmentHash.slice(-6)}</div>
-                <div style={{ opacity: 0.5, marginTop: '0.25rem' }}>Block #{item.blockHeight}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
+                tx: {tx.txHash.slice(0, 20)}...
               </div>
             </div>
-            
-            <div style={{ width: '100%', height: '300px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <LiquidImage src={`https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop&seed=${item.id}`} />
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : !isLoading ? (
+        <div style={{
+          textAlign: 'center',
+          padding: '4rem 2rem',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '11px',
+          color: 'var(--text-muted)',
+        }}>
+          No transactions found for this contract yet.<br />
+          <span style={{ opacity: 0.5 }}>Seal a premonition on the Oracle to see it here.</span>
+        </div>
+      ) : null}
     </motion.div>
   );
 };
