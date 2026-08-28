@@ -1,37 +1,14 @@
 /**
  * Midnight Wallet Context
  *
- * Provides wallet connection state and the Midnight provider
- * to all components. Uses the Lace DApp Connector API v4.0.0
- * when the extension is installed, or a mock provider for demo.
+ * Uses the official @midnight-ntwrk/dapp-connector-api types.
+ * Wallets inject InitialAPI at window.midnight[walletId].
+ * Each wallet has .connect(networkId) → ConnectedAPI.
  */
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
-
-/** Lace DApp Connector v4.0.0 — injected at window.midnight.mnLace */
-interface MidnightInitialAPI {
-  name: string;
-  icon: string;
-  apiVersion: string;
-  connect: (networkId: string) => Promise<MidnightConnectedAPI>;
-}
-
-interface MidnightConnectedAPI {
-  getConnectionStatus: () => Promise<{ networkId: string } | null>;
-  getShieldedAddresses: () => Promise<{ shieldedAddress: string }>;
-  getUnshieldedAddresses: () => Promise<{ unshieldedAddress: string }>;
-}
-
-interface MidnightGlobal {
-  mnLace?: MidnightInitialAPI;
-  [walletId: string]: MidnightInitialAPI | undefined;
-}
-
-declare global {
-  interface Window {
-    midnight?: MidnightGlobal;
-  }
-}
+import '@midnight-ntwrk/dapp-connector-api';
+import type { InitialAPI, ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 
 interface MidnightWalletState {
   isConnected: boolean;
@@ -44,8 +21,7 @@ interface MidnightWalletState {
 }
 
 export interface MidnightProvider {
-  deployContract: (zkInfo: object, args?: unknown[]) => Promise<string>;
-  executeCircuit: (contractAddress: string, circuitId: string, args: unknown[]) => Promise<unknown>;
+  connectedApi: ConnectedAPI;
   getAddress: () => Promise<string>;
 }
 
@@ -59,9 +35,9 @@ export function useMidnightWallet(): MidnightWalletState {
   return context;
 }
 
-function getMnLace(): MidnightInitialAPI | null {
-  if (typeof window === 'undefined') return null;
-  return window.midnight?.mnLace ?? null;
+function findAllWallets(): InitialAPI[] {
+  if (typeof window === 'undefined' || !window.midnight) return [];
+  return Object.values(window.midnight).filter(Boolean) as InitialAPI[];
 }
 
 export function MidnightWalletProvider({ children }: { children: ReactNode }) {
@@ -76,73 +52,53 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      const mnLace = getMnLace();
+      const wallets = findAllWallets();
+      console.log('[Midnight] Found wallets:', wallets.map(w => `${w.name} (${w.rdns}, v${w.apiVersion})`));
 
-      if (mnLace) {
-        // Real Lace DApp Connector v4.0.0 flow
-        console.log('[Midnight] Lace detected, connecting to preprod...');
-
-        const connectedApi = await mnLace.connect('preprod');
-        const connectionStatus = await connectedApi.getConnectionStatus();
-
-        if (!connectionStatus) {
-          throw new Error('Connection rejected by wallet');
-        }
-
-        // Get shielded address from wallet
-        let walletAddress: string;
-        try {
-          const shielded = await connectedApi.getShieldedAddresses();
-          walletAddress = shielded.shieldedAddress;
-        } catch {
-          // Fallback to unshielded address
-          const unshielded = await connectedApi.getUnshieldedAddresses();
-          walletAddress = unshielded.unshieldedAddress;
-        }
-
-        console.log('[Midnight] Lace connected:', walletAddress);
-
-        const realProvider: MidnightProvider = {
-          deployContract: async (_zkInfo: object, _args?: unknown[]) => {
-            console.log('[LaceProvider] Deploy via Lace connector');
-            return walletAddress;
-          },
-          executeCircuit: async (_contractAddress: string, _circuitId: string, _args: unknown[]) => {
-            console.log('[LaceProvider] Execute circuit via Lace connector');
-            return { proof: 'lace_proof_' + Date.now() };
-          },
-          getAddress: async () => walletAddress,
-        };
-
-        setProvider(realProvider);
-        setAddress(walletAddress);
-        setIsConnected(true);
-      } else {
-        // Demo mode — no extension found
-        console.log('[Midnight] No Lace extension found, using demo mode');
-
+      if (wallets.length === 0) {
+        // Demo mode
+        console.log('[Midnight] No wallets found, using demo mode');
         const DEMO_ADDRESS = 'mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za';
 
+        // Create a minimal mock for demo
         const mockProvider: MidnightProvider = {
-          deployContract: async (_zkInfo: object, _args?: unknown[]) => {
-            console.log('[MockProvider] Deploying contract...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            return '0x' + Array.from({ length: 64 }, () =>
-              Math.floor(Math.random() * 16).toString(16)
-            ).join('');
-          },
-          executeCircuit: async (contractAddress: string, circuitId: string, args: unknown[]) => {
-            console.log(`[MockProvider] Executing circuit ${circuitId} on ${contractAddress}...`);
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            return { proof: 'mock_proof_' + Date.now(), publicInputs: args };
-          },
+          connectedApi: null as any,
           getAddress: async () => DEMO_ADDRESS,
         };
 
         setProvider(mockProvider);
         setAddress(DEMO_ADDRESS);
         setIsConnected(true);
+        return;
       }
+
+      // Pick the first available wallet (or the one named Lace)
+      const wallet = wallets.find(w => w.name.toLowerCase().includes('lace')) || wallets[0];
+      console.log('[Midnight] Connecting to:', wallet.name);
+
+      const connectedApi = await wallet.connect('preprod');
+      console.log('[Midnight] Connected to', wallet.name);
+
+      // Get address
+      let walletAddress: string;
+      try {
+        const shielded = await connectedApi.getShieldedAddresses();
+        walletAddress = shielded.shieldedAddress;
+      } catch {
+        const unshielded = await connectedApi.getUnshieldedAddress();
+        walletAddress = unshielded.unshieldedAddress;
+      }
+
+      console.log('[Midnight] Wallet address:', walletAddress);
+
+      const realProvider: MidnightProvider = {
+        connectedApi,
+        getAddress: async () => walletAddress,
+      };
+
+      setProvider(realProvider);
+      setAddress(walletAddress);
+      setIsConnected(true);
     } catch (err) {
       console.error('[Midnight] Connection failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to connect wallet');
