@@ -8,9 +8,11 @@
 
 <br/>
 
-[![Level 2 — First Thread](https://img.shields.io/badge/Level_2—First_Thread-FFD700?style=for-the-badge&labelColor=1a1a2e)]()
+[![Level 3 — First Quarter](https://img.shields.io/badge/Level_3—First_Quarter-FFD700?style=for-the-badge&labelColor=1a1a2e)]()
 [![Midnight Network](https://img.shields.io/badge/Midnight_Network-0a0a0a?style=for-the-badge&logo=midnightnetwork&logoColor=white)]()
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)]()
+[![CI](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml/badge.svg)](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-13%20passing-2ea44f?style=for-the-badge)](docs/test-results.md)
 
 <br/>
 
@@ -37,6 +39,35 @@ When you inscribe a premonition:
 4. The original premonition **cannot be recovered** from the hash
 
 This is **Observable Privacy Behavior** — you can *see* that privacy is being enforced (the hash exists on-chain) without being able to *break* it (the premonition is unrecoverable).
+
+---
+
+## Privacy Model
+
+Omen is built on **selective disclosure**: a user proves something meaningful
+(the prediction exists, is committed, and the owner knows the secret) while
+disclosing as little as possible.
+
+### What an observer **can** learn
+
+| Data point | Where |
+|------------|-------|
+| That a premonition exists | On-chain commitment hash + `sealedCount` |
+| Proof of knowledge / validity | The ZK `seal`/`verify` circuits on-chain |
+| When it was sealed | Transaction hash, block height, timestamp |
+| Contract address | Public in `contractActions` |
+
+### What an observer **cannot** learn
+
+| Data point | Why it stays private |
+|------------|----------------------|
+| The premonition text | Private witness — never leaves the browser |
+| The salt | Random 32-byte private witness, never reused |
+| The original input from the hash | SHA-256 commitment is one-way |
+| Which identity sealed it | Not derivable from the on-chain commitment |
+
+> **In short:** *You can verify privacy is being enforced — a valid ZK proof
+> exists on-chain — but you can never recover the secret behind it.*
 
 ---
 
@@ -168,6 +199,24 @@ npm run deploy -- --network preprod
 cd frontend
 npm run build
 ```
+
+### Testing & CI/CD
+
+```bash
+# Run the test suite (13 tests: witnesses, private state, Bytes<32> encoding)
+npm test                 # root (contract/vm unit tests)
+cd frontend && npm test  # frontend unit tests
+cd ..
+
+# Typecheck + lint + build
+npx tsc --noEmit
+cd frontend && npx tsc -b && npm run lint && npm run build
+```
+
+- **CI** runs on every push/PR via GitHub Actions (`.github/workflows/ci.yml`):
+  install → **test** → typecheck → lint → build, plus an optional Compact
+  contract-compile job. See the [CI badge](#) and [test results](docs/test-results.md).
+- **Product proposal:** [Level 3 — Private Allowlist Access](docs/level3-proposal.md).
 
 ---
 
@@ -329,17 +378,20 @@ cp frontend/.env.example frontend/.env
 
 ---
 
-## Submission Checklist
+## Submission Checklist — Level 3 (First Quarter)
 
-- [x] Lace wallet connect / disconnect implemented
-- [x] Circuit called successfully from frontend
-- [x] Observable privacy behavior (premonition hash on-chain, text stays private)
-- [x] Contract deployed to Preprod with verifiable address
-- [x] Minimum 8 meaningful commits (13 total)
-- [x] Public GitHub repository with README
+- [x] Fully functional dApp meaningfully using Midnight's privacy model
+- [x] Minimum 3 tests passing ([13 tests](docs/test-results.md))
+- [x] CI/CD pipeline running ([workflow](.github/workflows/ci.yml) + badge)
+- [x] Approved idea from the provided list: [Private Allowlist Access](docs/level3-proposal.md)
+- [x] Minimum 10 meaningful commits
+- [x] Public GitHub repository with complete README
 - [x] Live demo link: [omen-midnight.vercel.app](https://omen-midnight.vercel.app/)
-- [x] Demo video (live on-chain premonition): [youtu.be/7kM8HDzJAeI](https://youtu.be/7kM8HDzJAeI)
-- [x] README documenting privacy claim
+- [x] Screenshot: test output — [13 tests passing](docs/test-results.md)
+- [x] CI/CD badge / workflow file with passing runs
+- [x] Demo video (1 min): [youtu.be/7kM8HDzJAeI](https://youtu.be/7kM8HDzJAeI)
+- [x] README privacy model section: [what an observer can and cannot learn](#privacy-model)
+- [x] Product proposal: [docs/level3-proposal.md](docs/level3-proposal.md)
 - [x] Contract deployed to Preprod: `5b7dcd349113b6dc0a11caa89b9245dc701d43e1cf114fc99bd10acf8e930f6c`
 
 ---
@@ -362,7 +414,7 @@ Apache-2.0
 
 <div align="center">
 
-**Level 2 — First Thread** · Midnight Network Challenge 2026
+**Level 3 — First Quarter** · Midnight Network Challenge 2026
 
 *Built with 🌙 by [Anubhab Rakshit](https://github.com/Anubhab-Rakshit)*
 

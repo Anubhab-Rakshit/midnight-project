@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test, typecheck, lint & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run contract tests (root)
+        run: npm test
+
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm test
+
+      - name: Typecheck (root)
+        run: npx tsc --noEmit
+
+      - name: Typecheck (frontend)
+        working-directory: frontend
+        run: npx tsc -b
+
+      - name: Lint (frontend)
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Build (frontend)
+        working-directory: frontend
+        run: npm run build
+
+  compile:
+    name: Compile Compact contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Compact compiler
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh \
+            | sh
+          compact update
+
+      - name: Compile premonition contract
+        run: npm run compile:premonition
+
