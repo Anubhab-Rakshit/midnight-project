@@ -31,6 +31,21 @@ export interface SealedPremonition {
 
 const PRIVATE_STATE_ID = 'premonitionPrivateState';
 
+/**
+ * Encode a premonition as a fixed 32-byte value. The contract's
+ * `localPremonition()` witness returns Bytes<32> and the runtime rejects any
+ * other length, so short strings must be zero-padded (not just sliced).
+ */
+function toBytes32(value: string): Uint8Array {
+  const bytes = new TextEncoder().encode(value);
+  if (bytes.length > 32) {
+    console.warn(`[Omen] premonition "${value.slice(0, 32)}…" truncated to 32 bytes`);
+  }
+  const out = new Uint8Array(32);
+  out.set(bytes.slice(0, 32));
+  return out;
+}
+
 export async function deployPremonition(
   connectedApi: ConnectedAPI,
   premonitionText: string,
@@ -38,6 +53,7 @@ export async function deployPremonition(
   const zkConfig = new BrowserZkConfigProvider();
 
   const walletProvider = new BrowserWalletProvider(connectedApi);
+  await walletProvider.initialize();
   const networkId = await walletProvider.networkId();
   setNetworkId(networkId);
 
@@ -48,7 +64,7 @@ export async function deployPremonition(
 
   let compiledContract: any = CompiledContract.make('premonition', OmenContract);
   compiledContract = CompiledContract.withWitnesses<any, any, any>(compiledContract as any, {
-    localPremonition: (ctx: any) => [ctx.privateState, new TextEncoder().encode(premonitionText).slice(0, 32)],
+    localPremonition: (ctx: any) => [ctx.privateState, toBytes32(premonitionText)],
     localSalt: (ctx: any) => [ctx.privateState, salt],
   } as any);
   compiledContract = CompiledContract.withCompiledFileAssets<any, any, any>(compiledContract as any, '' as any);
@@ -64,25 +80,40 @@ export async function deployPremonition(
     midnightProvider: walletProvider as any,
   } as any;
 
-  const deployed = await deployContract(providers, {
-    compiledContract,
-    args: [],
-    privateStateId: PRIVATE_STATE_ID,
-    initialPrivateState: {
-      premonition: premonitionText,
-      salt,
-      sealedAt: new Date().toISOString(),
-      commitmentHash: '',
-    },
-  } as any);
+  let deployed: any;
+  try {
+    deployed = await deployContract(providers, {
+      compiledContract,
+      args: [],
+      privateStateId: PRIVATE_STATE_ID,
+      initialPrivateState: {
+        premonition: premonitionText,
+        salt,
+        sealedAt: new Date().toISOString(),
+        commitmentHash: '',
+      },
+    } as any);
+  } catch (error: any) {
+    console.error('[Omen][deploy] deployContract failed:', error);
+    console.error('[Omen][deploy] networkId =', networkId, '| indexerUri =', indexerUri);
+    if (error instanceof Error) {
+      console.error('[Omen][deploy] message =', error.message);
+      console.error('[Omen][deploy] stack =', error.stack);
+    }
+    throw error;
+  }
 
   const deployTx = deployed.deployTxData.public as any;
   const contractAddress = (deployTx.contractAddress ?? deployed.deployTxData.public.contractAddress) as string;
+  // `FinalizedTxData.txHash` is the on-chain TRANSACTION hash (what the explorer's
+  // `/tx/` route resolves). Do NOT use `txId`/`identifiers[0]` here — those are the
+  // 33-byte action identifiers, not the transaction hash.
+  const txHash = deployTx.txHash as string;
 
   return {
     commitmentHash: contractAddress,
     contractAddress,
-    txHash: deployTx.txHash as string,
+    txHash,
     blockHeight: deployTx.blockHeight as number,
   };
 }

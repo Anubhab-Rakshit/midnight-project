@@ -1,10 +1,18 @@
 import react from '@vitejs/plugin-react'
-import { resolve } from 'node:path'
-import { defineConfig } from 'vite'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { defineConfig, type Plugin } from 'vite'
+import * as wasmModule from 'vite-plugin-wasm'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+// vite-plugin-wasm ships dual CJS/ESM; under module:nodenext tsc resolves the
+// `require` types (export = namespace), so unwrap `.default` explicitly.
+const wasm = (wasmModule as unknown as { default: () => Plugin }).default
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), wasm()],
   resolve: {
     alias: {
       // The Midnight indexer data provider imports `ws` (mapped by its browser

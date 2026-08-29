@@ -130,7 +130,7 @@ export const Chronicles = () => {
                       <div>
                         <span style={{ color: 'var(--text-muted)' }}>Tx: </span>
                         <a
-                          href={`https://explorer.preprod.midnight.network/tx/${p.txHash}`}
+                          href={`https://explorer.preprod.midnight.network/transactions/${p.txHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Click to validate on the Midnight Explorer"

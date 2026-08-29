@@ -291,6 +291,14 @@ npm run deploy -- --network preprod
 # 3. Contract address will be saved to .midnight-state.json
 ```
 
+### On-Chain Premonition
+
+In the browser, each inscription deploys a **fresh `premonition` contract instance**. The deploy transaction is the on-chain record — proven, balanced and submitted through the Lace wallet, then captured (with its transaction hash and block height) and persisted to Supabase. An example of a recorded on-chain premonition transaction (open the transaction on the explorer):
+
+```
+https://explorer.preprod.midnight.network/transactions/e765f0402df04ac3e0330192e86fd7ca225c4f10165d57057e9c791eade7c510
+```
+
 ---
 
 ## Scripts

@@ -15,6 +15,7 @@ import {
 } from '@midnight-ntwrk/dapp-connector-api';
 import { createProverKey, createVerifierKey, createZKIR, ZKConfigProvider } from '@midnight-ntwrk/midnight-js-types';
 import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { toHex, fromHex } from '@midnight-ntwrk/midnight-js-protocol/compact-runtime';
 
 export type OmenCircuitId = 'seal' | 'verify';
 
@@ -79,13 +80,6 @@ interface ProvingKeyMaterialLike {
   getVerifierKey(loc: string): Promise<Uint8Array>;
 }
 
-const base64ToBytes = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-const bytesToBase64 = (bytes: Uint8Array) => {
-  let binary = '';
-  bytes.forEach((b) => (binary += String.fromCharCode(b)));
-  return btoa(binary);
-};
-
 const bytesToHex = (bytes: Uint8Array) =>
   Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, '0'))
@@ -110,7 +104,7 @@ function normalizeKeyToHex(value: unknown, label: string): string {
   if (value && typeof (value as any).toBytes === 'function') {
     return bytesToHex(new Uint8Array((value as any).toBytes()));
   }
-  console.warn(`[Omen] ${label} was unexpected type:`, typeof value);
+  console.warn(`[Omen] ${label} was unexpected type: ${describe(value)}`);
   throw new Error(`${label} returned an unexpected value from the wallet`);
 }
 
@@ -118,52 +112,80 @@ function normalizeKeyToHex(value: unknown, label: string): string {
  * WalletProvider + MidnightProvider that route balances and submissions
  * through the Lace wallet's ConnectedAPI.
  */
+function describe(value: unknown): string {
+  if (typeof value === 'string') return `string(${value.length})="${value.slice(0, 32)}${value.length > 32 ? '…' : ''}"`;
+  if (value instanceof Uint8Array) return `Uint8Array(${value.length})${bytesToHex(value).slice(0, 32)}…`;
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (Array.isArray(value)) return `Array(${value.length})`;
+  return `${typeof value}::${String(value).slice(0, 40)}`;
+}
+
 export class BrowserWalletProvider {
   private config: { indexerUri: string; indexerWsUri: string; networkId: string } | null = null;
+  private addresses: { coinPublicKey: string; encryptionPublicKey: string } | null = null;
   private readonly connectedApi: ConnectedAPI;
 
   constructor(connectedApi: ConnectedAPI) {
     this.connectedApi = connectedApi;
   }
 
-  private async configuration() {
-    if (!this.config) {
-      const c = await this.connectedApi.getConfiguration();
-      this.config = {
-        indexerUri: c.indexerUri,
-        indexerWsUri: c.indexerWsUri,
-        networkId: c.networkId,
-      };
-    }
-    return this.config;
+  /**
+   * Loads wallet config + shielded addresses once. Must be awaited before any
+   * deploy because the SDK calls `getCoinPublicKey()`/`getEncryptionPublicKey()`
+   * SYNCHRONOUSLY (see midnight-js-contracts createUnprovenDeployTx).
+   */
+  async initialize(): Promise<void> {
+    const [c, addrs] = await Promise.all([
+      this.connectedApi.getConfiguration(),
+      this.connectedApi.getShieldedAddresses(),
+    ]);
+    console.log('[Omen][cfg] getConfiguration() =', JSON.stringify(c, (_k, v) => (typeof v === 'bigint' ? v.toString() : v)));
+    console.log('[Omen][addr] raw getShieldedAddresses() =', JSON.stringify(addrs));
+    this.config = {
+      indexerUri: c.indexerUri,
+      indexerWsUri: c.indexerWsUri,
+      networkId: c.networkId,
+    };
+    this.addresses = {
+      coinPublicKey: normalizeKeyToHex(addrs.shieldedCoinPublicKey, 'coin public key'),
+      encryptionPublicKey: normalizeKeyToHex(addrs.shieldedEncryptionPublicKey, 'encryption public key'),
+    };
+    console.log('[Omen][addr] → coin public key normalized =', describe(this.addresses.coinPublicKey));
+    console.log('[Omen][addr] → encryption public key normalized =', describe(this.addresses.encryptionPublicKey));
   }
 
-  networkId = async (): Promise<string> => (await this.configuration()).networkId;
-  indexerUri = async (): Promise<string> => (await this.configuration()).indexerUri;
-  indexerWsUri = async (): Promise<string> => (await this.configuration()).indexerWsUri;
+  private ensureInitialized() {
+    if (!this.config || !this.addresses) {
+      throw new Error('BrowserWalletProvider: initialize() must be called before use');
+    }
+    return this;
+  }
 
-  /** Best-effort coin public key from the wallet, normalized to hex. */
-  getCoinPublicKey = async (): Promise<unknown> => {
-    const addrs = await this.connectedApi.getShieldedAddresses();
-    return normalizeKeyToHex(addrs.shieldedCoinPublicKey, 'coin public key');
-  };
+  networkId = async (): Promise<string> => this.ensureInitialized().config!.networkId;
+  indexerUri = async (): Promise<string> => this.ensureInitialized().config!.indexerUri;
+  indexerWsUri = async (): Promise<string> => this.ensureInitialized().config!.indexerWsUri;
 
-  /** Best-effort encryption public key from the wallet, normalized to hex. */
-  getEncryptionPublicKey = async (): Promise<unknown> => {
-    const addrs = await this.connectedApi.getShieldedAddresses();
-    return normalizeKeyToHex(addrs.shieldedEncryptionPublicKey, 'encryption public key');
-  };
+  /** Coin public key from the wallet, normalized. SYNCHRONOUS (SDK contract). */
+  getCoinPublicKey = (): string => this.ensureInitialized().addresses!.coinPublicKey;
+
+  /** Encryption public key from the wallet, normalized. SYNCHRONOUS (SDK contract). */
+  getEncryptionPublicKey = (): string => this.ensureInitialized().addresses!.encryptionPublicKey;
 
   async balanceTx(tx: any): Promise<any> {
-    const serialized = bytesToBase64(tx.serialize());
-    const result = await this.connectedApi.balanceUnsealedTransaction(serialized);
-    return Transaction.deserialize('signature', 'proof', 'binding', base64ToBytes(result.tx));
+    const hex = toHex(tx.serialize());
+    console.log(`[Omen][balanceTx] sending hex len=${hex.length} bytes=${hex.length / 2} head=${hex.slice(0, 80)}`);
+    const result = await this.connectedApi.balanceUnsealedTransaction(hex);
+    const outHex = result.tx;
+    console.log(`[Omen][balanceTx] wallet returned hex len=${outHex.length} bytes=${outHex.length / 2} head=${outHex.slice(0, 80)}`);
+    return Transaction.deserialize('signature', 'proof', 'binding', fromHex(outHex));
   }
 
   async submitTx(tx: any): Promise<string> {
-    const serialized = bytesToBase64(tx.serialize());
-    await this.connectedApi.submitTransaction(serialized);
-    return tx.transactionHash();
+    const hex = toHex(tx.serialize());
+    console.log(`[Omen][submitTx] sending hex len=${hex.length} bytes=${hex.length / 2} head=${hex.slice(0, 80)}`);
+    await this.connectedApi.submitTransaction(hex);
+    return tx.identifiers()[0];
   }
 }
 
