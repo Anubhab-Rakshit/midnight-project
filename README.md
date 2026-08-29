@@ -217,6 +217,8 @@ cd frontend && npx tsc -b && npm run lint && npm run build
   install → **test** → typecheck → lint → build, plus an optional Compact
   contract-compile job. See the [CI badge](#) and [test results](docs/test-results.md).
 - **Product proposal:** [Level 3 — Private Allowlist Access](docs/level3-proposal.md).
+- **📦 Ready-to-submit package:** [`docs/level3-submission.md`](docs/level3-submission.md) —
+  full Level 3 submission package including a ready-to-paste submission message.
 
 ---
 
@@ -392,6 +394,7 @@ cp frontend/.env.example frontend/.env
 - [x] Demo video (1 min): [youtu.be/7kM8HDzJAeI](https://youtu.be/7kM8HDzJAeI)
 - [x] README privacy model section: [what an observer can and cannot learn](#privacy-model)
 - [x] Product proposal: [docs/level3-proposal.md](docs/level3-proposal.md)
+- [x] 📦 Complete submission package: [docs/level3-submission.md](docs/level3-submission.md)
 - [x] Contract deployed to Preprod: `5b7dcd349113b6dc0a11caa89b9245dc701d43e1cf114fc99bd10acf8e930f6c`
 
 ---
