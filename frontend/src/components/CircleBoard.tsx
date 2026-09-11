@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
 import { useMeridianContract } from '../hooks/useMeridianContract';
-import { saveCircle, saveExpense } from '../hooks/useCirclesStore';
+import { saveCircle, saveExpense, saveSettlement } from '../hooks/useCirclesStore';
+import { SettlementBoard } from './SettlementBoard';
+import { RecurringPacts } from './RecurringPacts';
+import { computeMinimumTransfers } from '../../src/meridian/netting';
 
 interface CircleState {
   contractAddress: string;
@@ -84,6 +87,25 @@ export const CircleBoard = () => {
 
     setExpenseLabel('');
     setExpenseAmount('');
+  };
+
+  const handleSettle = async (plan: any) => {
+    if (!circle) return;
+
+    // Save settlement to Supabase
+    if (address) {
+      try {
+        await saveSettlement({
+          circleAddress: circle.contractAddress,
+          transferCount: plan.transfers.length,
+        });
+      } catch (saveErr) {
+        console.warn('[Meridian] Failed to save settlement to Supabase:', saveErr);
+      }
+    }
+
+    // In Phase 2, this would call the settle circuit on-chain
+    console.log('[Meridian] Settlement plan:', plan);
   };
 
   const totalOwed = circle?.expenses.reduce((sum, e) => sum + e.amount, 0) ?? 0;
@@ -382,6 +404,28 @@ export const CircleBoard = () => {
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', color: 'var(--accent-gold)', fontWeight: 600 }}>${perPerson.toFixed(2)}</span>
                 </div>
               </div>
+
+              {/* Settlement Board */}
+              <div style={{ marginTop: '2rem' }}>
+                <SettlementBoard
+                  members={[
+                    { id: 'you', name: 'You' },
+                    { id: 'member2', name: 'Member 2' },
+                  ]}
+                  expenses={circle.expenses}
+                  onSettle={handleSettle}
+                />
+              </div>
+
+              {/* Recurring Pacts */}
+              {address && (
+                <div style={{ marginTop: '2rem' }}>
+                  <RecurringPacts
+                    walletAddress={address}
+                    circleAddress={circle.contractAddress}
+                  />
+                </div>
+              )}
             </div>
           ) : (
             <div style={{
