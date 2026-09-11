@@ -78,10 +78,8 @@ Meridian is built on **selective disclosure**: members prove something meaningfu
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![Framer Motion](https://img.shields.io/badge/Framer_Motion-05F?style=for-the-badge&logo=framer&logoColor=white)
 ![Midnight.js](https://img.shields.io/badge/Midnight.js-FFD700?style=for-the-badge&logoColor=black)
-![GraphQL](https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
 
 </div>
 
@@ -93,15 +91,19 @@ Meridian is built on **selective disclosure**: members prove something meaningfu
 ┌─────────────────────────────────────────────────────────────────┐
 │                        FRONTEND (React)                         │
 │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐   │
-│  │  Monolith    │  │  Chronicles  │  │  Midnight Wallet    │   │
-│  │  (Oracle)    │  │  (Gallery)   │  │  Context            │   │
+│  │ CircleBoard  │  │ Settlement   │  │  Midnight Wallet    │   │
+│  │              │  │ Board        │  │  Context            │   │
 │  └──────┬──────┘  └──────┬───────┘  └──────────┬──────────┘   │
 │         │                │                      │               │
+│  ┌──────┴──────┐  ┌──────┴───────┐              │               │
+│  │ Analytics   │  │ Recurring    │              │               │
+│  │ Dashboard   │  │ Pacts        │              │               │
+│  └──────┬──────┘  └──────┬───────┘              │               │
 │         └────────────────┼──────────────────────┘               │
 │                          │                                      │
 │                    ┌─────▼─────┐                                │
-│                    │ useOmen   │                                │
-│                    │ Contract  │                                │
+│                    │ useMeridian│                               │
+│                    │ Contract   │                                │
 │                    └─────┬─────┘                                │
 └──────────────────────────┼──────────────────────────────────────┘
                            │
@@ -120,22 +122,38 @@ Meridian is built on **selective disclosure**: members prove something meaningfu
 
 ## Features
 
-### 🔐 Programmable Privacy
+### Programmable Privacy
 - **Expense Commitments**: Amounts stored as ZK hashes — unrecoverable by observers
 - **ZK Invite Gate**: Join a circle by proving knowledge of the invite — no public member list
 - **Settlement Proofs**: Prove a settlement is correct and zero-sum without revealing balances
+- **Settlement Hash**: Previous settlement hash chained for auditability
 
-### 💳 Wallet Integration
+### Optimal Settlement Engine
+- **Minimum-Transfer Netting**: Computes the fewest payments needed to settle a circle
+- **Provable Correctness**: `verifySettlementPlan` checks zero-sum + balance consistency
+- **Cross-Circle Netting**: Merge balances across multiple circles to minimize total transfers
+
+### Privacy-Preserving Analytics
+- **Circle Analytics**: Total spent, average per member, spending tags (balanced/heavy/sporadic)
+- **Member Badges**: Top contributor, fair splitter, big spender, frequent spender, settler, newcomer
+- **Anomaly Detection**: Outlier spending detection (local-only, never shared)
+
+### Recurring Pacts
+- **Auto-Split Rules**: Weekly, biweekly, or monthly recurring expense splitting
+- **Supabase Persistence**: Pacts stored cross-device with active/inactive status
+
+### Wallet Integration
 - **Lace Wallet**: Connect/disconnect via Midnight DApp connector
 - **Browser ZK Proving**: All proofs generated client-side via Lace
 
-### 📊 Live Indexer
+### Live Indexer
 - **Real-time Data**: Fetches circle state from Midnight Preprod indexer
 - **Supabase Persistence**: Circles, expenses, settlements cached cross-device
 
-### 🎨 Production-Grade UI
+### Production-Grade UI
 - **Circle Board**: Create circles, log expenses, view summaries
 - **Settlement View**: Run the netting engine, see optimal transfer plans
+- **Analytics Dashboard**: Visual stats, badges, distribution tags
 - **Framer Motion**: Smooth animations throughout
 
 ---
@@ -148,7 +166,6 @@ Meridian is built on **selective disclosure**: members prove something meaningfu
 |-------------|---------|-------|
 | Node.js | 22+ | `node --version` |
 | npm | 10+ | `npm --version` |
-| Docker | 29+ | `docker --version` |
 | Compact CLI | 0.5+ | `compact --version` |
 | Lace Wallet | Latest | Browser extension |
 
@@ -173,9 +190,6 @@ cd frontend && npm install && cd ..
 ### Development
 
 ```bash
-# Start local devnet (requires Docker)
-npm run setup
-
 # Run frontend dev server
 cd frontend
 npm run dev
@@ -185,11 +199,7 @@ npm run dev
 
 ```bash
 # Compile the Compact contract
-cd contracts
-compact compile premonition.compact managed/premonition
-
-# Deploy to Preprod (requires wallet + tNIGHT)
-npm run deploy -- --network preprod
+npm run compile:splitpool
 
 # Build frontend for production
 cd frontend
@@ -199,9 +209,9 @@ npm run build
 ### Testing & CI/CD
 
 ```bash
-# Run the test suite (13 tests: witnesses, private state, Bytes<32> encoding)
-npm test                 # root (contract/vm unit tests)
-cd frontend && npm test  # frontend unit tests
+# Run the test suite (66 root tests + 10 frontend tests)
+npm test                 # root (witnesses, netting, analytics, badges, cross-circle, pacts)
+cd frontend && npm test  # frontend (circle-math, bytes32)
 cd ..
 
 # Typecheck + lint + build
@@ -211,10 +221,7 @@ cd frontend && npx tsc -b && npm run lint && npm run build
 
 - **CI** runs on every push/PR via GitHub Actions (`.github/workflows/ci.yml`):
   install → **test** → typecheck → lint → build, plus an optional Compact
-  contract-compile job. See the [CI badge](#) and [test results](docs/test-results.md).
-- **Product proposal:** [Level 3 — Private Allowlist Access](docs/level3-proposal.md).
-- **📦 Ready-to-submit package:** [`docs/level3-submission.md`](docs/level3-submission.md) —
-  full Level 3 submission package including a ready-to-paste submission message.
+  contract-compile job. See the [CI badge](#).
 
 ---
 
@@ -223,54 +230,43 @@ cd frontend && npx tsc -b && npm run lint && npm run build
 ```
 midnight-project/
 ├── contracts/
-│   ├── splitpool.compact        # Meridian ZK contract source
-│   ├── premonition.compact      # Omen contract (legacy)
-│   └── managed/
-│       ├── splitpool/           # Compiled ZK artifacts
-│       │   ├── compiler/        # Circuit metadata
-│       │   ├── contract/        # TypeScript bindings
-│       │   ├── keys/            # Prover/Verifier keys
-│       │   └── zkir/            # ZK Intermediate Rep
-│       └── premonition/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── CircleBoard.tsx  # Circle creation & expense logger
-│   │   │   ├── Chronicles.tsx   # Activity feed
-│   │   │   ├── Navbar.tsx       # Navigation
-│   │   │   ├── Footer.tsx       # Footer
-│   │   │   ├── LiquidAura.tsx   # Background effects
-│   │   │   └── Preloader.tsx    # Loading screen
-│   │   ├── context/
-│   │   │   └── MidnightWalletContext.tsx  # Wallet state
-│   │   ├── hooks/
-│   │   │   ├── useMeridianContract.ts  # Contract interaction
-│   │   │   └── useCirclesStore.ts      # Supabase persistence
-│   │   ├── midnight/
-│   │   │   ├── service.ts       # Browser deploy & prove
-│   │   │   ├── providers.ts     # ZK config & wallet providers
-│   │   │   └── contract/        # Compiled contract types
-│   │   ├── lib/
-│   │   │   ├── bytes32.ts       # Bytes<32> encoding
-│   │   │   └── supabase.ts      # Supabase client
-│   │   ├── App.tsx              # Main app
-│   │   └── main.tsx             # Entry point
-│   ├── package.json
-│   └── vite.config.ts
+│   └── splitpool.compact            # Meridian ZK contract (join/logExpense/settle)
 ├── src/
-│   ├── meridian/
-│   │   ├── witnesses.ts         # ZK witness providers
-│   │   ├── private-state.ts     # Private state schema
-│   │   ├── contract.ts          # Contract bindings
-│   │   ├── indexer.ts           # GraphQL queries
-│   │   ├── netting.ts           # Off-chain settlement engine
-│   │   └── index.ts             # Module exports
-│   └── omen/                    # Legacy Omen modules
+│   └── meridian/
+│       ├── witnesses.ts             # ZK witness providers
+│       ├── private-state.ts         # Private state schema (CirclePrivateState)
+│       ├── contract.ts              # Contract bindings
+│       ├── indexer.ts               # GraphQL queries
+│       ├── netting.ts               # Off-chain settlement engine
+│       ├── analytics.ts             # Privacy-preserving analytics
+│       ├── badges.ts                # Member achievement badges
+│       ├── cross-circle.ts          # Cross-circle balance netting
+│       └── index.ts                 # Module exports
+├── frontend/
+│   └── src/
+│       ├── components/
+│       │   ├── CircleBoard.tsx       # Circle creation & expense logger
+│       │   ├── SettlementBoard.tsx   # Net balances & optimal transfers
+│       │   ├── RecurringPacts.tsx    # Auto-split rules UI
+│       │   ├── AnalyticsDashboard.tsx # Stats, badges, distribution
+│       │   ├── Navbar.tsx            # Navigation
+│       │   └── ...
+│       ├── hooks/
+│       │   ├── useMeridianContract.ts  # Contract interaction
+│       │   └── useCirclesStore.ts      # Supabase persistence
+│       ├── midnight/
+│       │   ├── service.ts            # Browser deploy & prove
+│       │   └── providers.ts          # ZK config & wallet providers
+│       └── lib/
+│           └── supabase.ts           # Supabase client
 ├── supabase/
 │   └── migrations/
-│       ├── 001_create_premonitions.sql
-│       └── 002_create_meridian.sql
-└── .github/workflows/ci.yml
+│       ├── 002_create_meridian.sql   # Circles, expenses, settlements
+│       └── 003_create_recurring_pacts.sql  # Recurring pact rules
+├── docs/
+│   ├── level4-proposal.md           # Product proposal
+│   └── level4-submission.md         # Submission package
+└── .github/workflows/ci.yml        # CI/CD pipeline
 ```
 
 ---
@@ -289,10 +285,12 @@ export ledger inviteRoot: Bytes<32>;
 export ledger memberCount: Counter;
 export ledger expenseCount: Counter;
 export ledger settlementCount: Counter;
+export ledger lastSettlementHash: Bytes<32>;
 
 // Private witnesses — never leave the client
 witness localSecret(): Bytes<32>;
 witness localSalt(): Bytes<32>;
+witness settlementHash(): Bytes<32>;
 
 // Domain-separated commitment
 circuit commitSecret(secret: Bytes<32>, salt: Bytes<32>): Bytes<32> {
@@ -324,11 +322,13 @@ export circuit logExpense(): [] {
     expenseCount.increment(1);
 }
 
-// settle — prove settlement round complete
+// settle — prove settlement round complete, chain settlement hash
 export circuit settle(): [] {
     const s = localSecret();
     const salt = localSalt();
     assert(inviteRoot == commitSecret(s, salt), "Cannot verify settlement");
+    const sh = settlementHash();
+    lastSettlementHash = disclose(sh);
     settlementCount.increment(1);
 }
 ```
@@ -343,6 +343,7 @@ export circuit settle(): [] {
 │  inviteSecret    │ ──► │  inviteRoot       │
 │  expense amount  │     │  memberCount      │
 │  member balance  │     │  expenseCount     │
+│  settlement hash │     │  lastSettlementHash│
 └──────────────────┘     └──────────────────┘
          │                        │
          │    ZK Circuit          │
@@ -354,75 +355,28 @@ export circuit settle(): [] {
 
 ---
 
-## Network Configuration
-
-| Network | Purpose | Explorer |
-|---------|---------|----------|
-| `undeployed` | Local devnet | N/A |
-| `preview` | Public preview | [Explorer](https://explorer.preview.midnight.network) |
-| `preprod` | **Production testnet** | [Explorer](https://explorer.preprod.midnight.network) |
-
-### Preprod Deployment
-
-```bash
-# 1. Ensure wallet is funded (get tNIGHT from faucet)
-npm run check-balance -- --network preprod
-
-# 2. Deploy contract
-npm run deploy -- --network preprod
-
-# 3. Contract address will be saved to .midnight-state.json
-```
-
-### On-Chain Premonition
-
-In the browser, each inscription deploys a **fresh `premonition` contract instance**. The deploy transaction is the on-chain record — proven, balanced and submitted through the Lace wallet, then captured (with its transaction hash and block height) and persisted to Supabase. An example of a recorded on-chain premonition transaction (open the transaction on the explorer):
-
-```
-https://explorer.preprod.midnight.network/transactions/e765f0402df04ac3e0330192e86fd7ca225c4f10165d57057e9c791eade7c510
-```
-
----
-
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
 | `npm run compile:splitpool` | Compile Meridian contract |
-| `npm run compile:premonition` | Compile Omen contract (legacy) |
-| `npm run setup` | Start local devnet + compile + deploy |
-| `npm run deploy -- --network preprod` | Deploy to Preprod |
 | `npm run test` | Run root test suite |
 | `cd frontend && npm run dev` | Start frontend dev server |
 | `cd frontend && npm run build` | Build frontend for production |
 
 ---
 
-## Environment Variables
-
-Create `.env` files based on the examples:
-
-```bash
-# Root level
-cp .env.example .env
-
-# Frontend
-cp frontend/.env.example frontend/.env
-```
-
----
-
 ## Submission Checklist
 
 - [x] Fully functional dApp meaningfully using Midnight's privacy model
-- [x] Minimum 3 tests passing (15+ tests)
+- [x] 66+ tests passing (Vitest) — witnesses, netting, analytics, badges, cross-circle, pacts
 - [x] CI/CD pipeline running ([workflow](.github/workflows/ci.yml) + badge)
 - [x] Approved idea: Meridian — Confidential Group Expense Settlement
 - [x] Minimum 10 meaningful commits
 - [x] Public GitHub repository with complete README
 - [x] README privacy model section: [what an observer can and cannot learn](#privacy-model)
 - [x] Product proposal: [docs/level4-proposal.md](docs/level4-proposal.md)
-- [x] 📦 Complete submission package: [docs/level4-submission.md](docs/level4-submission.md)
+- [x] Complete submission package: [docs/level4-submission.md](docs/level4-submission.md)
 
 ---
 

@@ -69,27 +69,33 @@ the verification pattern into a new, genuinely useful proof.
 
 ### 5. Deliverables this cycle
 
-- **Contract:** `splitpool.compact` with join/logExpense/settle circuits on Preprod.
-- **Tests (Vitest):** witness encoding, private-state round-trip, netting
-  optimality, circle-math — deterministic, no chain needed.
-- **CI/CD (GitHub Actions):** test → typecheck → lint → build on every push,
-  plus optional Compact contract-compile job. Badge in README.
-- **Polished frontend:** circle board, expense logger, settlement view, explorer
-  links via `/transactions/<txHash>`.
-- **Supabase persistence:** circles, expenses, settlements — raw amounts stored
-  only in client-side private state.
+- **Contract:** `splitpool.compact` with join/logExpense/settle circuits + settlement hash chaining on Preprod.
+- **Netting engine:** Minimum-transfer settlement, settlement verification, cross-circle netting.
+- **Analytics:** Privacy-preserving circle stats, member badges, anomaly detection.
+- **Recurring pacts:** Weekly/biweekly/monthly auto-split rules with Supabase persistence.
+- **Tests (Vitest):** 66 root tests + 10 frontend tests — witnesses, netting, analytics, badges, cross-circle, pacts.
+- **CI/CD (GitHub Actions):** test → typecheck → lint → build on every push, plus optional Compact contract-compile job.
+- **Polished frontend:** CircleBoard, SettlementBoard, RecurringPacts, AnalyticsDashboard — Framer Motion UI.
+- **Supabase persistence:** circles, expenses, settlements, recurring pacts — raw amounts stored only in client-side private state.
 
 ---
 
-### 6. Product direction & future
+### 6. What was built
 
-- **Phase 1 (this cycle):** private circles + ZK invite-join + expense
-  commitments + provably-optimal settlement engine.
-- **Phase 2:** recurring pacts (weekly dinners, rent kitty) with auto-netting.
-- **Phase 3:** privacy-preserving analytics, percentile badges, cross-circle
-  netting.
-- **Phase 4:** stablecoin settlement rails, auditor/verifier API, security
-  review.
+| Phase | Status | Details |
+|-------|--------|---------|
+| Phase 1 | ✅ Complete | Core contract, netting engine, CircleBoard, CI/CD |
+| Phase 2 | ✅ Complete | SettlementBoard, settlement hash chaining, recurring pacts |
+| Phase 3 | ✅ Complete | Analytics, badges, cross-circle netting, AnalyticsDashboard |
+| Phase 4 | ✅ Complete | Hardening, 76+ tests, README rewrite, documentation |
+
+---
+
+### 7. Product direction & future
+
+- **Phase 1–4 (completed):** Private circles + ZK invite-join + expense commitments + provably-optimal settlement + recurring pacts + analytics + cross-circle netting.
+- **Next:** Contract compilation (requires `compact` CLI + proof-server), Preprod deployment, Vercel domain setup.
+- **Future:** Stablecoin settlement rails, auditor/verifier API, security review.
 
 **Idea submitted for approval:** Meridian — Confidential Group Expense
 Settlement. Category: **Consumer focus**.
