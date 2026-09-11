@@ -15,7 +15,7 @@ function AppContent() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [view, setView] = useState<'circles' | 'chronicles'>('circles');
 
-  const { isConnected, connect, disconnect, isConnecting, address } = useMidnightWallet();
+  useMidnightWallet();
 
   useEffect(() => {
     const lenis = new Lenis({

@@ -4,8 +4,8 @@ import { Magnetic } from './Magnetic';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
 
 interface NavbarProps {
-  view: 'oracle' | 'chronicles';
-  setView: (v: 'oracle' | 'chronicles') => void;
+  view: 'circles' | 'chronicles';
+  setView: (v: 'circles' | 'chronicles') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
@@ -19,10 +19,10 @@ export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
       transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="nav-pill">
-        <div className="omen-brand-mini">Omen.</div>
+        <div className="omen-brand-mini">Meridian.</div>
         
         <div className="nav-links">
-          <span className={`omen-nav-link ${view === 'oracle' ? 'active' : ''}`} onClick={() => setView('oracle')} style={{ cursor: 'none' }}>Oracle</span>
+          <span className={`omen-nav-link ${view === 'circles' ? 'active' : ''}`} onClick={() => setView('circles')} style={{ cursor: 'none' }}>Circles</span>
           <span className={`omen-nav-link ${view === 'chronicles' ? 'active' : ''}`} onClick={() => setView('chronicles')} style={{ cursor: 'none' }}>Chronicles</span>
         </div>
 
