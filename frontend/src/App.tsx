@@ -3,17 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Lenis from 'lenis';
 
 import { Preloader } from './components/Preloader';
-import { CircleBoard } from './components/CircleBoard';
 import { Chronicles } from './components/Chronicles';
 import { CustomCursor } from './components/CustomCursor';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { LiquidAura } from './components/LiquidAura';
 import { MidnightWalletProvider, useMidnightWallet } from './context/MidnightWalletContext';
+import { ToastProvider } from './components/TransactionToast';
+
+import { CircleList } from './components/CircleList';
+import { CircleDetail } from './components/CircleDetail';
+import { CreateCircleForm } from './components/CreateCircleForm';
 
 function AppContent() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [view, setView] = useState<'circles' | 'chronicles'>('circles');
+  const [activeCircle, setActiveCircle] = useState<string | null>(null);
 
   useMidnightWallet();
 
@@ -55,14 +60,29 @@ function AppContent() {
           animate={{ opacity: 1 }} 
           transition={{ duration: 2, ease: "easeOut" }}
         >
-          <Navbar view={view} setView={setView} />
+          <Navbar view={view} setView={(v) => { setView(v); setActiveCircle(null); }} />
 
           <div className="omen-layout">
             <main className="omen-content" style={{ marginTop: '120px' }}>
               <AnimatePresence mode="wait">
                 {view === 'circles' ? (
                   <motion.div key="circles-view" style={{ width: '100%' }}>
-                    <CircleBoard />
+                    {activeCircle === 'new' ? (
+                      <CreateCircleForm 
+                        onBack={() => setActiveCircle(null)} 
+                        onCreated={(addr) => setActiveCircle(addr)}
+                      />
+                    ) : activeCircle ? (
+                      <CircleDetail 
+                        contractAddress={activeCircle} 
+                        onBack={() => setActiveCircle(null)} 
+                      />
+                    ) : (
+                      <CircleList 
+                        onSelectCircle={setActiveCircle} 
+                        onCreateNew={() => setActiveCircle('new')} 
+                      />
+                    )}
                   </motion.div>
                 ) : (
                   <Chronicles key="chronicles-view" />
@@ -80,9 +100,11 @@ function AppContent() {
 
 function App() {
   return (
-    <MidnightWalletProvider>
-      <AppContent />
-    </MidnightWalletProvider>
+    <ToastProvider>
+      <MidnightWalletProvider>
+        <AppContent />
+      </MidnightWalletProvider>
+    </ToastProvider>
   );
 }
 
