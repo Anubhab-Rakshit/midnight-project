@@ -17,7 +17,7 @@ import { createProverKey, createVerifierKey, createZKIR, ZKConfigProvider } from
 import { Transaction } from '@midnight-ntwrk/ledger-v8';
 import { toHex, fromHex } from '@midnight-ntwrk/midnight-js-protocol/compact-runtime';
 
-export type OmenCircuitId = 'seal' | 'verify';
+export type MeridianCircuitId = 'join' | 'logExpense' | 'settle';
 
 interface AssetUrls {
   prover: string;
@@ -25,20 +25,24 @@ interface AssetUrls {
   zkir: string;
 }
 
-const sealProverUrl = new URL('../midnight/keys/seal.prover', import.meta.url).href;
-const sealVerifierUrl = new URL('../midnight/keys/seal.verifier', import.meta.url).href;
-const sealZkirUrl = new URL('../midnight/zkir/seal.zkir', import.meta.url).href;
-const verifyProverUrl = new URL('../midnight/keys/verify.prover', import.meta.url).href;
-const verifyVerifierUrl = new URL('../midnight/keys/verify.verifier', import.meta.url).href;
-const verifyZkirUrl = new URL('../midnight/zkir/verify.zkir', import.meta.url).href;
+const joinProverUrl = new URL('../midnight/keys/join.prover', import.meta.url).href;
+const joinVerifierUrl = new URL('../midnight/keys/join.verifier', import.meta.url).href;
+const joinZkirUrl = new URL('../midnight/zkir/join.zkir', import.meta.url).href;
+const logExpenseProverUrl = new URL('../midnight/keys/logExpense.prover', import.meta.url).href;
+const logExpenseVerifierUrl = new URL('../midnight/keys/logExpense.verifier', import.meta.url).href;
+const logExpenseZkirUrl = new URL('../midnight/zkir/logExpense.zkir', import.meta.url).href;
+const settleProverUrl = new URL('../midnight/keys/settle.prover', import.meta.url).href;
+const settleVerifierUrl = new URL('../midnight/keys/settle.verifier', import.meta.url).href;
+const settleZkirUrl = new URL('../midnight/zkir/settle.zkir', import.meta.url).href;
 
-const ASSETS: Record<OmenCircuitId, AssetUrls> = {
-  seal: { prover: sealProverUrl, verifier: sealVerifierUrl, zkir: sealZkirUrl },
-  verify: { prover: verifyProverUrl, verifier: verifyVerifierUrl, zkir: verifyZkirUrl },
+const ASSETS: Record<MeridianCircuitId, AssetUrls> = {
+  join: { prover: joinProverUrl, verifier: joinVerifierUrl, zkir: joinZkirUrl },
+  logExpense: { prover: logExpenseProverUrl, verifier: logExpenseVerifierUrl, zkir: logExpenseZkirUrl },
+  settle: { prover: settleProverUrl, verifier: settleVerifierUrl, zkir: settleZkirUrl },
 };
 
-function stripExt(location: string): OmenCircuitId {
-  const base = location.replace(/\.(zkir|prover|verifier)$/, '') as OmenCircuitId;
+function stripExt(location: string): MeridianCircuitId {
+  const base = location.replace(/\.(zkir|prover|verifier)$/, '') as MeridianCircuitId;
   if (!(base in ASSETS)) throw new Error(`Unknown circuit key location: ${location}`);
   return base;
 }
@@ -53,14 +57,14 @@ async function fetchAsset(url: string): Promise<Uint8Array> {
  * ZKConfigProvider that fetches the compiled contract artifacts from the
  * bundled frontend assets.
  */
-export class BrowserZkConfigProvider extends ZKConfigProvider<OmenCircuitId> {
-  async getZKIR(circuitId: OmenCircuitId): Promise<any> {
+export class BrowserZkConfigProvider extends ZKConfigProvider<MeridianCircuitId> {
+  async getZKIR(circuitId: MeridianCircuitId): Promise<any> {
     return createZKIR(await fetchAsset(ASSETS[circuitId].zkir));
   }
-  async getProverKey(circuitId: OmenCircuitId): Promise<any> {
+  async getProverKey(circuitId: MeridianCircuitId): Promise<any> {
     return createProverKey(await fetchAsset(ASSETS[circuitId].prover));
   }
-  async getVerifierKey(circuitId: OmenCircuitId): Promise<any> {
+  async getVerifierKey(circuitId: MeridianCircuitId): Promise<any> {
     return createVerifierKey(await fetchAsset(ASSETS[circuitId].verifier));
   }
 
@@ -98,13 +102,13 @@ function normalizeKeyToHex(value: unknown, label: string): string {
     return /^[0-9a-fA-F]{64}$/.test(v) ? v.toLowerCase() : value;
   }
   if (value instanceof Uint8Array) {
-    console.log(`[Omen] ${label} was a byte array (${value.length} bytes) — encoding to hex`);
+    console.log(`[Meridian] ${label} was a byte array (${value.length} bytes) — encoding to hex`);
     return bytesToHex(value);
   }
   if (value && typeof (value as any).toBytes === 'function') {
     return bytesToHex(new Uint8Array((value as any).toBytes()));
   }
-  console.warn(`[Omen] ${label} was unexpected type: ${describe(value)}`);
+  console.warn(`[Meridian] ${label} was unexpected type: ${describe(value)}`);
   throw new Error(`${label} returned an unexpected value from the wallet`);
 }
 
@@ -140,8 +144,8 @@ export class BrowserWalletProvider {
       this.connectedApi.getConfiguration(),
       this.connectedApi.getShieldedAddresses(),
     ]);
-    console.log('[Omen][cfg] getConfiguration() =', JSON.stringify(c, (_k, v) => (typeof v === 'bigint' ? v.toString() : v)));
-    console.log('[Omen][addr] raw getShieldedAddresses() =', JSON.stringify(addrs));
+    console.log('[Meridian][cfg] getConfiguration() =', JSON.stringify(c, (_k, v) => (typeof v === 'bigint' ? v.toString() : v)));
+    console.log('[Meridian][addr] raw getShieldedAddresses() =', JSON.stringify(addrs));
     this.config = {
       indexerUri: c.indexerUri,
       indexerWsUri: c.indexerWsUri,
@@ -151,8 +155,8 @@ export class BrowserWalletProvider {
       coinPublicKey: normalizeKeyToHex(addrs.shieldedCoinPublicKey, 'coin public key'),
       encryptionPublicKey: normalizeKeyToHex(addrs.shieldedEncryptionPublicKey, 'encryption public key'),
     };
-    console.log('[Omen][addr] → coin public key normalized =', describe(this.addresses.coinPublicKey));
-    console.log('[Omen][addr] → encryption public key normalized =', describe(this.addresses.encryptionPublicKey));
+    console.log('[Meridian][addr] → coin public key normalized =', describe(this.addresses.coinPublicKey));
+    console.log('[Meridian][addr] → encryption public key normalized =', describe(this.addresses.encryptionPublicKey));
   }
 
   private ensureInitialized() {
@@ -174,16 +178,16 @@ export class BrowserWalletProvider {
 
   async balanceTx(tx: any): Promise<any> {
     const hex = toHex(tx.serialize());
-    console.log(`[Omen][balanceTx] sending hex len=${hex.length} bytes=${hex.length / 2} head=${hex.slice(0, 80)}`);
+    console.log(`[Meridian][balanceTx] sending hex len=${hex.length} bytes=${hex.length / 2} head=${hex.slice(0, 80)}`);
     const result = await this.connectedApi.balanceUnsealedTransaction(hex);
     const outHex = result.tx;
-    console.log(`[Omen][balanceTx] wallet returned hex len=${outHex.length} bytes=${outHex.length / 2} head=${outHex.slice(0, 80)}`);
+    console.log(`[Meridian][balanceTx] wallet returned hex len=${outHex.length} bytes=${outHex.length / 2} head=${outHex.slice(0, 80)}`);
     return Transaction.deserialize('signature', 'proof', 'binding', fromHex(outHex));
   }
 
   async submitTx(tx: any): Promise<string> {
     const hex = toHex(tx.serialize());
-    console.log(`[Omen][submitTx] sending hex len=${hex.length} bytes=${hex.length / 2} head=${hex.slice(0, 80)}`);
+    console.log(`[Meridian][submitTx] sending hex len=${hex.length} bytes=${hex.length / 2} head=${hex.slice(0, 80)}`);
     await this.connectedApi.submitTransaction(hex);
     return tx.identifiers()[0];
   }
