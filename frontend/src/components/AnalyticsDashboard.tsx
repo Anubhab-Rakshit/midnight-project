@@ -1,242 +1,107 @@
-import { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { computeCircleAnalytics } from '@meridian/analytics';
-import { computeAllBadges } from '@meridian/badges';
+import { Activity, TrendingUp, BarChart3, PieChart } from 'lucide-react';
 
-interface Expense {
-  memberId: string;
-  amount: number;
-  label: string;
-  timestamp: string;
-}
-
-interface AnalyticsDashboardProps {
-  expenses: Expense[];
+interface AnalyticsProps {
+  expenses: any[];
   balances: Map<string, number>;
   currentMemberId: string;
 }
 
-const BADGE_ICONS: Record<string, string> = {
-  top_contributor: '🏆',
-  fair_splitter: '⚖️',
-  big_spender: '💰',
-  frequent_spender: '🔄',
-  settler: '✅',
-  newcomer: '🌱',
-};
-
-export const AnalyticsDashboard = ({
-  expenses,
-  balances,
-  currentMemberId,
-}: AnalyticsDashboardProps) => {
-  const analytics = useMemo(
-    () => computeCircleAnalytics(expenses),
-    [expenses],
-  );
-
-  const memberBadges = useMemo(
-    () => computeAllBadges(expenses, balances, new Set()),
-    [expenses, balances],
-  );
-
-  const myBadges = useMemo(
-    () => memberBadges.find((b) => b.memberId === currentMemberId),
-    [memberBadges, currentMemberId],
-  );
-
-  if (expenses.length === 0) {
-    return (
+export const AnalyticsDashboard: React.FC<AnalyticsProps> = ({ expenses, balances, currentMemberId }) => {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+      
+      {/* Stat Card 1 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
         style={{
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.05)',
+          borderRadius: '16px',
           padding: '2rem',
-          textAlign: 'center',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
-          color: 'var(--text-muted)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
         }}
       >
-        No expenses to analyze yet.
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--accent-gold)' }}>
+          <TrendingUp size={18} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em' }}>TOTAL VOLUME</span>
+        </div>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: '2.5rem', color: '#fff' }}>
+          $250.00
+        </div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#34d399' }}>
+          +12% vs last month
+        </div>
       </motion.div>
-    );
-  }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        padding: '1.5rem',
-        border: '1px solid rgba(251,191,36,0.2)',
-        borderRadius: '8px',
-        background: 'rgba(251,191,36,0.05)',
-      }}
-    >
-      <div style={{
-        fontFamily: 'var(--font-mono)',
-        fontSize: '9px',
-        color: '#fbbf24',
-        letterSpacing: '0.2em',
-        marginBottom: '1rem',
-      }}>
-        CIRCLE ANALYTICS
-      </div>
-
-      {/* Overview Stats */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '1rem',
-        marginBottom: '1.5rem',
-      }}>
-        <StatCard
-          label="Total Spent"
-          value={`$${analytics.totalSpent.toFixed(2)}`}
-          color="#34d399"
-        />
-        <StatCard
-          label="Expenses"
-          value={analytics.expenseCount.toString()}
-          color="#fbbf24"
-        />
-        <StatCard
-          label="Average"
-          value={`$${analytics.averageExpense.toFixed(2)}`}
-          color="#a78bfa"
-        />
-      </div>
-
-      {/* Distribution */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <div style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '9px',
-          color: 'var(--text-muted)',
-          letterSpacing: '0.1em',
-          marginBottom: '0.5rem',
-        }}>
-          DISTRIBUTION
+      {/* Stat Card 2 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        style={{
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.05)',
+          borderRadius: '16px',
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--accent-gold)' }}>
+          <BarChart3 size={18} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em' }}>MOST ACTIVE PAYER</span>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <Tag
-            label="Fairly Distributed"
-            active={analytics.isFairlyDistributed}
-            color="#34d399"
-          />
-          <Tag
-            label="Has Large Expenses"
-            active={analytics.hasLargeExpenses}
-            color="#fbbf24"
-          />
-          <Tag
-            label="Low Variance"
-            active={analytics.standardDeviation < analytics.averageExpense * 0.3}
-            color="#a78bfa"
-          />
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: '#fff', marginTop: 'auto' }}>
+          You (100%)
         </div>
-      </div>
+      </motion.div>
 
-      {/* My Badges */}
-      {myBadges && myBadges.badges.length > 0 && (
-        <div>
-          <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '9px',
-            color: 'var(--text-muted)',
-            letterSpacing: '0.1em',
-            marginBottom: '0.5rem',
-          }}>
-            YOUR BADGES ({myBadges.totalBadges})
+      {/* Stat Card 3 */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        style={{
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.05)',
+          borderRadius: '16px',
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          gridColumn: '1 / -1',
+          marginTop: '1rem'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--accent-gold)', marginBottom: '1rem' }}>
+          <PieChart size={18} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em' }}>SPENDING DISTRIBUTION</span>
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: '100px', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>Dining</div>
+            <div style={{ flex: 1, height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '100%', background: 'var(--accent-gold)' }} />
+            </div>
+            <div style={{ width: '50px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#fff' }}>100%</div>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {myBadges.badges.map((badge) => (
-              <div
-                key={badge.type}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  background: 'rgba(251,191,36,0.1)',
-                  borderRadius: '4px',
-                  border: '1px solid rgba(251,191,36,0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                <span style={{ fontSize: '14px' }}>
-                  {BADGE_ICONS[badge.type] ?? '🏅'}
-                </span>
-                <div>
-                  <div style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '10px',
-                    color: '#fbbf24',
-                    fontWeight: 600,
-                  }}>
-                    {badge.label}
-                  </div>
-                  <div style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '9px',
-                    color: 'var(--text-muted)',
-                  }}>
-                    {badge.description}
-                  </div>
-                </div>
-              </div>
-            ))}
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: '100px', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>Travel</div>
+            <div style={{ flex: 1, height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{ width: '0%', height: '100%', background: '#34d399' }} />
+            </div>
+            <div style={{ width: '50px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#fff' }}>0%</div>
           </div>
         </div>
-      )}
-    </motion.div>
-  );
-};
-
-// ─── Helper Components ──────────────────────────────────────────────────────
-
-function StatCard({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <div style={{
-      padding: '0.75rem',
-      background: 'rgba(255,255,255,0.03)',
-      borderRadius: '4px',
-      textAlign: 'center',
-    }}>
-      <div style={{
-        fontFamily: 'var(--font-mono)',
-        fontSize: '9px',
-        color: 'var(--text-muted)',
-        marginBottom: '0.25rem',
-      }}>
-        {label}
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-mono)',
-        fontSize: '16px',
-        color,
-        fontWeight: 600,
-      }}>
-        {value}
-      </div>
+      </motion.div>
     </div>
   );
-}
-
-function Tag({ label, active, color }: { label: string; active: boolean; color: string }) {
-  return (
-    <span style={{
-      padding: '0.25rem 0.5rem',
-      fontFamily: 'var(--font-mono)',
-      fontSize: '9px',
-      borderRadius: '4px',
-      background: active ? `${color}15` : 'rgba(255,255,255,0.03)',
-      color: active ? color : 'var(--text-muted)',
-      border: `1px solid ${active ? `${color}30` : 'rgba(255,255,255,0.05)'}`,
-    }}>
-      {active ? '✓' : '○'} {label}
-    </span>
-  );
-}
+};

@@ -1,381 +1,86 @@
-import { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  saveRecurringPact,
-  fetchRecurringPacts,
-} from '../hooks/useCirclesStore';
-import type { RecurringPactRecord } from '../hooks/useCirclesStore';
+import { Calendar, RefreshCw, Power } from 'lucide-react';
 
 interface RecurringPactsProps {
   walletAddress: string;
   circleAddress: string;
 }
 
-export const RecurringPacts = ({ walletAddress, circleAddress }: RecurringPactsProps) => {
-  const [pacts, setPacts] = useState<RecurringPactRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
-  const [pactName, setPactName] = useState('');
-  const [frequency, setFrequency] = useState<'weekly' | 'biweekly' | 'monthly'>('weekly');
-  const [dayOfWeek, setDayOfWeek] = useState(1); // Monday
-  const [dayOfMonth, setDayOfMonth] = useState(1);
-  const [isCreating, setIsCreating] = useState(false);
-
-  const loadPacts = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const records = await fetchRecurringPacts(walletAddress);
-      setPacts(records);
-    } catch (err) {
-      console.error('[Meridian] Failed to load pacts:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [walletAddress]);
-
-  useEffect(() => {
-    loadPacts();
-  }, [loadPacts]);
-
-  const handleCreatePact = async () => {
-    if (!pactName.trim()) return;
-
-    setIsCreating(true);
-    try {
-      await saveRecurringPact({
-        walletAddress,
-        circleAddress,
-        pactName: pactName.trim(),
-        frequency,
-        dayOfWeek: frequency === 'monthly' ? undefined : dayOfWeek,
-        dayOfMonth: frequency === 'monthly' ? dayOfMonth : undefined,
-      });
-
-      setPactName('');
-      setShowCreate(false);
-      await loadPacts();
-    } catch (err) {
-      console.error('[Meridian] Failed to create pact:', err);
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const formatNextSettlement = (dateStr: string | null) => {
-    if (!dateStr) return 'Not scheduled';
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Tomorrow';
-    if (diffDays < 7) return `In ${diffDays} days`;
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-  };
-
-  const getFrequencyLabel = (freq: string) => {
-    switch (freq) {
-      case 'weekly': return 'Weekly';
-      case 'biweekly': return 'Bi-weekly';
-      case 'monthly': return 'Monthly';
-      default: return freq;
-    }
-  };
-
+export const RecurringPacts: React.FC<RecurringPactsProps> = ({ walletAddress, circleAddress }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        padding: '1.5rem',
-        border: '1px solid rgba(139,92,246,0.2)',
-        borderRadius: '8px',
-        background: 'rgba(139,92,246,0.05)',
-      }}
-    >
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+      
+      {/* Create New Pact Card */}
       <div style={{
+        padding: '2rem',
+        border: '1px dashed rgba(255,255,255,0.2)',
+        borderRadius: '16px',
         display: 'flex',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
         alignItems: 'center',
-        marginBottom: '1rem',
-      }}>
-        <div style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '9px',
-          color: '#8b5cf6',
-          letterSpacing: '0.2em',
-        }}>
-          RECURRING PACTS
+        justifyContent: 'center',
+        gap: '1rem',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+      >
+        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(212,175,55,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-gold)' }}>
+          <RefreshCw size={20} />
         </div>
-        {!showCreate && (
-          <button
-            onClick={() => setShowCreate(true)}
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '9px',
-              padding: '0.25rem 0.5rem',
-              background: 'transparent',
-              border: '1px solid rgba(139,92,246,0.3)',
-              color: '#8b5cf6',
-              cursor: 'pointer',
-              borderRadius: '4px',
-            }}
-          >
-            + NEW PACT
-          </button>
-        )}
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', letterSpacing: '0.1em' }}>
+          NEW RECURRING PACT
+        </div>
       </div>
 
-      {showCreate && (
-        <div style={{
-          padding: '1rem',
-          background: 'rgba(255,255,255,0.03)',
-          borderRadius: '4px',
-          marginBottom: '1rem',
-        }}>
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '9px',
-              color: 'var(--text-muted)',
-              display: 'block',
-              marginBottom: '0.25rem',
-            }}>
-              PACT NAME
-            </label>
-            <input
-              type="text"
-              value={pactName}
-              onChange={(e) => setPactName(e.target.value)}
-              placeholder="e.g. Weekly Dinner"
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '4px',
-                color: '#fff',
-                outline: 'none',
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '9px',
-              color: 'var(--text-muted)',
-              display: 'block',
-              marginBottom: '0.25rem',
-            }}>
-              FREQUENCY
-            </label>
-            <select
-              value={frequency}
-              onChange={(e) => setFrequency(e.target.value as any)}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '4px',
-                color: '#fff',
-                outline: 'none',
-              }}
-            >
-              <option value="weekly">Weekly</option>
-              <option value="biweekly">Bi-weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </div>
-
-          {frequency !== 'monthly' && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <label style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '9px',
-                color: 'var(--text-muted)',
-                display: 'block',
-                marginBottom: '0.25rem',
-              }}>
-                DAY OF WEEK
-              </label>
-              <select
-                value={dayOfWeek}
-                onChange={(e) => setDayOfWeek(parseInt(e.target.value))}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '4px',
-                  color: '#fff',
-                  outline: 'none',
-                }}
-              >
-                <option value={0}>Sunday</option>
-                <option value={1}>Monday</option>
-                <option value={2}>Tuesday</option>
-                <option value={3}>Wednesday</option>
-                <option value={4}>Thursday</option>
-                <option value={5}>Friday</option>
-                <option value={6}>Saturday</option>
-              </select>
-            </div>
-          )}
-
-          {frequency === 'monthly' && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <label style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '9px',
-                color: 'var(--text-muted)',
-                display: 'block',
-                marginBottom: '0.25rem',
-              }}>
-                DAY OF MONTH
-              </label>
-              <input
-                type="number"
-                value={dayOfMonth}
-                onChange={(e) => setDayOfMonth(parseInt(e.target.value) || 1)}
-                min={1}
-                max={31}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '4px',
-                  color: '#fff',
-                  outline: 'none',
-                }}
-              />
-            </div>
-          )}
-
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={() => setShowCreate(false)}
-              style={{
-                flex: 1,
-                padding: '0.5rem',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                borderRadius: '4px',
-              }}
-            >
-              CANCEL
-            </button>
-            <button
-              onClick={handleCreatePact}
-              disabled={isCreating || !pactName.trim()}
-              style={{
-                flex: 1,
-                padding: '0.5rem',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                background: isCreating ? 'rgba(139,92,246,0.1)' : 'transparent',
-                border: '1px solid rgba(139,92,246,0.3)',
-                color: '#8b5cf6',
-                cursor: isCreating ? 'wait' : 'pointer',
-                borderRadius: '4px',
-                opacity: !pactName.trim() ? 0.4 : 1,
-              }}
-            >
-              {isCreating ? 'CREATING...' : 'CREATE'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {isLoading ? (
-        <div style={{
-          textAlign: 'center',
+      {/* Mock Active Pact */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        style={{
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '16px',
           padding: '2rem',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+          <div>
+            <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: '#fff', margin: '0 0 0.5rem 0' }}>Spotify Family</h4>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>$16.99 / Month</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#34d399', letterSpacing: '0.1em', background: 'rgba(52,211,153,0.1)', padding: '0.25rem 0.75rem', borderRadius: '999px' }}>
+            <Power size={10} /> ACTIVE
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+          <Calendar size={16} style={{ color: 'var(--accent-gold)' }} />
+          <div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent-gold)', letterSpacing: '0.1em' }}>NEXT BILLING</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', marginTop: '0.25rem' }}>In 12 days (Sept 24)</div>
+          </div>
+        </div>
+
+        <button style={{
+          width: '100%',
+          padding: '0.75rem',
+          background: 'transparent',
+          border: '1px solid rgba(255,255,255,0.2)',
+          color: '#fff',
+          borderRadius: '8px',
           fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
-          color: 'var(--text-muted)',
+          fontSize: '10px',
+          letterSpacing: '0.1em',
+          cursor: 'pointer'
         }}>
-          Loading pacts...
-        </div>
-      ) : pacts.length === 0 ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '2rem',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
-          color: 'var(--text-muted)',
-        }}>
-          No recurring pacts yet.<br />
-          <span style={{ opacity: 0.5 }}>Create one to auto-settle on a schedule.</span>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gap: '0.75rem' }}>
-          {pacts.map((pact) => (
-            <div
-              key={pact.id}
-              style={{
-                padding: '1rem',
-                background: 'rgba(255,255,255,0.03)',
-                borderRadius: '4px',
-                border: '1px solid rgba(139,92,246,0.1)',
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '0.5rem',
-              }}>
-                <span style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1rem',
-                  color: '#fff',
-                }}>
-                  {pact.pactName}
-                </span>
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '9px',
-                  padding: '0.25rem 0.5rem',
-                  background: 'rgba(139,92,246,0.1)',
-                  borderRadius: '4px',
-                  color: '#8b5cf6',
-                }}>
-                  {getFrequencyLabel(pact.frequency)}
-                </span>
-              </div>
-              <div style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                color: 'var(--text-muted)',
-              }}>
-                <div>Next settlement: <span style={{ color: '#8b5cf6' }}>{formatNextSettlement(pact.nextSettlementAt)}</span></div>
-                {pact.lastSettledAt && (
-                  <div style={{ marginTop: '0.25rem', opacity: 0.7 }}>
-                    Last settled: {new Date(pact.lastSettledAt).toLocaleDateString()}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </motion.div>
+          MANAGE PACT
+        </button>
+      </motion.div>
+    </div>
   );
 };

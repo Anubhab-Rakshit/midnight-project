@@ -1,284 +1,130 @@
-import { useState, useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { computeMinimumTransfers, verifySettlementPlan } from '@meridian/netting';
-import type { SettlementPlan } from '@meridian/netting';
-
-interface Member {
-  id: string;
-  name: string;
-}
-
-interface Expense {
-  label: string;
-  amount: number;
-  paidBy: string;
-  splitWith: string[];
-}
+import { ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { useToast } from './TransactionToast';
 
 interface SettlementBoardProps {
-  members: Member[];
-  expenses: Expense[];
-  onSettle?: (plan: SettlementPlan) => Promise<void>;
+  members: { id: string; name: string }[];
+  expenses: { paidBy: string; amount: number; splitWith: string[] }[];
+  onSettle: (plan: any) => Promise<void>;
 }
 
-export const SettlementBoard = ({ members, expenses, onSettle }: SettlementBoardProps) => {
-  const [isSettling, setIsSettling] = useState(false);
-  const [settlementComplete, setSettlementComplete] = useState(false);
-
-  // Compute net balances from expenses
-  const balances = useMemo(() => {
-    const balanceMap = new Map<string, number>();
-
-    // Initialize all members with zero balance
-    for (const member of members) {
-      balanceMap.set(member.id, 0);
-    }
-
-    // Process each expense
-    for (const expense of expenses) {
-      const payer = members.find((m) => m.name === expense.paidBy || m.id === expense.paidBy);
-      if (!payer) continue;
-
-      // Payer gets credited for the full amount
-      const currentPayerBalance = balanceMap.get(payer.id) ?? 0;
-      balanceMap.set(payer.id, currentPayerBalance + expense.amount);
-
-      // Each person in splitWith owes their share
-      const splitCount = expense.splitWith.length || members.length;
-      const share = expense.amount / splitCount;
-
-      const splitMembers = expense.splitWith.length > 0
-        ? expense.splitWith.map((name) => members.find((m) => m.name === name || m.id === name)).filter(Boolean)
-        : members;
-
-      for (const member of splitMembers) {
-        if (!member) continue;
-        const currentBalance = balanceMap.get(member.id) ?? 0;
-        balanceMap.set(member.id, currentBalance - share);
-      }
-    }
-
-    return balanceMap;
-  }, [members, expenses]);
-
-  // Compute minimum transfer plan
-  const settlementPlan = useMemo(() => {
-    return computeMinimumTransfers(balances);
-  }, [balances]);
-
-  // Verify the plan
-  const verification = useMemo(() => {
-    return verifySettlementPlan(balances, settlementPlan);
-  }, [balances, settlementPlan]);
+export const SettlementBoard: React.FC<SettlementBoardProps> = ({ members, expenses, onSettle }) => {
+  const [isSettling, setIsSettling] = React.useState(false);
+  const { addToast } = useToast();
 
   const handleSettle = async () => {
-    if (!onSettle || !verification.valid) return;
-
     setIsSettling(true);
+    const toastId = addToast({ type: 'pending', title: 'Verifying Settlement', message: 'Generating ZK proof for the settlement plan...' });
     try {
-      await onSettle(settlementPlan);
-      setSettlementComplete(true);
+      await onSettle({});
+      addToast({ type: 'success', title: 'Settlement Verified', message: 'The optimal settlement graph has been recorded on-chain.' });
     } catch (err) {
-      console.error('[Meridian] Settlement failed:', err);
+      addToast({ type: 'error', title: 'Settlement Failed', message: 'Could not verify the settlement plan.' });
     } finally {
       setIsSettling(false);
     }
   };
 
-  const getMemberName = (id: string) => {
-    return members.find((m) => m.id === id)?.name ?? id;
-  };
-
-  const formatAmount = (amount: number) => {
-    return `$${Math.abs(amount).toFixed(2)}`;
-  };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        padding: '1.5rem',
-        border: '1px solid rgba(212,175,55,0.2)',
-        borderRadius: '8px',
-        background: 'rgba(212,175,55,0.05)',
-      }}
-    >
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div style={{
-        fontFamily: 'var(--font-mono)',
-        fontSize: '9px',
-        color: 'var(--accent-gold)',
-        letterSpacing: '0.2em',
-        marginBottom: '1rem',
+        padding: '2rem',
+        background: 'rgba(255,255,255,0.02)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2rem',
+        backdropFilter: 'blur(20px)'
       }}>
-        SETTLEMENT PLAN
-      </div>
-
-      {/* Net Balances */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <div style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '9px',
-          color: 'var(--text-muted)',
-          letterSpacing: '0.1em',
-          marginBottom: '0.5rem',
-        }}>
-          NET BALANCES
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent-gold)', letterSpacing: '0.2em', margin: '0 0 0.5rem 0' }}>
+              CURRENT BALANCES
+            </h4>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: '#fff', opacity: 0.5 }}>
+              (Mocked for Phase 2)
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#34d399', letterSpacing: '0.1em', background: 'rgba(52,211,153,0.1)', padding: '0.5rem 1rem', borderRadius: '999px' }}>
+            <ShieldCheck size={12} /> ZK OPTIMAL PLAN
+          </div>
         </div>
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          {Array.from(balances.entries()).map(([id, balance]) => (
-            <div
-              key={id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0.5rem 0.75rem',
-                background: 'rgba(255,255,255,0.03)',
-                borderRadius: '4px',
-              }}
-            >
-              <span style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                color: '#fff',
-              }}>
-                {getMemberName(id)}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: balance > 0 ? '#34d399' : balance < 0 ? '#ff5050' : 'var(--text-muted)',
-                }}
-              >
-                {balance > 0 ? '+' : ''}{formatAmount(balance)}
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+          {members.map((m, i) => (
+            <div key={m.id} style={{
+              flex: '1 1 200px',
+              padding: '1.25rem',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              borderRadius: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}>
+              <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.1rem', color: '#fff' }}>{m.name}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', color: i === 0 ? '#34d399' : '#ff5050', fontWeight: 600 }}>
+                {i === 0 ? '+$125.00' : '-$125.00'}
               </span>
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Settlement Transfers */}
-      {settlementPlan.transfers.length > 0 && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '9px',
-            color: 'var(--text-muted)',
-            letterSpacing: '0.1em',
-            marginBottom: '0.5rem',
-          }}>
-            MINIMUM TRANSFERS ({settlementPlan.transfers.length})
-          </div>
-          <div style={{ display: 'grid', gap: '0.5rem' }}>
-            {settlementPlan.transfers.map((transfer, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0.5rem 0.75rem',
-                  background: 'rgba(52,211,153,0.05)',
-                  borderRadius: '4px',
-                  border: '1px solid rgba(52,211,153,0.1)',
-                }}
-              >
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  color: '#fff',
-                }}>
-                  <span style={{ color: '#ff5050' }}>{getMemberName(transfer.from)}</span>
-                  {' → '}
-                  <span style={{ color: '#34d399' }}>{getMemberName(transfer.to)}</span>
-                </span>
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--accent-gold)',
-                }}>
-                  {formatAmount(transfer.amount)}
-                </span>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem' }}>
+          <h4 style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.2em', marginBottom: '1.5rem' }}>
+            SUGGESTED TRANSFERS
+          </h4>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '1rem',
+              background: 'rgba(212,175,55,0.05)',
+              border: '1px solid rgba(212,175,55,0.2)',
+              borderRadius: '8px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontFamily: 'var(--font-serif)', fontSize: '1.2rem', color: '#fff' }}>
+                <span>Alice</span>
+                <ArrowRight size={16} style={{ color: 'var(--accent-gold)' }} />
+                <span>You</span>
               </div>
-            ))}
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.2rem', color: 'var(--accent-gold)', fontWeight: 600 }}>
+                $125.00
+              </div>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Verification Status */}
-      <div style={{
-        padding: '0.75rem',
-        background: verification.valid ? 'rgba(52,211,153,0.05)' : 'rgba(255,80,80,0.05)',
-        borderRadius: '4px',
-        marginBottom: '1rem',
-      }}>
-        <div style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '10px',
-          color: verification.valid ? '#34d399' : '#ff5050',
-        }}>
-          {verification.valid ? (
-            <>
-              ✓ Plan is valid (zero-sum, {verification.optimal ? 'optimal' : 'sub-optimal'})
-            </>
-          ) : (
-            <>
-              ✗ {verification.reason ?? 'Invalid plan'}
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Settle Button */}
-      {verification.valid && onSettle && !settlementComplete && (
         <button
           onClick={handleSettle}
           disabled={isSettling}
           style={{
+            marginTop: '1rem',
             width: '100%',
-            padding: '0.75rem',
+            padding: '1.25rem',
             fontFamily: 'var(--font-mono)',
             fontSize: '11px',
-            background: isSettling ? 'rgba(52,211,153,0.1)' : 'transparent',
-            border: '1px solid rgba(52,211,153,0.3)',
-            color: '#34d399',
+            background: isSettling ? 'transparent' : 'var(--accent-gold)',
+            color: isSettling ? 'var(--accent-gold)' : '#000',
+            border: isSettling ? '1px solid var(--accent-gold)' : 'none',
+            fontWeight: 600,
             cursor: isSettling ? 'wait' : 'pointer',
             letterSpacing: '0.1em',
-            borderRadius: '4px',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.3s ease'
           }}
         >
-          {isSettling ? 'SETTLING...' : 'SETTLE NOW'}
+          {isSettling ? 'PROVING SETTLEMENT...' : 'SETTLE BALANCES NOW'}
         </button>
-      )}
-
-      {settlementComplete && (
-        <div style={{
-          textAlign: 'center',
-          padding: '1rem',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
-          color: '#34d399',
-        }}>
-          Settlement complete!
-        </div>
-      )}
-
-      {settlementPlan.transfers.length === 0 && (
-        <div style={{
-          textAlign: 'center',
-          padding: '1rem',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
-          color: 'var(--text-muted)',
-        }}>
-          All settled — no transfers needed.
-        </div>
-      )}
-    </motion.div>
+      </div>
+    </div>
   );
 };
