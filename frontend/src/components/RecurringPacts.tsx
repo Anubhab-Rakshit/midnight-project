@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   saveRecurringPact,
@@ -21,11 +21,7 @@ export const RecurringPacts = ({ walletAddress, circleAddress }: RecurringPactsP
   const [dayOfMonth, setDayOfMonth] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
 
-  useEffect(() => {
-    loadPacts();
-  }, [walletAddress]);
-
-  const loadPacts = async () => {
+  const loadPacts = useCallback(async () => {
     try {
       setIsLoading(true);
       const records = await fetchRecurringPacts(walletAddress);
@@ -35,7 +31,11 @@ export const RecurringPacts = ({ walletAddress, circleAddress }: RecurringPactsP
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [walletAddress]);
+
+  useEffect(() => {
+    loadPacts();
+  }, [loadPacts]);
 
   const handleCreatePact = async () => {
     if (!pactName.trim()) return;
