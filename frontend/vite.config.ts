@@ -20,6 +20,8 @@ export default defineConfig({
       // Route both to the browser's native global.
       ws: resolve(__dirname, 'src/lib/ws-shim.ts'),
       'isomorphic-ws': resolve(__dirname, 'src/lib/ws-shim.ts'),
+      // Meridian shared modules (netting engine, types)
+      '@meridian': resolve(__dirname, '../src/meridian'),
     },
   },
   assetsInclude: ['**/*.prover', '**/*.verifier', '**/*.zkir', '**/*.bzkir'],
