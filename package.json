@@ -9,6 +9,7 @@
     "compile": "compact compile contracts/hello-world.compact contracts/managed/hello-world",
     "compile:premonition": "compact compile contracts/premonition.compact contracts/managed/premonition",
     "compile:splitpool": "compact compile contracts/splitpool.compact contracts/managed/splitpool",
+    "deploy:meridian": "npx tsx src/deploy-meridian.ts",
     "build": "npx tsc --noEmit || true",
     "setup": "npx tsx src/setup.ts",
     "deploy": "npx tsx src/deploy.ts",
