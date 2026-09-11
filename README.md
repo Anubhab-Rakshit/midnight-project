@@ -14,7 +14,7 @@
 
 <br/>
 
-**[GitHub repository](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/)**
+**[GitHub repository](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d)**
 
 <br/>
 
@@ -206,6 +206,27 @@ cd frontend
 npm run build
 ```
 
+### Preprod Deployment
+
+The contract is deployed on **Midnight Preprod**:
+
+| Detail | Value |
+|--------|-------|
+| Contract Address | `2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d` |
+| Deployer | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` |
+| Invite Secret | `eac549ce2e8f4ce794f1a1317fcaf6a1` |
+| Deployed At | Sep 11, 2026 |
+
+To deploy to a different network:
+
+```bash
+# Local devnet (requires Docker containers running)
+npm run deploy:meridian -- --network undeployed
+
+# Preprod
+npm run deploy:meridian -- --network preprod
+```
+
 ### Testing & CI/CD
 
 ```bash
@@ -360,6 +381,7 @@ export circuit settle(): [] {
 | Command | Description |
 |---------|-------------|
 | `npm run compile:splitpool` | Compile Meridian contract |
+| `npm run deploy:meridian -- --network <net>` | Deploy contract to network |
 | `npm run test` | Run root test suite |
 | `cd frontend && npm run dev` | Start frontend dev server |
 | `cd frontend && npm run build` | Build frontend for production |
