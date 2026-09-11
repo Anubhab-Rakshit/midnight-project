@@ -71,6 +71,6 @@ jobs:
             | sh
           compact update
 
-      - name: Compile premonition contract
-        run: npm run compile:premonition
+      - name: Compile Meridian contract
+        run: npm run compile:splitpool
 

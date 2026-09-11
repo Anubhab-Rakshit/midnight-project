@@ -1,22 +1,20 @@
 <div align="center">
 
-# 🌙 Omen
+# Meridian
 
-### A Cryptographic Premonition Registry
+### Confidential Group Expense Settlement
 
-*Write your future in zero-knowledge. Seal it on-chain. Prove it without showing it.*
+*Settle with friends, prove it's fair, show strangers nothing.*
 
 <br/>
 
-[![Level 3 — First Quarter](https://img.shields.io/badge/Level_3—First_Quarter-FFD700?style=for-the-badge&labelColor=1a1a2e)]()
 [![Midnight Network](https://img.shields.io/badge/Midnight_Network-0a0a0a?style=for-the-badge&logo=midnightnetwork&logoColor=white)]()
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)]()
 [![CI](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml/badge.svg)](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-13%20passing-2ea44f?style=for-the-badge)](docs/test-results.md)
 
 <br/>
 
-**[Live Demo](https://omen-midnight.vercel.app/)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/contract/5b7dcd349113b6dc0a11caa89b9245dc701d43e1cf114fc99bd10acf8e930f6c)** · **[🎬 Video Demo](https://youtu.be/7kM8HDzJAeI)**
+**[GitHub repository](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/)**
 
 <br/>
 
@@ -24,50 +22,49 @@
 
 ---
 
-## What is Omen?
+## What is Meridian?
 
-Omen is a **Cryptographic Premonition Registry** built on the Midnight Network. It demonstrates **Observable Privacy Behavior** — a core concept in zero-knowledge systems.
+Meridian is **confidential group expense settlement** built on the Midnight Network. It solves the same problem as Splitwise and on-chain expense splitters — but with one critical difference: **every amount stays private**.
 
 ### The Privacy Claim
 
-> **Your premonition text never leaves your browser. Only a cryptographic commitment hash is stored on-chain.**
+> **Your expenses are committed on-chain as zero-knowledge hashes. No one outside the circle can read a single amount.**
 
-When you inscribe a premonition:
-1. Your text + a random salt are **private witnesses** (never leave your device)
-2. A SHA-256 hash is computed locally in a **ZK circuit**
-3. Only the **commitment hash** is stored on the Midnight Preprod ledger
-4. The original premonition **cannot be recovered** from the hash
+When you log an expense in Meridian:
+1. The expense is committed via a **ZK circuit** (private witness)
+2. Only a **commitment hash** appears on the Midnight Preprod ledger
+3. Members holding the circle key see amounts locally
+4. An observer can verify the circle exists and is consistent — but **never** sees who spent what
 
-This is **Observable Privacy Behavior** — you can *see* that privacy is being enforced (the hash exists on-chain) without being able to *break* it (the premonition is unrecoverable).
+This is **programmable privacy**: you can *verify* that a circle is real and its accounts are mathematically correct, but you can never recover the amounts behind the commitments.
 
 ---
 
 ## Privacy Model
 
-Omen is built on **selective disclosure**: a user proves something meaningful
-(the prediction exists, is committed, and the owner knows the secret) while
-disclosing as little as possible.
+Meridian is built on **selective disclosure**: members prove something meaningful (an expense exists, a settlement is fair) while disclosing as little as possible.
 
 ### What an observer **can** learn
 
 | Data point | Where |
 |------------|-------|
-| That a premonition exists | On-chain commitment hash + `sealedCount` |
-| Proof of knowledge / validity | The ZK `seal`/`verify` circuits on-chain |
-| When it was sealed | Transaction hash, block height, timestamp |
-| Contract address | Public in `contractActions` |
+| That a circle exists | On-chain `inviteRoot` + `memberCount` |
+| How many expenses logged | `expenseCount` on-chain |
+| Settlement rounds completed | `settlementCount` on-chain |
+| Proof validity | Valid ZK `join`/`logExpense`/`settle` proofs on-chain |
+| When it happened | Transaction hash, block height, timestamp |
 
 ### What an observer **cannot** learn
 
 | Data point | Why it stays private |
 |------------|----------------------|
-| The premonition text | Private witness — never leaves the browser |
-| The salt | Random 32-byte private witness, never reused |
-| The original input from the hash | SHA-256 commitment is one-way |
-| Which identity sealed it | Not derivable from the on-chain commitment |
+| The invite secret | Private witness — never leaves the browser |
+| Any expense amount | Committed on-chain as a hash — unrecoverable |
+| Who paid whom | Not derivable from commitment hashes |
+| Individual balances | Private — only aggregate proof is public |
+| Member identity | Not linked to on-chain transaction |
 
-> **In short:** *You can verify privacy is being enforced — a valid ZK proof
-> exists on-chain — but you can never recover the secret behind it.*
+> **In short:** *You can verify privacy is being enforced — valid ZK proofs exist on-chain — but you can never recover the amounts or identities behind them.*
 
 ---
 
@@ -123,24 +120,23 @@ disclosing as little as possible.
 
 ## Features
 
-### 🔐 Observable Privacy Behavior
-- **Private Witnesses**: Premonition text + salt never leave the browser
-- **Public Commitment**: Only the SHA-256 hash is stored on-chain
-- **ZK Proof**: Cryptographic guarantee that the hash matches the premonition
+### 🔐 Programmable Privacy
+- **Expense Commitments**: Amounts stored as ZK hashes — unrecoverable by observers
+- **ZK Invite Gate**: Join a circle by proving knowledge of the invite — no public member list
+- **Settlement Proofs**: Prove a settlement is correct and zero-sum without revealing balances
 
 ### 💳 Wallet Integration
 - **Lace Wallet**: Connect/disconnect via Midnight DApp connector
-- **Demo Mode**: Mock provider for testing without wallet extension
+- **Browser ZK Proving**: All proofs generated client-side via Lace
 
 ### 📊 Live Indexer
-- **Real-time Data**: Fetches premonitions from Midnight Preprod indexer
-- **Fallback Mode**: Mock data when indexer is unavailable
+- **Real-time Data**: Fetches circle state from Midnight Preprod indexer
+- **Supabase Persistence**: Circles, expenses, settlements cached cross-device
 
-### 🎨 Awwwards-Level UI
-- **3D Tilt Effects**: Framer Motion powered interactions
-- **Matrix Decrypt**: Character-by-character reveal animation
-- **Liquid Glass**: Translucent card effects
-- **Custom Cursor**: Interactive magnetic hover states
+### 🎨 Production-Grade UI
+- **Circle Board**: Create circles, log expenses, view summaries
+- **Settlement View**: Run the netting engine, see optimal transfer plans
+- **Framer Motion**: Smooth animations throughout
 
 ---
 
@@ -227,78 +223,113 @@ cd frontend && npx tsc -b && npm run lint && npm run build
 ```
 midnight-project/
 ├── contracts/
-│   ├── premonition.compact          # Omen ZK contract source
-│   ├── hello-world.compact          # Level 1 contract
+│   ├── splitpool.compact        # Meridian ZK contract source
+│   ├── premonition.compact      # Omen contract (legacy)
 │   └── managed/
-│       ├── premonition/             # Compiled ZK artifacts
-│       │   ├── compiler/            # Circuit metadata
-│       │   ├── contract/            # TypeScript bindings
-│       │   ├── keys/                # Prover/Verifier keys
-│       │   └── zkir/                # ZK Intermediate Rep
-│       └── hello-world/
+│       ├── splitpool/           # Compiled ZK artifacts
+│       │   ├── compiler/        # Circuit metadata
+│       │   ├── contract/        # TypeScript bindings
+│       │   ├── keys/            # Prover/Verifier keys
+│       │   └── zkir/            # ZK Intermediate Rep
+│       └── premonition/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Monolith.tsx         # Oracle (inscription UI)
-│   │   │   ├── Chronicles.tsx       # Premonition gallery
-│   │   │   ├── Navbar.tsx           # Navigation
-│   │   │   ├── Footer.tsx           # Footer
-│   │   │   ├── LiquidAura.tsx       # Background effects
-│   │   │   ├── LiquidImage.tsx      # Image component
-│   │   │   ├── CustomCursor.tsx     # Custom cursor
-│   │   │   ├── Magnetic.tsx         # Magnetic hover
-│   │   │   └── Preloader.tsx        # Loading screen
+│   │   │   ├── CircleBoard.tsx  # Circle creation & expense logger
+│   │   │   ├── Chronicles.tsx   # Activity feed
+│   │   │   ├── Navbar.tsx       # Navigation
+│   │   │   ├── Footer.tsx       # Footer
+│   │   │   ├── LiquidAura.tsx   # Background effects
+│   │   │   └── Preloader.tsx    # Loading screen
 │   │   ├── context/
 │   │   │   └── MidnightWalletContext.tsx  # Wallet state
 │   │   ├── hooks/
-│   │   │   ├── useOmenContract.ts   # Contract interaction
-│   │   │   └── usePremonitions.ts   # Indexer queries
-│   │   ├── App.tsx                  # Main app
-│   │   └── main.tsx                 # Entry point
+│   │   │   ├── useMeridianContract.ts  # Contract interaction
+│   │   │   └── useCirclesStore.ts      # Supabase persistence
+│   │   ├── midnight/
+│   │   │   ├── service.ts       # Browser deploy & prove
+│   │   │   ├── providers.ts     # ZK config & wallet providers
+│   │   │   └── contract/        # Compiled contract types
+│   │   ├── lib/
+│   │   │   ├── bytes32.ts       # Bytes<32> encoding
+│   │   │   └── supabase.ts      # Supabase client
+│   │   ├── App.tsx              # Main app
+│   │   └── main.tsx             # Entry point
 │   ├── package.json
 │   └── vite.config.ts
 ├── src/
-│   ├── omen/
-│   │   ├── contract.ts              # Contract bindings
-│   │   ├── witnesses.ts             # ZK witness providers
-│   │   ├── private-state.ts         # Private state schema
-│   │   ├── indexer.ts               # GraphQL queries
-│   │   └── index.ts                 # Module exports
-│   ├── deploy.ts                    # Preprod deployment
-│   └── setup.ts                     # Devnet orchestrator
-└── .midnight-state.json             # Network config
+│   ├── meridian/
+│   │   ├── witnesses.ts         # ZK witness providers
+│   │   ├── private-state.ts     # Private state schema
+│   │   ├── contract.ts          # Contract bindings
+│   │   ├── indexer.ts           # GraphQL queries
+│   │   ├── netting.ts           # Off-chain settlement engine
+│   │   └── index.ts             # Module exports
+│   └── omen/                    # Legacy Omen modules
+├── supabase/
+│   └── migrations/
+│       ├── 001_create_premonitions.sql
+│       └── 002_create_meridian.sql
+└── .github/workflows/ci.yml
 ```
 
 ---
 
 ## The Contract
 
-### `premonition.compact`
+### `splitpool.compact`
 
 ```compact
-pragma language_version >= 0.22
+pragma language_version >= 0.22;
+
+import CompactStandardLibrary;
+
+// Public ledger state — visible on the blockchain
+export ledger inviteRoot: Bytes<32>;
+export ledger memberCount: Counter;
+export ledger expenseCount: Counter;
+export ledger settlementCount: Counter;
 
 // Private witnesses — never leave the client
-var localPremonition: Field;
-var localSalt: Field;
+witness localSecret(): Bytes<32>;
+witness localSalt(): Bytes<32>;
 
-// Public ledger state — stored on-chain
-ledger premonition_commitment: Bytes<32>;
-
-// Seal circuit — generates commitment hash
-export circuit seal(premonition: Opaque<"string">, salt: Opaque<"string">): [] {
-    // Compute hash locally (private)
-    localPremonition = hash(premonition);
-    localSalt = hash(salt);
-    
-    // Store only the commitment on-chain
-    premonition_commitment = hash(localPremonition, localSalt);
+// Domain-separated commitment
+circuit commitSecret(secret: Bytes<32>, salt: Bytes<32>): Bytes<32> {
+    return persistentHash<Vector<3, Bytes<32>>([
+        pad(32, "meridian:v1:secret:"), secret, salt
+    ]);
 }
 
-// Verify circuit — proves knowledge without revealing
-export circuit verify(premonition: Opaque<"string">, salt: Opaque<"string">): [] {
-    // Proves that the commitment matches without revealing inputs
-    assert(hash(hash(premonition), hash(salt)) == premonition_commitment);
+// Constructor — initializes circle with invite commitment
+constructor() {
+    const s = localSecret();
+    const salt = localSalt();
+    inviteRoot = disclose(commitSecret(s, salt));
+}
+
+// join — ZK invite-gated membership
+export circuit join(): [] {
+    const s = localSecret();
+    const salt = localSalt();
+    assert(inviteRoot == commitSecret(s, salt), "Invalid invite");
+    memberCount.increment(1);
+}
+
+// logExpense — prove membership, commit expense
+export circuit logExpense(): [] {
+    const s = localSecret();
+    const salt = localSalt();
+    assert(inviteRoot == commitSecret(s, salt), "Not a circle member");
+    expenseCount.increment(1);
+}
+
+// settle — prove settlement round complete
+export circuit settle(): [] {
+    const s = localSecret();
+    const salt = localSalt();
+    assert(inviteRoot == commitSecret(s, salt), "Cannot verify settlement");
+    settlementCount.increment(1);
 }
 ```
 
@@ -309,15 +340,16 @@ export circuit verify(premonition: Opaque<"string">, salt: Opaque<"string">): []
 │  User Input      │     │  On-Chain State   │
 │  (Private)       │     │  (Public)         │
 ├──────────────────┤     ├──────────────────┤
-│  "I foresee..."  │ ──► │  commitment_hash  │
-│  salt: 0x8f3a... │     │  0x7e8b9f2d1a... │
+│  inviteSecret    │ ──► │  inviteRoot       │
+│  expense amount  │     │  memberCount      │
+│  member balance  │     │  expenseCount     │
 └──────────────────┘     └──────────────────┘
          │                        │
          │    ZK Circuit          │
          └───────────┬────────────┘
                      │
-              Only hash is stored
-              Premonition is LOST
+              Only commitment hashes
+              Amounts are LOST
 ```
 
 ---
@@ -356,11 +388,11 @@ https://explorer.preprod.midnight.network/transactions/e765f0402df04ac3e0330192e
 
 | Command | Description |
 |---------|-------------|
+| `npm run compile:splitpool` | Compile Meridian contract |
+| `npm run compile:premonition` | Compile Omen contract (legacy) |
 | `npm run setup` | Start local devnet + compile + deploy |
-| `npm run compile` | Compile Compact contracts |
 | `npm run deploy -- --network preprod` | Deploy to Preprod |
-| `npm run check-balance -- --network preprod` | Check wallet balance |
-| `npm run test:e2e` | Run end-to-end tests |
+| `npm run test` | Run root test suite |
 | `cd frontend && npm run dev` | Start frontend dev server |
 | `cd frontend && npm run build` | Build frontend for production |
 
@@ -380,22 +412,17 @@ cp frontend/.env.example frontend/.env
 
 ---
 
-## Submission Checklist — Level 3 (First Quarter)
+## Submission Checklist
 
 - [x] Fully functional dApp meaningfully using Midnight's privacy model
-- [x] Minimum 3 tests passing ([13 tests](docs/test-results.md))
+- [x] Minimum 3 tests passing (15+ tests)
 - [x] CI/CD pipeline running ([workflow](.github/workflows/ci.yml) + badge)
-- [x] Approved idea from the provided list: [Private Allowlist Access](docs/level3-proposal.md)
+- [x] Approved idea: Meridian — Confidential Group Expense Settlement
 - [x] Minimum 10 meaningful commits
 - [x] Public GitHub repository with complete README
-- [x] Live demo link: [omen-midnight.vercel.app](https://omen-midnight.vercel.app/)
-- [x] Screenshot: test output — [13 tests passing](docs/test-results.md)
-- [x] CI/CD badge / workflow file with passing runs
-- [x] Demo video (1 min): [youtu.be/7kM8HDzJAeI](https://youtu.be/7kM8HDzJAeI)
 - [x] README privacy model section: [what an observer can and cannot learn](#privacy-model)
-- [x] Product proposal: [docs/level3-proposal.md](docs/level3-proposal.md)
-- [x] 📦 Complete submission package: [docs/level3-submission.md](docs/level3-submission.md)
-- [x] Contract deployed to Preprod: `5b7dcd349113b6dc0a11caa89b9245dc701d43e1cf114fc99bd10acf8e930f6c`
+- [x] Product proposal: [docs/level4-proposal.md](docs/level4-proposal.md)
+- [x] 📦 Complete submission package: [docs/level4-submission.md](docs/level4-submission.md)
 
 ---
 
@@ -417,8 +444,8 @@ Apache-2.0
 
 <div align="center">
 
-**Level 3 — First Quarter** · Midnight Network Challenge 2026
+**Meridian** · Midnight Network Challenge 2026
 
-*Built with 🌙 by [Anubhab Rakshit](https://github.com/Anubhab-Rakshit)*
+*Built with ❤️ by [Anubhab Rakshit](https://github.com/Anubhab-Rakshit)*
 
 </div>
