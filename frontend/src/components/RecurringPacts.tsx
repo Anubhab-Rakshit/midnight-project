@@ -2,11 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   saveRecurringPact,
-  savePactMember,
   fetchRecurringPacts,
-  fetchPactMembers,
 } from '../hooks/useCirclesStore';
-import type { RecurringPactRecord, PactMemberRecord } from '../hooks/useCirclesStore';
+import type { RecurringPactRecord } from '../hooks/useCirclesStore';
 
 interface RecurringPactsProps {
   walletAddress: string;
@@ -83,17 +81,6 @@ export const RecurringPacts = ({ walletAddress, circleAddress }: RecurringPactsP
       case 'monthly': return 'Monthly';
       default: return freq;
     }
-  };
-
-  const getDayLabel = (pact: RecurringPactRecord) => {
-    if (pact.frequency === 'monthly' && pact.dayOfMonth) {
-      return `Day ${pact.dayOfMonth}`;
-    }
-    if (pact.dayOfWeek !== null) {
-      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      return days[pact.dayOfWeek];
-    }
-    return '';
   };
 
   return (

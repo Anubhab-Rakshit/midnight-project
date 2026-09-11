@@ -20,8 +20,8 @@ import {
   getWalletProvingProvider,
 } from '../midnight/providers';
 import { toBytes32 } from '../lib/bytes32';
-import { computeSettlementHash } from '../../src/meridian/netting';
-import type { SettlementPlan } from '../../src/meridian/netting';
+import { computeSettlementHash } from '@meridian/netting';
+import type { SettlementPlan } from '@meridian/netting';
 
 const MeridianContract: any = Contract;
 
@@ -187,15 +187,10 @@ export async function settleCircle(
   salt: Uint8Array,
   settlementPlan: SettlementPlan,
 ): Promise<SettledCircle> {
-  const zkConfig = new BrowserZkConfigProvider();
-
   const walletProvider = new BrowserWalletProvider(connectedApi);
   await walletProvider.initialize();
   const networkId = await walletProvider.networkId();
   setNetworkId(networkId);
-
-  const indexerUri = await walletProvider.indexerUri();
-  const indexerWsUri = await walletProvider.indexerWsUri();
 
   // Compute the settlement plan hash
   const planHash = await computeSettlementHash(settlementPlan);
@@ -208,21 +203,13 @@ export async function settleCircle(
   } as any);
   compiledContract = CompiledContract.withCompiledFileAssets<any, any, any>(compiledContract as any, '' as any);
 
-  const provingProvider = await getWalletProvingProvider(connectedApi, zkConfig);
-
-  const providers = {
-    privateStateProvider: new MemoryPrivateStateProvider(),
-    publicDataProvider: indexerPublicDataProvider(indexerUri, indexerWsUri),
-    zkConfigProvider: zkConfig as any,
-    proofProvider: createProofProvider(provingProvider as any),
-    walletProvider: walletProvider as any,
-    midnightProvider: walletProvider as any,
-  } as any;
-
   // For settlement, we need to connect to the existing contract
   // This is a placeholder - actual implementation depends on SDK
+  const hexHash = Array.from(planHash)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
   console.log('[Meridian] Settling circle:', contractAddress);
-  console.log('[Meridian] Settlement hash:', Buffer.from(planHash).toString('hex'));
+  console.log('[Meridian] Settlement hash:', hexHash);
 
   // In production, this would call the settle circuit on the existing contract
   // For now, we return a placeholder result

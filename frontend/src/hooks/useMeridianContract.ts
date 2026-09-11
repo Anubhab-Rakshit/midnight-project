@@ -8,7 +8,7 @@
 import { useState, useCallback } from 'react';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
 import { deployCircle, settleCircle } from '../midnight/service';
-import type { SettlementPlan } from '../../src/meridian/netting';
+import type { SettlementPlan } from '@meridian/netting';
 
 export interface CircleResult {
   inviteRoot: string;

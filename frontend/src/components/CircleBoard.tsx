@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
 import { useMeridianContract } from '../hooks/useMeridianContract';
-import { saveCircle, saveExpense, saveSettlement } from '../hooks/useCirclesStore';
+import { saveCircle, saveSettlement } from '../hooks/useCirclesStore';
 import { SettlementBoard } from './SettlementBoard';
 import { RecurringPacts } from './RecurringPacts';
-import { computeMinimumTransfers } from '../../src/meridian/netting';
 
 interface CircleState {
   contractAddress: string;
@@ -31,7 +30,6 @@ export const CircleBoard = () => {
   const [expenseLabel, setExpenseLabel] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
   const [createError, setCreateError] = useState<string | null>(null);
-  const [joinMode, setJoinMode] = useState(false);
 
   const handleCreateCircle = async () => {
     if (!circleName.trim()) return;

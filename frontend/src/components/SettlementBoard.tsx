@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { computeMinimumTransfers, verifySettlementPlan } from '../../src/meridian/netting';
-import type { SettlementPlan } from '../../src/meridian/netting';
+import { computeMinimumTransfers, verifySettlementPlan } from '@meridian/netting';
+import type { SettlementPlan } from '@meridian/netting';
 
 interface Member {
   id: string;
