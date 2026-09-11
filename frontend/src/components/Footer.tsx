@@ -47,14 +47,14 @@ export const Footer = () => {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
         >
-          Predict the Unseen.
+          Settle in Secret.
         </motion.div>
         
         <div className="footer-grid">
           <div className="footer-col">
             <h4 className="footer-heading">MIDNIGHT NETWORK</h4>
             <p className="footer-desc">
-              Omen utilizes Zero-Knowledge proofs on the Midnight Preprod testnet to guarantee observable privacy behavior.
+              Meridian utilizes Zero-Knowledge proofs on the Midnight Preprod testnet to guarantee observable privacy behavior for group expenses.
             </p>
           </div>
           
@@ -69,8 +69,8 @@ export const Footer = () => {
         </div>
 
         <div className="footer-bottom">
-          <span className="text-mono text-muted">&copy; 2026 Omen Protocol</span>
-          <span className="text-mono text-muted">A Cryptographic Registry</span>
+          <span className="text-mono text-muted">&copy; 2026 Meridian</span>
+          <span className="text-mono text-muted">Confidential Ledger</span>
         </div>
       </div>
     </footer>

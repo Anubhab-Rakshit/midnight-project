@@ -1,7 +1,7 @@
 
 import { motion } from 'framer-motion';
 import { Magnetic } from './Magnetic';
-import { useMidnightWallet } from '../context/MidnightWalletContext';
+import { WalletConnect } from './WalletConnect';
 
 interface NavbarProps {
   view: 'circles' | 'chronicles';
@@ -9,8 +9,6 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
-  const { isConnected, isConnecting, address, connect, disconnect } = useMidnightWallet();
-
   return (
     <motion.nav 
       className="floating-nav"
@@ -18,31 +16,16 @@ export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="nav-pill">
+      <div className="nav-pill" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         <div className="omen-brand-mini">Meridian.</div>
         
         <div className="nav-links">
-          <span className={`omen-nav-link ${view === 'circles' ? 'active' : ''}`} onClick={() => setView('circles')} style={{ cursor: 'none' }}>Circles</span>
-          <span className={`omen-nav-link ${view === 'chronicles' ? 'active' : ''}`} onClick={() => setView('chronicles')} style={{ cursor: 'none' }}>Chronicles</span>
+          <span className={`omen-nav-link ${view === 'circles' ? 'active' : ''}`} onClick={() => setView('circles')} style={{ cursor: 'pointer' }}>Circles</span>
+          <span className={`omen-nav-link ${view === 'chronicles' ? 'active' : ''}`} onClick={() => setView('chronicles')} style={{ cursor: 'pointer' }}>Chronicles</span>
         </div>
 
         <div className="nav-actions">
-          <div className="status-indicator">
-            <div className="status-dot emerald"></div>
-            <span className="text-mono text-muted" style={{ fontSize: '9px' }}>SYS.ONLINE</span>
-          </div>
-          <Magnetic pull={0.2}>
-            <button 
-              className="connect-btn"
-              onClick={isConnected ? disconnect : connect}
-              disabled={isConnecting}
-            >
-              <span className="btn-text">
-                {isConnecting ? 'CONNECTING...' : isConnected ? `${address?.slice(0, 12)}...` : 'CONNECT LACE'}
-              </span>
-              <div className="btn-glare"></div>
-            </button>
-          </Magnetic>
+          <WalletConnect />
         </div>
       </div>
     </motion.nav>

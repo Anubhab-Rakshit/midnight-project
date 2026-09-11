@@ -14,6 +14,7 @@ interface MidnightWalletState {
   isConnected: boolean;
   isConnecting: boolean;
   address: string | null;
+  balance: number | null;
   provider: MidnightProvider | null;
   error: string | null;
   connect: () => Promise<void>;
@@ -44,6 +45,7 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
   const [provider, setProvider] = useState<MidnightProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -107,6 +109,16 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
         getAddress: async () => walletAddress,
       };
 
+      try {
+        const state = await connectedApi.state();
+        const tNightBalance = state.balances.unshielded || 0n;
+        // Convert from dust to tNIGHT (assuming 6 decimals like ADA/tADA, or 1 for testnet mock)
+        setBalance(Number(tNightBalance) / 1_000_000); 
+      } catch (err) {
+        console.warn('[Midnight] Could not fetch balance:', err);
+        setBalance(0);
+      }
+
       setProvider(realProvider);
       setAddress(walletAddress);
       setIsConnected(true);
@@ -121,6 +133,7 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
   const disconnect = useCallback(() => {
     setProvider(null);
     setAddress(null);
+    setBalance(null);
     setIsConnected(false);
     setError(null);
   }, []);
@@ -129,6 +142,7 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
     isConnected,
     isConnecting,
     address,
+    balance,
     provider,
     error,
     connect,
