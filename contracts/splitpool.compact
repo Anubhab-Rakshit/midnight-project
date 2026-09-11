@@ -18,10 +18,12 @@ export ledger inviteRoot: Bytes<32>;
 export ledger memberCount: Counter;
 export ledger expenseCount: Counter;
 export ledger settlementCount: Counter;
+export ledger lastSettlementHash: Bytes<32>;
 
 // Private witnesses — never leave the client
 witness localSecret(): Bytes<32>;
 witness localSalt(): Bytes<32>;
+witness settlementHash(): Bytes<32>;
 
 // ============================================================
 // Helper: domain-separated commitment hash
@@ -74,6 +76,7 @@ export circuit logExpense(): [] {
 
 // ============================================================
 // settle — prove a settlement round is complete
+// Stores a commitment to the settlement plan on-chain
 // ============================================================
 export circuit settle(): [] {
     const s = localSecret();
@@ -81,6 +84,10 @@ export circuit settle(): [] {
 
     // Verify caller is a member of this circle
     assert(inviteRoot == commitSecret(s, salt), "Cannot verify settlement");
+
+    // Store commitment to the settlement plan
+    const planHash = settlementHash();
+    lastSettlementHash = disclose(planHash);
 
     settlementCount.increment(1);
 }

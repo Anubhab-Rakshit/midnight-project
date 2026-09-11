@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { computeMinimumTransfers, verifySettlementPlan } from './netting';
+import {
+  computeMinimumTransfers,
+  verifySettlementPlan,
+  computeSettlementHash,
+} from './netting';
 
 describe('computeMinimumTransfers', () => {
   it('returns empty plan for no balances', () => {
@@ -116,5 +120,71 @@ describe('verifySettlementPlan', () => {
     const result = verifySettlementPlan(balances, subOptimal);
     expect(result.valid).toBe(true);
     expect(result.optimal).toBe(false);
+  });
+});
+
+describe('computeSettlementHash', () => {
+  it('returns a 32-byte hash', async () => {
+    const plan = {
+      transfers: [{ from: 'bob', to: 'alice', amount: 50 }],
+      nonZeroCount: 2,
+      totalSettled: 50,
+    };
+    const hash = await computeSettlementHash(plan);
+    expect(hash).toBeInstanceOf(Uint8Array);
+    expect(hash.length).toBe(32);
+  });
+
+  it('produces deterministic hashes for same plan', async () => {
+    const plan = {
+      transfers: [
+        { from: 'bob', to: 'alice', amount: 40 },
+        { from: 'charlie', to: 'alice', amount: 60 },
+      ],
+      nonZeroCount: 3,
+      totalSettled: 100,
+    };
+    const hash1 = await computeSettlementHash(plan);
+    const hash2 = await computeSettlementHash(plan);
+    expect(hash1).toEqual(hash2);
+  });
+
+  it('produces different hashes for different plans', async () => {
+    const plan1 = {
+      transfers: [{ from: 'bob', to: 'alice', amount: 50 }],
+      nonZeroCount: 2,
+      totalSettled: 50,
+    };
+    const plan2 = {
+      transfers: [{ from: 'bob', to: 'alice', amount: 60 }],
+      nonZeroCount: 2,
+      totalSettled: 60,
+    };
+    const hash1 = await computeSettlementHash(plan1);
+    const hash2 = await computeSettlementHash(plan2);
+    expect(hash1).not.toEqual(hash2);
+  });
+
+  it('is order-independent for canonical serialization', async () => {
+    // Same transfers in different order should produce same hash
+    const plan1 = {
+      transfers: [
+        { from: 'bob', to: 'alice', amount: 40 },
+        { from: 'charlie', to: 'alice', amount: 60 },
+      ],
+      nonZeroCount: 3,
+      totalSettled: 100,
+    };
+    const plan2 = {
+      transfers: [
+        { from: 'charlie', to: 'alice', amount: 60 },
+        { from: 'bob', to: 'alice', amount: 40 },
+      ],
+      nonZeroCount: 3,
+      totalSettled: 100,
+    };
+    const hash1 = await computeSettlementHash(plan1);
+    const hash2 = await computeSettlementHash(plan2);
+    expect(hash1).toEqual(hash2);
   });
 });

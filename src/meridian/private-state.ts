@@ -19,6 +19,8 @@ export interface CirclePrivateState {
   createdAt: string;
   /** The on-chain invite root commitment hash (for cross-reference) */
   inviteRoot: string;
+  /** Commitment hash of the last settlement plan */
+  settlementPlanHash?: Uint8Array;
 }
 
 // ─── Initial State Factory ──────────────────────────────────────────────────

@@ -26,6 +26,39 @@ export interface SettlementPlan {
   totalSettled: number;
 }
 
+// ─── Settlement Hash ────────────────────────────────────────────────────────
+
+/**
+ * Compute a deterministic commitment hash for a settlement plan.
+ * This hash is stored on-chain via the settle circuit, committing
+ * to the plan without revealing individual amounts or participants.
+ *
+ * The hash is computed by serializing all transfers in a canonical order
+ * and hashing with domain separation.
+ */
+export async function computeSettlementHash(
+  plan: SettlementPlan,
+): Promise<Uint8Array> {
+  // Canonical serialization: sorted by from, then to, then amount
+  const sorted = [...plan.transfers].sort((a, b) => {
+    if (a.from !== b.from) return a.from.localeCompare(b.from);
+    if (a.to !== b.to) return a.to.localeCompare(b.to);
+    return a.amount - b.amount;
+  });
+
+  const parts: string[] = [];
+  for (const t of sorted) {
+    parts.push(`${t.from}:${t.to}:${t.amount.toFixed(2)}`);
+  }
+  const canonical = `meridian:settlement:v1:${parts.join('|')}`;
+
+  // Hash using Web Crypto API (SHA-256)
+  const encoder = new TextEncoder();
+  const data = encoder.encode(canonical);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return new Uint8Array(hashBuffer);
+}
+
 // ─── Netting Engine ─────────────────────────────────────────────────────────
 
 /**
