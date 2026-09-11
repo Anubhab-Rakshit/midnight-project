@@ -5,6 +5,7 @@ import { useMeridianContract } from '../hooks/useMeridianContract';
 import { saveCircle, saveSettlement } from '../hooks/useCirclesStore';
 import { SettlementBoard } from './SettlementBoard';
 import { RecurringPacts } from './RecurringPacts';
+import { AnalyticsDashboard } from './AnalyticsDashboard';
 
 interface CircleState {
   contractAddress: string;
@@ -424,6 +425,23 @@ export const CircleBoard = () => {
                   />
                 </div>
               )}
+
+              {/* Analytics Dashboard */}
+              <div style={{ marginTop: '2rem' }}>
+                <AnalyticsDashboard
+                  expenses={circle.expenses.map((e, i) => ({
+                    memberId: `member-${i}`,
+                    amount: e.amount,
+                    label: e.label,
+                    timestamp: new Date().toISOString(),
+                  }))}
+                  balances={new Map([
+                    ['member-0', circle.expenses.reduce((sum, e) => sum + e.amount, 0) / 2],
+                    ['member-1', -circle.expenses.reduce((sum, e) => sum + e.amount, 0) / 2],
+                  ])}
+                  currentMemberId="member-0"
+                />
+              </div>
             </div>
           ) : (
             <div style={{
