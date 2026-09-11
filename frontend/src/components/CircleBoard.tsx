@@ -22,7 +22,7 @@ interface ExpenseEntry {
 }
 
 export const CircleBoard = () => {
-  const { isConnected, address, connect, isConnecting } = useMidnightWallet();
+  const { isConnected, address, connect, isConnecting, error: walletError } = useMidnightWallet();
   const { createCircle, isExecuting } = useMeridianContract();
 
   const [circleName, setCircleName] = useState('');
@@ -138,6 +138,21 @@ export const CircleBoard = () => {
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
             Connect your Midnight wallet to create or join a circle.
           </p>
+          {walletError && (
+            <div style={{
+              padding: '1rem',
+              border: '1px solid rgba(255, 80, 80, 0.3)',
+              borderRadius: '8px',
+              background: 'rgba(255, 80, 80, 0.05)',
+              marginBottom: '1.5rem',
+              maxWidth: '500px',
+              margin: '0 auto 1.5rem',
+            }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#ff5050' }}>
+                {walletError}
+              </p>
+            </div>
+          )}
           <button
             onClick={connect}
             disabled={isConnecting}

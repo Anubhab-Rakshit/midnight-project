@@ -76,7 +76,18 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
       const wallet = wallets.find(w => w.name.toLowerCase().includes('lace')) || wallets[0];
       console.log('[Midnight] Connecting to:', wallet.name);
 
-      const connectedApi = await wallet.connect('preprod');
+      let connectedApi: ConnectedAPI;
+      try {
+        connectedApi = await wallet.connect('preprod');
+      } catch (connectErr: any) {
+        // Lace's background service worker goes idle → feature-flags channel dies
+        if (connectErr?.message?.includes('RemoteApiShutdownError') || connectErr?.message?.includes('feature-flags')) {
+          throw new Error(
+            'Lace wallet connection expired. Please: (1) unlock Lace, (2) refresh this page, then try again.'
+          );
+        }
+        throw connectErr;
+      }
       console.log('[Midnight] Connected to', wallet.name);
 
       // Get address
