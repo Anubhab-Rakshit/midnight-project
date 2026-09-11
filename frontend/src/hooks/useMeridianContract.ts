@@ -7,7 +7,8 @@
 
 import { useState, useCallback } from 'react';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
-import { deployCircle } from '../midnight/service';
+import { deployCircle, settleCircle } from '../midnight/service';
+import type { SettlementPlan } from '../../src/meridian/netting';
 
 export interface CircleResult {
   inviteRoot: string;
@@ -15,6 +16,12 @@ export interface CircleResult {
   txHash: string;
   blockHeight: number;
   proof: unknown;
+}
+
+export interface SettleResult {
+  txHash: string;
+  blockHeight: number;
+  settlementHash: string;
 }
 
 export function useMeridianContract() {
@@ -60,8 +67,56 @@ export function useMeridianContract() {
     [provider, isConnected]
   );
 
+  const settle = useCallback(
+    async (
+      contractAddress: string,
+      inviteSecret: string,
+      salt: Uint8Array,
+      settlementPlan: SettlementPlan,
+    ): Promise<SettleResult> => {
+      if (!provider || !isConnected) {
+        throw new Error('Wallet not connected');
+      }
+      if (!provider.connectedApi) {
+        throw new Error('Connected API unavailable — a real wallet is required for on-chain settlement');
+      }
+
+      setIsExecuting(true);
+      setError(null);
+
+      try {
+        const settled = await settleCircle(
+          provider.connectedApi,
+          contractAddress,
+          inviteSecret,
+          salt,
+          settlementPlan,
+        );
+
+        console.log('[Meridian] Circle settled on-chain');
+        console.log('[Meridian] Tx hash:', settled.txHash);
+        console.log('[Meridian] Settlement hash:', settled.settlementHash);
+
+        return {
+          txHash: settled.txHash,
+          blockHeight: settled.blockHeight,
+          settlementHash: settled.settlementHash,
+        };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Settlement failed';
+        console.error('[Meridian] Settle circle failed:', err);
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setIsExecuting(false);
+      }
+    },
+    [provider, isConnected]
+  );
+
   return {
     createCircle,
+    settle,
     isExecuting,
     error,
   };

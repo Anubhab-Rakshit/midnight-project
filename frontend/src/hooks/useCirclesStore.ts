@@ -80,6 +80,54 @@ interface SettlementRow {
   created_at: string;
 }
 
+// ─── Recurring Pact Record ─────────────────────────────────────────────────
+
+export interface RecurringPactRecord {
+  id: string;
+  walletAddress: string;
+  circleAddress: string;
+  pactName: string;
+  frequency: 'weekly' | 'biweekly' | 'monthly';
+  dayOfWeek: number | null;
+  dayOfMonth: number | null;
+  isActive: boolean;
+  lastSettledAt: string | null;
+  nextSettlementAt: string | null;
+  createdAt: string;
+}
+
+interface RecurringPactRow {
+  id: string;
+  wallet_address: string;
+  circle_address: string;
+  pact_name: string;
+  frequency: string;
+  day_of_week: number | null;
+  day_of_month: number | null;
+  is_active: boolean;
+  last_settled_at: string | null;
+  next_settlement_at: string | null;
+  created_at: string;
+}
+
+// ─── Pact Member Record ────────────────────────────────────────────────────
+
+export interface PactMemberRecord {
+  id: string;
+  pactId: string;
+  walletAddress: string;
+  memberName: string;
+  joinedAt: string;
+}
+
+interface PactMemberRow {
+  id: string;
+  pact_id: string;
+  wallet_address: string;
+  member_name: string;
+  joined_at: string;
+}
+
 // ─── Mappers ────────────────────────────────────────────────────────────────
 
 function mapCircleRow(row: CircleRow): CircleRecord {
@@ -116,6 +164,32 @@ function mapSettlementRow(row: SettlementRow): SettlementRecord {
     txHash: row.tx_hash,
     blockHeight: row.block_height,
     createdAt: row.created_at,
+  };
+}
+
+function mapRecurringPactRow(row: RecurringPactRow): RecurringPactRecord {
+  return {
+    id: row.id,
+    walletAddress: row.wallet_address,
+    circleAddress: row.circle_address,
+    pactName: row.pact_name,
+    frequency: row.frequency as RecurringPactRecord['frequency'],
+    dayOfWeek: row.day_of_week,
+    dayOfMonth: row.day_of_month,
+    isActive: row.is_active,
+    lastSettledAt: row.last_settled_at,
+    nextSettlementAt: row.next_settlement_at,
+    createdAt: row.created_at,
+  };
+}
+
+function mapPactMemberRow(row: PactMemberRow): PactMemberRecord {
+  return {
+    id: row.id,
+    pactId: row.pact_id,
+    walletAddress: row.wallet_address,
+    memberName: row.member_name,
+    joinedAt: row.joined_at,
   };
 }
 
@@ -172,6 +246,100 @@ export async function saveSettlement(input: {
     block_height: input.blockHeight ?? null,
   });
   if (error) throw new Error(`Failed to save settlement: ${error.message}`);
+}
+
+// ─── Recurring Pact Functions ──────────────────────────────────────────────
+
+export async function saveRecurringPact(input: {
+  walletAddress: string;
+  circleAddress: string;
+  pactName: string;
+  frequency: 'weekly' | 'biweekly' | 'monthly';
+  dayOfWeek?: number;
+  dayOfMonth?: number;
+}): Promise<string> {
+  // Calculate next settlement date
+  const now = new Date();
+  let nextSettlement = new Date(now);
+
+  if (input.frequency === 'weekly' && input.dayOfWeek !== undefined) {
+    const daysUntil = (input.dayOfWeek - now.getDay() + 7) % 7 || 7;
+    nextSettlement.setDate(now.getDate() + daysUntil);
+  } else if (input.frequency === 'biweekly' && input.dayOfWeek !== undefined) {
+    const daysUntil = (input.dayOfWeek - now.getDay() + 14) % 14 || 14;
+    nextSettlement.setDate(now.getDate() + daysUntil);
+  } else if (input.frequency === 'monthly' && input.dayOfMonth !== undefined) {
+    nextSettlement.setDate(input.dayOfMonth);
+    if (nextSettlement <= now) {
+      nextSettlement.setMonth(nextSettlement.getMonth() + 1);
+    }
+  } else {
+    // Default: next Monday
+    const daysUntilMonday = (1 - now.getDay() + 7) % 7 || 7;
+    nextSettlement.setDate(now.getDate() + daysUntilMonday);
+  }
+
+  const { data, error } = await supabase
+    .from('recurring_pacts')
+    .insert({
+      wallet_address: input.walletAddress,
+      circle_address: input.circleAddress,
+      pact_name: input.pactName,
+      frequency: input.frequency,
+      day_of_week: input.dayOfWeek ?? null,
+      day_of_month: input.dayOfMonth ?? null,
+      next_settlement_at: nextSettlement.toISOString(),
+    })
+    .select('id')
+    .single();
+
+  if (error) throw new Error(`Failed to save recurring pact: ${error.message}`);
+  return data.id;
+}
+
+export async function savePactMember(input: {
+  pactId: string;
+  walletAddress: string;
+  memberName: string;
+}): Promise<void> {
+  const { error } = await supabase.from('pact_members').insert({
+    pact_id: input.pactId,
+    wallet_address: input.walletAddress,
+    member_name: input.memberName,
+  });
+  if (error) throw new Error(`Failed to save pact member: ${error.message}`);
+}
+
+export async function fetchRecurringPacts(walletAddress: string): Promise<RecurringPactRecord[]> {
+  const { data, error } = await supabase
+    .from('recurring_pacts')
+    .select('*')
+    .eq('wallet_address', walletAddress)
+    .eq('is_active', true)
+    .order('next_settlement_at', { ascending: true });
+  if (error) throw new Error(`Failed to fetch recurring pacts: ${error.message}`);
+  return (data ?? []).map(mapRecurringPactRow);
+}
+
+export async function fetchPactMembers(pactId: string): Promise<PactMemberRecord[]> {
+  const { data, error } = await supabase
+    .from('pact_members')
+    .select('*')
+    .eq('pact_id', pactId)
+    .order('joined_at', { ascending: true });
+  if (error) throw new Error(`Failed to fetch pact members: ${error.message}`);
+  return (data ?? []).map(mapPactMemberRow);
+}
+
+export async function updatePactSettlement(pactId: string): Promise<void> {
+  const now = new Date();
+  const { error } = await supabase
+    .from('recurring_pacts')
+    .update({
+      last_settled_at: now.toISOString(),
+    })
+    .eq('id', pactId);
+  if (error) throw new Error(`Failed to update pact settlement: ${error.message}`);
 }
 
 // ─── Fetch Functions ────────────────────────────────────────────────────────
