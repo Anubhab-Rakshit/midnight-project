@@ -22,6 +22,23 @@
 
 ---
 
+## Quick Navigation
+
+| Section | Description |
+|---------|-------------|
+| [What is Meridian?](#what-is-meridian) | Product overview and privacy claim |
+| [Privacy Model](#privacy-model) | What observers can and cannot learn |
+| [Tech Stack](#tech-stack) | Frameworks and tools used |
+| [Architecture](#architecture) | System diagram and component flow |
+| [Features](#features) | Core capabilities and UI components |
+| [Getting Started](#getting-started) | Installation, dev, build, and deployment |
+| [Deployed Contracts](#deployed-contracts) | On-chain contract details |
+| [The Contract](#the-contract) | Compact source code and privacy flow |
+| [Scripts](#scripts) | Available npm commands |
+| [Resources](#resources) | Midnight documentation links |
+
+---
+
 ## What is Meridian?
 
 Meridian is **confidential group expense settlement** built on the Midnight Network. It solves the same problem as Splitwise and on-chain expense splitters — but with one critical difference: **every amount stays private**.
@@ -219,27 +236,6 @@ cd frontend
 npm run build
 ```
 
-### Preprod Deployment
-
-The contract is deployed on **Midnight Preprod**:
-
-| Detail | Value |
-|--------|-------|
-| Contract Address | `2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d` |
-| Deployer | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` |
-| Invite Secret | `eac549ce2e8f4ce794f1a1317fcaf6a1` |
-| Deployed At | Sep 11, 2026 |
-
-To deploy to a different network:
-
-```bash
-# Local devnet (requires Docker containers running)
-npm run deploy:meridian -- --network undeployed
-
-# Preprod
-npm run deploy:meridian -- --network preprod
-```
-
 ### Testing & CI/CD
 
 ```bash
@@ -256,6 +252,44 @@ cd frontend && npx tsc -b && npm run lint && npm run build
 - **CI** runs on every push/PR via GitHub Actions (`.github/workflows/ci.yml`):
   install → **test** → typecheck → lint → build, plus an optional Compact
   contract-compile job. See the [CI badge](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml).
+
+---
+
+## Deployed Contracts
+
+All contracts are live on **Midnight Preprod**.
+
+<div align="center">
+
+| Contract | Network | Address | Deployer | Date |
+|----------|---------|---------|----------|------|
+| `splitpool` | Preprod | [`2eff47c4...f7896d`](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d) | [`mn_addr_preprod...tqdt24za`](https://explorer.preprod.midnight.network/address/mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za) | Sep 11, 2026 |
+
+</div>
+
+<details>
+<summary><strong>Full Contract Details</strong></summary>
+
+| Field | Value |
+|-------|-------|
+| **Contract Address** | `2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d` |
+| **Deployer Address** | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` |
+| **Invite Secret** | `eac549ce2e8f4ce794f1a1317fcaf6a1` |
+| **Deployed At** | Sep 11, 2026 |
+| **Network** | Midnight Preprod |
+| **Explorer** | [View on Explorer](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d) |
+
+</details>
+
+To deploy to a different network:
+
+```bash
+# Local devnet (requires Docker containers running)
+npm run deploy:meridian -- --network undeployed
+
+# Preprod
+npm run deploy:meridian -- --network preprod
+```
 
 ---
 
@@ -415,18 +449,9 @@ export circuit settle(): [] {
 
 ---
 
-## Level 4 Submission Checklist
+## What is 1am?
 
-- [x] Working MVP live on Preprod (verifiable address)
-- [x] Documentation — README + setup + usage + privacy model
-- [x] CI/CD pipeline running ([workflow](.github/workflows/ci.yml) + [badge](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml))
-- [x] Minimum 15 meaningful commits (56 total)
-- [x] Public GitHub repository with full documentation
-- [x] Product proposal — [docs/level4-proposal.md](docs/level4-proposal.md)
-- [x] Submission package — [docs/level4-submission.md](docs/level4-submission.md)
-- [ ] Product X / Twitter profile created — [link TBD](#)
-- [ ] Live demo link deployed — [link TBD](#)
-- [ ] Demo video of the MVP — [link TBD](#)
+**1am** is the community nickname for the Midnight Network — a play on the name. Midnight is 12:00 AM, and 1am is one step beyond. It's what builders call the ecosystem: *"We're building at 1am."*
 
 ---
 
