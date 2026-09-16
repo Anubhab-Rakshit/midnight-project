@@ -14,7 +14,7 @@
 
 <br/>
 
-**[GitHub repo](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d)** · **[Live Demo](#)** · **[X / Twitter](#)**
+**[GitHub repo](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d)** · **[Live Demo](https://meridian-midnight.vercel.app/)** · **[X / Twitter](https://x.com/anubhab_26/status/2100218988907421779?s=20)**
 
 <br/>
 

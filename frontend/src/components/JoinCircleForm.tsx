@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X, Hash, Loader2 } from 'lucide-react';
 import { useToast } from './TransactionToast';
@@ -44,30 +45,33 @@ export const JoinCircleForm: React.FC<JoinCircleFormProps> = ({ onClose }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div style={{
       position: 'fixed',
-      top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.8)',
-      backdropFilter: 'blur(10px)',
-      zIndex: 1000,
+      inset: 0,
+      background: 'rgba(4,4,7,0.78)',
+      backdropFilter: 'blur(20px) saturate(180%)',
+      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+      zIndex: 99999,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      padding: '1.25rem',
     }}>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.94, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        exit={{ opacity: 0, scale: 0.94, y: 16 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         style={{
-          background: 'rgba(15,15,18,0.95)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '16px',
-          padding: '3rem',
+          background: 'linear-gradient(180deg, rgba(22, 22, 28, 0.96) 0%, rgba(12, 12, 16, 0.98) 100%)',
+          border: '1px solid rgba(212, 175, 55, 0.25)',
+          borderRadius: '24px',
+          padding: '2.5rem',
           width: '100%',
-          maxWidth: '500px',
+          maxWidth: '480px',
           position: 'relative',
-          boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
+          boxShadow: '0 30px 70px -10px rgba(0,0,0,0.9), 0 0 40px -5px rgba(212,175,55,0.12)',
         }}
       >
         <button
@@ -173,6 +177,7 @@ export const JoinCircleForm: React.FC<JoinCircleFormProps> = ({ onClose }) => {
           </button>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -55,8 +55,8 @@ export const CreateCircleForm: React.FC<CreateCircleFormProps> = ({ onBack, onCr
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
           Connect your wallet to deploy a new confidential circle.
         </p>
-        <button onClick={connect} className="omen-btn-primary">
-          CONNECT LACE
+        <button onClick={() => connect()} className="omen-btn-primary">
+          CONNECT WALLET
         </button>
       </div>
     );

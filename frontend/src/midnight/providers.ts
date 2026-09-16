@@ -1,5 +1,5 @@
 /**
- * Browser Midnight providers backed by the Lace wallet's ConnectedAPI.
+ * Browser Midnight providers backed by the wallet's ConnectedAPI.
  *
  * In the browser we never touch private keys directly — the wallet does:
  *   - proving  via `getProvingProvider(keyMaterialProvider)`
@@ -114,7 +114,7 @@ function normalizeKeyToHex(value: unknown, label: string): string {
 
 /**
  * WalletProvider + MidnightProvider that route balances and submissions
- * through the Lace wallet's ConnectedAPI.
+ * through the wallet's ConnectedAPI.
  */
 function describe(value: unknown): string {
   if (typeof value === 'string') return `string(${value.length})="${value.slice(0, 32)}${value.length > 32 ? '…' : ''}"`;

@@ -3,7 +3,7 @@
  *
  * Each circle deploys its own contract (one circle per box),
  * so the deploy transaction itself is the on-chain record. The wallet
- * performs proving, balancing and submission via the Lace ConnectedAPI.
+ * performs proving, balancing and submission via the wallet ConnectedAPI.
  */
 
 import { setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
