@@ -43,6 +43,8 @@ export interface ExpenseRecord {
   walletAddress: string;
   circleAddress: string;
   expenseLabel: string;
+  amount: number;
+  expenseType: 'equal' | 'custom';
   commitmentHash: string;
   txHash: string | null;
   blockHeight: number | null;
@@ -54,6 +56,8 @@ interface ExpenseRow {
   wallet_address: string;
   circle_address: string;
   expense_label: string;
+  amount: number;
+  expense_type: string;
   commitment_hash: string;
   tx_hash: string | null;
   block_height: number | null;
@@ -149,6 +153,8 @@ function mapExpenseRow(row: ExpenseRow): ExpenseRecord {
     walletAddress: row.wallet_address,
     circleAddress: row.circle_address,
     expenseLabel: row.expense_label,
+    amount: row.amount,
+    expenseType: row.expense_type as 'equal' | 'custom',
     commitmentHash: row.commitment_hash,
     txHash: row.tx_hash,
     blockHeight: row.block_height,
@@ -218,6 +224,8 @@ export async function saveExpense(input: {
   walletAddress: string;
   circleAddress: string;
   expenseLabel: string;
+  amount: number;
+  expenseType: 'equal' | 'custom';
   commitmentHash: string;
   txHash?: string;
   blockHeight?: number;
@@ -226,6 +234,8 @@ export async function saveExpense(input: {
     wallet_address: input.walletAddress,
     circle_address: input.circleAddress,
     expense_label: input.expenseLabel,
+    amount: input.amount,
+    expense_type: input.expenseType,
     commitment_hash: input.commitmentHash,
     tx_hash: input.txHash ?? null,
     block_height: input.blockHeight ?? null,
@@ -408,4 +418,31 @@ export function useCirclesStore(walletAddress: string | null) {
     error,
     refetch,
   };
+}
+
+export function useCircleExpenses(circleAddress: string | null) {
+  const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const refetch = useCallback(async () => {
+    if (!circleAddress) {
+      setExpenses([]);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const records = await fetchExpenses(circleAddress);
+      setExpenses(records);
+    } catch (err) {
+      console.warn('[CirclesStore] Failed to fetch expenses:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [circleAddress]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return { expenses, isLoading, refetch };
 }

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useCirclesStore } from '../hooks/useCirclesStore';
+import { useCirclesStore, useCircleExpenses, saveExpense } from '../hooks/useCirclesStore';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
 import { ExpenseForm } from './ExpenseForm';
 import { MemberList } from './MemberList';
@@ -9,6 +9,8 @@ import { SettlementBoard } from './SettlementBoard';
 import { RecurringPacts } from './RecurringPacts';
 import { AnalyticsDashboard } from './AnalyticsDashboard';
 import { ArrowLeft, ExternalLink, Activity, Users, Shield, Zap } from 'lucide-react';
+import { computeMinimumTransfers } from '@meridian/netting';
+import { computeCircleAnalytics } from '@meridian/analytics';
 
 interface CircleDetailProps {
   contractAddress: string;
@@ -20,26 +22,115 @@ type Tab = 'expenses' | 'members' | 'settlement' | 'pacts' | 'analytics';
 export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onBack }) => {
   const { address } = useMidnightWallet();
   const { circles } = useCirclesStore(address);
+  const { expenses, refetch: refetchExpenses } = useCircleExpenses(contractAddress);
   const circle = circles.find((c) => c.contractAddress === contractAddress);
 
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
 
-  // Mock members and expenses for now (Opencode will wire real ones later)
-  const mockMembers = [
-    { id: '1', name: 'You', address: address || 'mn_addr_preprod1...', isCreator: true },
-    { id: '2', name: 'Alice (Encrypted)', address: 'mn_addr_preprod1xyz...', isCreator: false },
-  ];
+  // Compute real members from expenses
+  const members = useMemo(() => {
+    const memberMap = new Map<string, { id: string; name: string; address: string; isCreator: boolean }>();
 
-  const mockExpenses = [
-    { id: 'e1', label: 'Dinner at Dorsia', amount: 250, paidBy: 'You', splitWith: ['Alice'] },
-  ];
+    // Add the current user as creator
+    if (address) {
+      memberMap.set(address, {
+        id: address,
+        name: 'You',
+        address,
+        isCreator: true,
+      });
+    }
+
+    // Add unique payers from expenses
+    for (const exp of expenses) {
+      if (!memberMap.has(exp.walletAddress)) {
+        const isYou = exp.walletAddress === address;
+        memberMap.set(exp.walletAddress, {
+          id: exp.walletAddress,
+          name: isYou ? 'You' : `Member ${exp.walletAddress.slice(0, 8)}...`,
+          address: exp.walletAddress,
+          isCreator: false,
+        });
+      }
+    }
+
+    return Array.from(memberMap.values());
+  }, [expenses, address]);
+
+  // Compute real balances using netting engine
+  const balances = useMemo(() => {
+    if (expenses.length === 0 || members.length === 0) return new Map<string, number>();
+
+    const balanceMap = new Map<string, number>();
+    for (const m of members) {
+      balanceMap.set(m.id, 0);
+    }
+
+    // Each expense: payer is owed (amount / members.length) by each non-payer
+    const sharePerMember = members.length;
+    for (const exp of expenses) {
+      const share = exp.amount / sharePerMember;
+      const currentBalance = balanceMap.get(exp.walletAddress) || 0;
+      balanceMap.set(exp.walletAddress, currentBalance + exp.amount - share);
+
+      for (const m of members) {
+        if (m.id !== exp.walletAddress) {
+          const mb = balanceMap.get(m.id) || 0;
+          balanceMap.set(m.id, mb - share);
+        }
+      }
+    }
+
+    return balanceMap;
+  }, [expenses, members]);
+
+  // Compute settlement plan
+  const settlementPlan = useMemo(() => {
+    if (balances.size === 0) return null;
+    return computeMinimumTransfers(balances);
+  }, [balances]);
+
+  // Compute analytics
+  const analytics = useMemo(() => {
+    if (expenses.length === 0) return null;
+    return computeCircleAnalytics(
+      expenses.map((e) => ({
+        memberId: e.walletAddress,
+        amount: e.amount,
+        label: e.expenseLabel,
+        timestamp: e.createdAt,
+      }))
+    );
+  }, [expenses]);
+
+  // Real totals
+  const totalSpent = useMemo(
+    () => expenses.reduce((sum, e) => sum + e.amount, 0),
+    [expenses]
+  );
+  const yourBalance = address ? (balances.get(address) ?? 0) : 0;
 
   if (!circle) return null;
 
   const handleAddExpense = async (label: string, amount: number, splitType: 'equal' | 'custom') => {
-    // Mock for now
-    console.log('[Mock] Adding expense:', label, amount, splitType);
-    await new Promise(res => setTimeout(res, 2000));
+    if (!address) throw new Error('Wallet not connected');
+
+    const commitmentHash = Array.from(
+      crypto.getRandomValues(new Uint8Array(32))
+    )
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    await saveExpense({
+      walletAddress: address,
+      circleAddress: contractAddress,
+      expenseLabel: label,
+      amount,
+      expenseType: splitType,
+      commitmentHash,
+    });
+
+    await refetchExpenses();
   };
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
@@ -61,13 +152,13 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
       <motion.button
         whileHover={{ x: -5, color: 'var(--accent-gold)' }}
         onClick={onBack}
-        style={{ 
-          display: 'inline-flex', 
-          alignItems: 'center', 
-          gap: '0.5rem', 
-          marginBottom: '2rem', 
-          background: 'transparent', 
-          border: 'none', 
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '2rem',
+          background: 'transparent',
+          border: 'none',
           padding: 0,
           fontFamily: 'var(--font-mono)',
           fontSize: '11px',
@@ -94,16 +185,16 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
             {circle.circleName}
           </h2>
           <a
-            href={`https://explorer.preprod.midnight.network/transactions/${circle.txHash}`}
+            href={`https://explorer.preprod.midnight.network/address/${circle.contractAddress}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              gap: '0.5rem', 
-              fontFamily: 'var(--font-mono)', 
-              fontSize: '11px', 
-              color: 'var(--text-muted)', 
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '11px',
+              color: 'var(--text-muted)',
               textDecoration: 'none',
               letterSpacing: '0.05em',
             }}
@@ -116,11 +207,13 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
         <div style={{ display: 'flex', gap: '2rem' }}>
           <div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.2em' }}>TOTAL SPENT</div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: '#fff' }}>$250.00</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: '#fff' }}>${totalSpent.toFixed(2)}</div>
           </div>
           <div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.2em' }}>YOUR BALANCE</div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: '#34d399' }}>+$125.00</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: yourBalance >= 0 ? '#34d399' : '#ff5050' }}>
+              {yourBalance >= 0 ? '+' : ''}${yourBalance.toFixed(2)}
+            </div>
           </div>
         </div>
       </div>
@@ -165,36 +258,42 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem' }}>
               <div>
                 <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', color: '#fff', marginBottom: '2rem' }}>Ledger</h3>
-                {mockExpenses.length === 0 ? (
-                  <EmptyState 
+                {expenses.length === 0 ? (
+                  <EmptyState
                     title="Clean Slate"
                     description="No expenses have been logged in this circle yet. Use the panel on the right to log the first confidential expense."
                   />
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {mockExpenses.map((e) => (
-                      <div key={e.id} style={{
-                        padding: '1.5rem',
-                        background: 'rgba(255,255,255,0.02)',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        borderRadius: '12px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}>
-                        <div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
-                            {e.paidBy} paid for
+                    {expenses.map((e) => {
+                      const payerName = e.walletAddress === address ? 'You' : `Member ${e.walletAddress.slice(0, 8)}...`;
+                      return (
+                        <div key={e.id} style={{
+                          padding: '1.5rem',
+                          background: 'rgba(255,255,255,0.02)',
+                          border: '1px solid rgba(255,255,255,0.05)',
+                          borderRadius: '12px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}>
+                          <div>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                              {payerName} paid for
+                            </div>
+                            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: '#fff' }}>
+                              {e.expenseLabel}
+                            </div>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                              {e.expenseType} split · {new Date(e.createdAt).toLocaleDateString()}
+                            </div>
                           </div>
-                          <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: '#fff' }}>
-                            {e.label}
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', color: 'var(--accent-gold)', fontWeight: 600 }}>
+                            ${e.amount.toFixed(2)}
                           </div>
                         </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', color: 'var(--accent-gold)', fontWeight: 600 }}>
-                          ${e.amount.toFixed(2)}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -207,18 +306,32 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
           {activeTab === 'members' && (
             <div style={{ maxWidth: '600px' }}>
               <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', color: '#fff', marginBottom: '2rem' }}>Circle Members</h3>
-              <MemberList members={mockMembers} inviteSecret={circle.inviteSecret} />
+              <MemberList members={members} inviteSecret={circle.inviteSecret} />
             </div>
           )}
 
           {activeTab === 'settlement' && (
             <div>
               <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', color: '#fff', marginBottom: '2rem' }}>Optimal Settlement Graph</h3>
-              <SettlementBoard
-                members={mockMembers}
-                expenses={mockExpenses}
-                onSettle={async () => { console.log('settle'); }}
-              />
+              {settlementPlan && settlementPlan.transfers.length > 0 ? (
+                <SettlementBoard
+                  members={members}
+                  expenses={expenses.map((e) => ({
+                    paidBy: e.walletAddress,
+                    amount: e.amount,
+                    splitWith: members.map((m) => m.id),
+                  }))}
+                  settlementPlan={settlementPlan}
+                  onSettle={async () => { console.log('Settle on-chain'); }}
+                />
+              ) : (
+                <EmptyState
+                  title="Nothing to Settle"
+                  description={expenses.length === 0
+                    ? "Log some expenses first, then come back to settle."
+                    : "All balances are even. No transfers needed."}
+                />
+              )}
             </div>
           )}
 
@@ -234,11 +347,23 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
           {activeTab === 'analytics' && (
             <div>
               <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', color: '#fff', marginBottom: '2rem' }}>Private Analytics</h3>
-              <AnalyticsDashboard
-                expenses={[]}
-                balances={new Map()}
-                currentMemberId="1"
-              />
+              {analytics ? (
+                <AnalyticsDashboard
+                  analytics={analytics}
+                  currentMemberId={address || ''}
+                  expenses={expenses.map((e) => ({
+                    memberId: e.walletAddress,
+                    amount: e.amount,
+                    label: e.expenseLabel,
+                    timestamp: e.createdAt,
+                  }))}
+                />
+              ) : (
+                <EmptyState
+                  title="No Analytics Yet"
+                  description="Log some expenses to see your circle's analytics."
+                />
+              )}
             </div>
           )}
         </motion.div>
