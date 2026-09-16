@@ -1,6 +1,5 @@
 
 import { motion } from 'framer-motion';
-import { Magnetic } from './Magnetic';
 import { WalletConnect } from './WalletConnect';
 
 interface NavbarProps {

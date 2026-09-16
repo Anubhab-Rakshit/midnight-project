@@ -15,7 +15,7 @@ export const CreateCircleForm: React.FC<CreateCircleFormProps> = ({ onBack, onCr
   const [circleName, setCircleName] = useState('');
   const [inviteSecret, setInviteSecret] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
-  const { addToast } = useToast();
+  const { addToast, updateToast } = useToast();
 
   const handleCreateCircle = async () => {
     if (!circleName.trim() || !address) return;
@@ -40,10 +40,10 @@ export const CreateCircleForm: React.FC<CreateCircleFormProps> = ({ onBack, onCr
         blockHeight: 12345,
       });
 
-      addToast({ type: 'success', title: 'Vault Deployed', message: 'Your confidential circle has been created.', txHash: mockTxHash });
+      updateToast(toastId, { type: 'success', title: 'Vault Deployed', message: 'Your confidential circle has been created.', txHash: mockTxHash });
       onCreated(mockContractAddress);
     } catch (err) {
-      addToast({ type: 'error', title: 'Deployment Failed', message: err instanceof Error ? err.message : 'Failed to deploy contract' });
+      updateToast(toastId, { type: 'error', title: 'Deployment Failed', message: err instanceof Error ? err.message : 'Failed to deploy contract' });
     } finally {
       setIsExecuting(false);
     }

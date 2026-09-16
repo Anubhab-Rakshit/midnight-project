@@ -14,7 +14,7 @@ export const JoinCircleForm: React.FC<JoinCircleFormProps> = ({ onClose }) => {
   const [inviteSecret, setInviteSecret] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   
-  const { addToast } = useToast();
+  const { addToast, updateToast } = useToast();
   const { address } = useMidnightWallet();
 
   const handleJoin = async () => {
@@ -35,10 +35,10 @@ export const JoinCircleForm: React.FC<JoinCircleFormProps> = ({ onClose }) => {
         inviteSecret,
       });
 
-      addToast({ type: 'success', title: 'Circle Joined', message: 'You have successfully verified membership.' });
+      updateToast(toastId, { type: 'success', title: 'Circle Joined', message: 'You have successfully verified membership.' });
       onClose();
     } catch (err) {
-      addToast({ type: 'error', title: 'Join Failed', message: err instanceof Error ? err.message : 'Invalid invite secret' });
+      updateToast(toastId, { type: 'error', title: 'Join Failed', message: err instanceof Error ? err.message : 'Invalid invite secret' });
     } finally {
       setIsJoining(false);
     }

@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { useToast } from './TransactionToast';
 
 interface SettlementBoardProps {
@@ -9,18 +8,18 @@ interface SettlementBoardProps {
   onSettle: (plan: any) => Promise<void>;
 }
 
-export const SettlementBoard: React.FC<SettlementBoardProps> = ({ members, expenses, onSettle }) => {
+export const SettlementBoard: React.FC<SettlementBoardProps> = ({ members, onSettle }) => {
   const [isSettling, setIsSettling] = React.useState(false);
-  const { addToast } = useToast();
+  const { addToast, updateToast } = useToast();
 
   const handleSettle = async () => {
     setIsSettling(true);
     const toastId = addToast({ type: 'pending', title: 'Verifying Settlement', message: 'Generating ZK proof for the settlement plan...' });
     try {
       await onSettle({});
-      addToast({ type: 'success', title: 'Settlement Verified', message: 'The optimal settlement graph has been recorded on-chain.' });
+      updateToast(toastId, { type: 'success', title: 'Settlement Verified', message: 'The optimal settlement graph has been recorded on-chain.' });
     } catch (err) {
-      addToast({ type: 'error', title: 'Settlement Failed', message: 'Could not verify the settlement plan.' });
+      updateToast(toastId, { type: 'error', title: 'Settlement Failed', message: 'Could not verify the settlement plan.' });
     } finally {
       setIsSettling(false);
     }

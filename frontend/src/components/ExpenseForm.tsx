@@ -12,7 +12,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense }) => {
   const [amount, setAmount] = useState('');
   const [splitType, setSplitType] = useState<'equal' | 'custom'>('equal');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { addToast } = useToast();
+  const { addToast, updateToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,11 +26,11 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense }) => {
 
     try {
       await onAddExpense(label, parsedAmount, splitType);
-      addToast({ type: 'success', title: 'Expense Logged', message: 'The commitment was successfully recorded on Midnight.' });
+      updateToast(toastId, { type: 'success', title: 'Expense Logged', message: 'The commitment was successfully recorded on Midnight.' });
       setLabel('');
       setAmount('');
     } catch (err) {
-      addToast({ type: 'error', title: 'Transaction Failed', message: err instanceof Error ? err.message : 'Unknown error' });
+      updateToast(toastId, { type: 'error', title: 'Transaction Failed', message: err instanceof Error ? err.message : 'Unknown error' });
     } finally {
       setIsSubmitting(false);
     }

@@ -110,10 +110,11 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
       };
 
       try {
-        const state = await connectedApi.state();
-        const tNightBalance = state.balances.unshielded || 0n;
-        // Convert from dust to tNIGHT (assuming 6 decimals like ADA/tADA, or 1 for testnet mock)
-        setBalance(Number(tNightBalance) / 1_000_000); 
+        const unshielded = await connectedApi.getUnshieldedBalances();
+        // Sum all token balances; native tNIGHT is the primary token
+        const totalDust = Object.values(unshielded).reduce((sum, v) => sum + Number(v), 0);
+        // Convert from dust (µtNIGHT) to tNIGHT (6 decimals)
+        setBalance(totalDust / 1_000_000);
       } catch (err) {
         console.warn('[Midnight] Could not fetch balance:', err);
         setBalance(0);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity, TrendingUp, BarChart3, PieChart } from 'lucide-react';
+import { TrendingUp, BarChart3, PieChart } from 'lucide-react';
 
 interface AnalyticsProps {
   expenses: any[];
@@ -8,7 +8,7 @@ interface AnalyticsProps {
   currentMemberId: string;
 }
 
-export const AnalyticsDashboard: React.FC<AnalyticsProps> = ({ expenses, balances, currentMemberId }) => {
+export const AnalyticsDashboard: React.FC<AnalyticsProps> = () => {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
       
