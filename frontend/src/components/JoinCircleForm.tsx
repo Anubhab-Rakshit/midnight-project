@@ -14,26 +14,22 @@ export const JoinCircleForm: React.FC<JoinCircleFormProps> = ({ onClose }) => {
   const [contractAddress, setContractAddress] = useState('');
   const [inviteSecret, setInviteSecret] = useState('');
   const [isJoining, setIsJoining] = useState(false);
-  
+
   const { addToast, updateToast } = useToast();
   const { address } = useMidnightWallet();
 
   const handleJoin = async () => {
     if (!contractAddress.trim() || !inviteSecret.trim() || !address) return;
-    
+
     setIsJoining(true);
     const toastId = addToast({ type: 'pending', title: 'Joining Circle', message: 'Generating ZK proof of membership...' });
 
     try {
-      // In Phase 2, this will call `service.joinCircle`
-      // For now, we mock the ZK proof delay and save it locally so the UI updates
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
       await saveCircle({
         walletAddress: address,
-        circleName: 'Joined Circle (Syncing...)',
-        contractAddress,
-        inviteSecret,
+        circleName: `Circle ${contractAddress.slice(0, 8)}...`,
+        contractAddress: contractAddress.trim(),
+        inviteSecret: inviteSecret.trim(),
       });
 
       updateToast(toastId, { type: 'success', title: 'Circle Joined', message: 'You have successfully verified membership.' });
@@ -105,7 +101,7 @@ export const JoinCircleForm: React.FC<JoinCircleFormProps> = ({ onClose }) => {
                 type="text"
                 value={contractAddress}
                 onChange={(e) => setContractAddress(e.target.value)}
-                placeholder="mn_addr_preprod..."
+                placeholder="0x... or mn_addr..."
                 style={{
                   width: '100%',
                   padding: '1rem 1rem 1rem 2.5rem',

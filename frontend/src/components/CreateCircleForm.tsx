@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
+import { useMeridianContract } from '../hooks/useMeridianContract';
 import { saveCircle } from '../hooks/useCirclesStore';
 import { useToast } from './TransactionToast';
 
@@ -12,6 +13,7 @@ interface CreateCircleFormProps {
 
 export const CreateCircleForm: React.FC<CreateCircleFormProps> = ({ onBack, onCreated }) => {
   const { address, isConnected, connect } = useMidnightWallet();
+  const { createCircle } = useMeridianContract();
   const [circleName, setCircleName] = useState('');
   const [inviteSecret, setInviteSecret] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
@@ -19,31 +21,29 @@ export const CreateCircleForm: React.FC<CreateCircleFormProps> = ({ onBack, onCr
 
   const handleCreateCircle = async () => {
     if (!circleName.trim() || !address) return;
-    
+
     setIsExecuting(true);
     const secret = inviteSecret.trim() || crypto.randomUUID().slice(0, 16);
-    
+
     const toastId = addToast({ type: 'pending', title: 'Deploying Contract', message: 'Deploying new Meridian vault to Midnight Preprod...' });
 
     try {
-      // Mock deploy for Phase 2 UI building (Opencode wires actual `useMeridianContract`)
-      await new Promise(res => setTimeout(res, 3000));
-      const mockContractAddress = `mn_addr_preprod${Math.random().toString(36).slice(2, 12)}`;
-      const mockTxHash = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
+      const deployed = await createCircle(secret);
 
       await saveCircle({
         walletAddress: address,
         circleName,
-        contractAddress: mockContractAddress,
+        contractAddress: deployed.contractAddress,
         inviteSecret: secret,
-        txHash: mockTxHash,
-        blockHeight: 12345,
+        txHash: deployed.txHash,
+        blockHeight: deployed.blockHeight,
       });
 
-      updateToast(toastId, { type: 'success', title: 'Vault Deployed', message: 'Your confidential circle has been created.', txHash: mockTxHash });
-      onCreated(mockContractAddress);
+      updateToast(toastId, { type: 'success', title: 'Vault Deployed', message: 'Your confidential circle has been created.', txHash: deployed.txHash });
+      onCreated(deployed.contractAddress);
     } catch (err) {
-      updateToast(toastId, { type: 'error', title: 'Deployment Failed', message: err instanceof Error ? err.message : 'Failed to deploy contract' });
+      const message = err instanceof Error ? err.message : 'Failed to deploy contract';
+      updateToast(toastId, { type: 'error', title: 'Deployment Failed', message });
     } finally {
       setIsExecuting(false);
     }
@@ -72,13 +72,13 @@ export const CreateCircleForm: React.FC<CreateCircleFormProps> = ({ onBack, onCr
       <motion.button
         whileHover={{ x: -5, color: 'var(--accent-gold)' }}
         onClick={onBack}
-        style={{ 
-          display: 'inline-flex', 
-          alignItems: 'center', 
-          gap: '0.5rem', 
-          marginBottom: '2rem', 
-          background: 'transparent', 
-          border: 'none', 
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '2rem',
+          background: 'transparent',
+          border: 'none',
           padding: 0,
           fontFamily: 'var(--font-mono)',
           fontSize: '11px',
