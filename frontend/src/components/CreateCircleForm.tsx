@@ -29,7 +29,7 @@ export const CreateCircleForm: React.FC<CreateCircleFormProps> = ({ onBack, onCr
       // Mock deploy for Phase 2 UI building (Opencode wires actual `useMeridianContract`)
       await new Promise(res => setTimeout(res, 3000));
       const mockContractAddress = `mn_addr_preprod${Math.random().toString(36).slice(2, 12)}`;
-      const mockTxHash = `0x${Math.random().toString(16).slice(2, 10)}...`;
+      const mockTxHash = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
 
       await saveCircle({
         walletAddress: address,
