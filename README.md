@@ -451,7 +451,7 @@ export circuit settle(): [] {
 
 ## What is 1am?
 
-**1 AM** is a wallet for the Midnight Network. It's an alternative to Lace that supports Midnight's DApp connector. If Lace isn't working with Midnight, try switching to 1 AM.
+**1am** is the community nickname for the Midnight Network — a play on the name. Midnight is 12:00 AM, and 1am is one step beyond. It's what builders call the ecosystem: *"We're building at 1am."*
 
 ---
 
