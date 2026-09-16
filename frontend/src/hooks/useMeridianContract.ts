@@ -71,7 +71,6 @@ export function useMeridianContract() {
     async (
       contractAddress: string,
       inviteSecret: string,
-      salt: Uint8Array,
       settlementPlan: SettlementPlan,
     ): Promise<SettleResult> => {
       if (!provider || !isConnected) {
@@ -89,7 +88,6 @@ export function useMeridianContract() {
           provider.connectedApi,
           contractAddress,
           inviteSecret,
-          salt,
           settlementPlan,
         );
 
