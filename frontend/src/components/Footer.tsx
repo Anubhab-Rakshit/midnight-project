@@ -7,7 +7,11 @@ import { Magnetic } from './Magnetic';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const Footer = () => {
+interface FooterProps {
+  onNavigateAbout?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavigateAbout }) => {
   const textRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,6 +60,27 @@ export const Footer = () => {
             <p className="footer-desc">
               Meridian utilizes Zero-Knowledge proofs on the Midnight Preprod testnet to guarantee observable privacy behavior for group expenses.
             </p>
+            {onNavigateAbout && (
+              <button
+                onClick={onNavigateAbout}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: 0,
+                  marginTop: '0.75rem',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '11px',
+                  color: 'var(--accent-gold)',
+                  letterSpacing: '0.08em',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                <span>Read Architecture & Mission →</span>
+              </button>
+            )}
           </div>
           
           <div className="footer-col align-right">
@@ -76,3 +101,4 @@ export const Footer = () => {
     </footer>
   );
 };
+

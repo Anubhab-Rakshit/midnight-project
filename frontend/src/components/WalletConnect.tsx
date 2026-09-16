@@ -668,14 +668,15 @@ export const WalletConnect: React.FC = () => {
             exit={{ opacity: 0, scale: 0.95 }}
             onClick={openWalletModal}
             disabled={isConnecting}
+            className="wallet-trigger-btn"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.55rem',
+              gap: '0.45rem',
               fontFamily: 'var(--font-mono)',
               fontSize: '11px',
               fontWeight: 500,
-              padding: '0.55rem 1.25rem',
+              padding: '0.5rem 1rem',
               background: 'linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(255,255,255,0.03) 100%)',
               border: '1px solid rgba(212,175,55,0.35)',
               color: 'var(--accent-gold)',
@@ -686,6 +687,7 @@ export const WalletConnect: React.FC = () => {
               WebkitBackdropFilter: 'blur(12px)',
               boxShadow: '0 4px 15px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1)',
               transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              whiteSpace: 'nowrap',
             }}
             whileHover={{
               scale: 1.04,
@@ -696,14 +698,16 @@ export const WalletConnect: React.FC = () => {
           >
             {isConnecting ? (
               <>
-                <Loader2 size={13} className="animate-spin" />
-                <span>CONNECTING...</span>
+                <Loader2 size={12} className="animate-spin" />
+                <span className="wallet-label-full">CONNECTING...</span>
+                <span className="wallet-label-short">...</span>
               </>
             ) : (
               <>
-                <Wallet size={13} />
-                <span>CONNECT WALLET</span>
-                <ChevronDown size={11} style={{ opacity: 0.7 }} />
+                <Wallet size={12} />
+                <span className="wallet-label-full">CONNECT WALLET</span>
+                <span className="wallet-label-short">CONNECT</span>
+                <ChevronDown size={10} style={{ opacity: 0.7 }} className="wallet-chevron" />
               </>
             )}
           </motion.button>
@@ -714,19 +718,21 @@ export const WalletConnect: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             onClick={() => setShowAccountMenu(true)}
+            className="wallet-connected-pill"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.75rem',
+              gap: '0.6rem',
               background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
               border: '1px solid rgba(212, 175, 55, 0.3)',
               borderRadius: '999px',
-              padding: '0.35rem 0.85rem 0.35rem 0.65rem',
+              padding: '0.35rem 0.75rem 0.35rem 0.6rem',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               cursor: 'pointer',
               boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
               transition: 'all 0.25s ease',
+              whiteSpace: 'nowrap',
             }}
             whileHover={{
               scale: 1.02,
@@ -737,9 +743,9 @@ export const WalletConnect: React.FC = () => {
           >
             {/* Live Status Indicator */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
               {selectedWallet && (
-                <span style={{
+                <span className="wallet-tag-hide-mobile" style={{
                   fontFamily: 'var(--font-mono)',
                   fontSize: '9px',
                   color: 'var(--accent-gold)',
@@ -757,14 +763,14 @@ export const WalletConnect: React.FC = () => {
 
             {/* Balance */}
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', fontWeight: 600 }}>
-              {balance !== null ? `${balance.toFixed(2)} tNIGHT` : '0.00 tNIGHT'}
+              {balance !== null ? `${balance.toFixed(1)} tNIGHT` : '0.0 tNIGHT'}
             </div>
 
             {/* Divider */}
-            <div style={{ width: '1px', height: '14px', background: 'rgba(255,255,255,0.15)' }} />
+            <div className="wallet-divider-hide-mobile" style={{ width: '1px', height: '14px', background: 'rgba(255,255,255,0.15)' }} />
 
             {/* Address */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <div className="wallet-addr-hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#fff', letterSpacing: '0.03em' }}>
                 {formatAddress(address || '')}
               </span>

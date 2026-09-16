@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Lenis from 'lenis';
 
 import { Preloader } from './components/Preloader';
-import { Chronicles } from './components/Chronicles';
+import { AboutUs } from './components/AboutUs';
 import { CustomCursor } from './components/CustomCursor';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -17,7 +17,7 @@ import { CreateCircleForm } from './components/CreateCircleForm';
 
 function AppContent() {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [view, setView] = useState<'circles' | 'chronicles'>('circles');
+  const [view, setView] = useState<'circles' | 'about'>('circles');
   const [activeCircle, setActiveCircle] = useState<string | null>(null);
 
   useMidnightWallet();
@@ -66,7 +66,14 @@ function AppContent() {
             <main className="omen-content" style={{ marginTop: '120px' }}>
               <AnimatePresence mode="wait">
                 {view === 'circles' ? (
-                  <motion.div key="circles-view" style={{ width: '100%' }}>
+                  <motion.div 
+                    key="circles-view" 
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ width: '100%' }}
+                  >
                     {activeCircle === 'new' ? (
                       <CreateCircleForm 
                         onBack={() => setActiveCircle(null)} 
@@ -85,12 +92,21 @@ function AppContent() {
                     )}
                   </motion.div>
                 ) : (
-                  <Chronicles key="chronicles-view" />
+                  <motion.div
+                    key="about-view"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ width: '100%' }}
+                  >
+                    <AboutUs onLaunch={() => { setView('circles'); setActiveCircle(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+                  </motion.div>
                 )}
               </AnimatePresence>
             </main>
             
-            <Footer />
+            <Footer onNavigateAbout={() => { setView('about'); setActiveCircle(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
           </div>
         </motion.div>
       )}
@@ -109,3 +125,4 @@ function App() {
 }
 
 export default App;
+
