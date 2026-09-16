@@ -9,12 +9,12 @@
 <br/>
 
 [![Midnight Network](https://img.shields.io/badge/Midnight_Network-0a0a0a?style=for-the-badge&logo=midnightnetwork&logoColor=white)]()
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)]()
 [![CI](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml/badge.svg)](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)]()
 
 <br/>
 
-**[GitHub repository](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d)**
+**[GitHub repo](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d)** · **[Live Demo](#)** · **[X / Twitter](#)**
 
 <br/>
 
@@ -88,34 +88,46 @@ Meridian is built on **selective disclosure**: members prove something meaningfu
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        FRONTEND (React)                         │
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐   │
-│  │ CircleBoard  │  │ Settlement   │  │  Midnight Wallet    │   │
-│  │              │  │ Board        │  │  Context            │   │
-│  └──────┬──────┘  └──────┬───────┘  └──────────┬──────────┘   │
-│         │                │                      │               │
-│  ┌──────┴──────┐  ┌──────┴───────┐              │               │
-│  │ Analytics   │  │ Recurring    │              │               │
-│  │ Dashboard   │  │ Pacts        │              │               │
-│  └──────┬──────┘  └──────┬───────┘              │               │
-│         └────────────────┼──────────────────────┘               │
-│                          │                                      │
-│                    ┌─────▼─────┐                                │
-│                    │ useMeridian│                               │
-│                    │ Contract   │                                │
-│                    └─────┬─────┘                                │
-└──────────────────────────┼──────────────────────────────────────┘
-                           │
-              ┌────────────▼────────────┐
-              │   Midnight.js SDK       │
-              │   (ZK Circuit Exec)     │
-              └────────────┬────────────┘
-                           │
-              ┌────────────▼────────────┐
-              │   Midnight Network      │
-              │   (Preprod Testnet)     │
-              └─────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                        FRONTEND (React + Vite)                       │
+│                                                                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │
+│  │  CircleList   │  │  CircleDetail│  │  WalletConnect           │  │
+│  │  (browse /    │  │  (tabbed:    │  │  (Lace DApp connector,  │  │
+│  │   join view)  │  │   roll →     │  │   balance tracking)      │  │
+│  └──────┬───────┘  │   ledger →   │  └──────────┬───────────────┘  │
+│         │          │   settle →   │             │                    │
+│  ┌──────┴───────┐  │   analytics  │  ┌──────────┴───────────────┐  │
+│  │  CreateCircle │  │   → pacts)  │  │  TransactionToast        │  │
+│  │  Form         │  └──────┬──────┘  │  (pending → confirmed)   │  │
+│  └──────────────┘         │         └──────────┬───────────────┘  │
+│  ┌──────────────┐  ┌──────┴───────┐            │                    │
+│  │  JoinCircle   │  │ ExpenseForm  │  ┌─────────┴────────────────┐  │
+│  │  Form         │  │ MemberList   │  │  useCirclesStore         │  │
+│  └──────────────┘  └──────────────┘  │  (localStorage +         │  │
+│                                       │   Supabase persistence)  │  │
+│  ┌──────────────┐  ┌──────────────┐  └─────────┬────────────────┘  │
+│  │  Settlement   │  │ Recurring    │            │                    │
+│  │  Board        │  │ Pacts        │  ┌─────────┴────────────────┐  │
+│  └──────────────┘  └──────────────┘  │  useMeridianContract      │  │
+│                                       └────────────┬───────────────┘  │
+│  ┌──────────────────────────────┐                 │                    │
+│  │  AnalyticsDashboard          │                 │                    │
+│  │  (spending tags, badges,     │                 │                    │
+│  │   distribution charts)       │                 │                    │
+│  └──────────────┬───────────────┘                 │                    │
+│                 └─────────────────────────────────┘                    │
+└───────────────────────────────────┼──────────────────────────────────┘
+                                    │
+                       ┌────────────▼────────────┐
+                       │   Midnight.js SDK        │
+                       │   (ZK Circuit Execution) │
+                       └────────────┬────────────┘
+                                    │
+                       ┌────────────▼────────────┐
+                       │   Midnight Network       │
+                       │   (Preprod Testnet)      │
+                       └──────────────────────────┘
 ```
 
 ---
@@ -124,9 +136,9 @@ Meridian is built on **selective disclosure**: members prove something meaningfu
 
 ### Programmable Privacy
 - **Expense Commitments**: Amounts stored as ZK hashes — unrecoverable by observers
-- **ZK Invite Gate**: Join a circle by proving knowledge of the invite — no public member list
+- **ZK Invite Gate**: Join a circle by proving knowledge of the invite secret — no public member list
 - **Settlement Proofs**: Prove a settlement is correct and zero-sum without revealing balances
-- **Settlement Hash**: Previous settlement hash chained for auditability
+- **Settlement Hash Chaining**: Previous settlement hash chained for auditability
 
 ### Optimal Settlement Engine
 - **Minimum-Transfer Netting**: Computes the fewest payments needed to settle a circle
@@ -134,7 +146,7 @@ Meridian is built on **selective disclosure**: members prove something meaningfu
 - **Cross-Circle Netting**: Merge balances across multiple circles to minimize total transfers
 
 ### Privacy-Preserving Analytics
-- **Circle Analytics**: Total spent, average per member, spending tags (balanced/heavy/sporadic)
+- **Circle Analytics**: Total spent, average per member, spending tags (balanced / heavy / sporadic)
 - **Member Badges**: Top contributor, fair splitter, big spender, frequent spender, settler, newcomer
 - **Anomaly Detection**: Outlier spending detection (local-only, never shared)
 
@@ -143,18 +155,19 @@ Meridian is built on **selective disclosure**: members prove something meaningfu
 - **Supabase Persistence**: Pacts stored cross-device with active/inactive status
 
 ### Wallet Integration
-- **Lace Wallet**: Connect/disconnect via Midnight DApp connector
+- **Lace Wallet**: Connect / disconnect via Midnight DApp connector
+- **Balance Tracking**: Real-time tNIGHT balance display
 - **Browser ZK Proving**: All proofs generated client-side via Lace
 
 ### Live Indexer
 - **Real-time Data**: Fetches circle state from Midnight Preprod indexer
 - **Supabase Persistence**: Circles, expenses, settlements cached cross-device
 
-### Production-Grade UI
-- **Circle Board**: Create circles, log expenses, view summaries
-- **Settlement View**: Run the netting engine, see optimal transfer plans
-- **Analytics Dashboard**: Visual stats, badges, distribution tags
-- **Framer Motion**: Smooth animations throughout
+### Circle Management
+- **Create Circle**: Deploy a new splitpool contract on-chain, get an invite secret
+- **Join Circle**: Enter invite secret to join an existing circle via ZK proof
+- **Circle Detail**: Tabbed view — Roll (expenses), Ledger, Settle, Analytics, Pacts
+- **Transaction Toast**: Real-time tx status updates (pending → confirmed with explorer links)
 
 ---
 
@@ -242,7 +255,7 @@ cd frontend && npx tsc -b && npm run lint && npm run build
 
 - **CI** runs on every push/PR via GitHub Actions (`.github/workflows/ci.yml`):
   install → **test** → typecheck → lint → build, plus an optional Compact
-  contract-compile job. See the [CI badge](#).
+  contract-compile job. See the [CI badge](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml).
 
 ---
 
@@ -251,43 +264,57 @@ cd frontend && npx tsc -b && npm run lint && npm run build
 ```
 midnight-project/
 ├── contracts/
-│   └── splitpool.compact            # Meridian ZK contract (join/logExpense/settle)
+│   ├── splitpool.compact              # Meridian ZK contract (join / logExpense / settle)
+│   └── managed/splitpool/             # Compiled artifacts (bindings, keys, zkir)
 ├── src/
 │   └── meridian/
-│       ├── witnesses.ts             # ZK witness providers
-│       ├── private-state.ts         # Private state schema (CirclePrivateState)
-│       ├── contract.ts              # Contract bindings
-│       ├── indexer.ts               # GraphQL queries
-│       ├── netting.ts               # Off-chain settlement engine
-│       ├── analytics.ts             # Privacy-preserving analytics
-│       ├── badges.ts                # Member achievement badges
-│       ├── cross-circle.ts          # Cross-circle balance netting
-│       └── index.ts                 # Module exports
+│       ├── witnesses.ts               # ZK witness providers
+│       ├── private-state.ts           # Private state schema (CirclePrivateState)
+│       ├── contract.ts                # Contract bindings
+│       ├── indexer.ts                 # GraphQL queries
+│       ├── netting.ts                 # Off-chain settlement engine
+│       ├── analytics.ts               # Privacy-preserving analytics
+│       ├── badges.ts                  # Member achievement badges
+│       ├── cross-circle.ts            # Cross-circle balance netting
+│       └── index.ts                   # Module exports
 ├── frontend/
 │   └── src/
 │       ├── components/
-│       │   ├── CircleBoard.tsx       # Circle creation & expense logger
-│       │   ├── SettlementBoard.tsx   # Net balances & optimal transfers
-│       │   ├── RecurringPacts.tsx    # Auto-split rules UI
-│       │   ├── AnalyticsDashboard.tsx # Stats, badges, distribution
-│       │   ├── Navbar.tsx            # Navigation
-│       │   └── ...
+│       │   ├── CircleList.tsx          # Browse circles, create / join entry point
+│       │   ├── CircleDetail.tsx        # Tabbed view (Roll / Ledger / Settle / Analytics / Pacts)
+│       │   ├── CreateCircleForm.tsx    # Deploy new circle on-chain
+│       │   ├── JoinCircleForm.tsx      # Join via invite secret
+│       │   ├── MemberList.tsx          # Circle members display
+│       │   ├── ExpenseForm.tsx         # Log new expense form
+│       │   ├── SettlementBoard.tsx     # Net balances & optimal transfers
+│       │   ├── RecurringPacts.tsx      # Auto-split rules UI
+│       │   ├── AnalyticsDashboard.tsx  # Stats, badges, distribution charts
+│       │   ├── WalletConnect.tsx       # Lace wallet connect / balance display
+│       │   ├── TransactionToast.tsx    # Tx status toast (pending → confirmed)
+│       │   ├── EmptyState.tsx          # Empty circle state
+│       │   ├── Navbar.tsx              # Navigation
+│       │   └── Footer.tsx             # Footer
 │       ├── hooks/
-│       │   ├── useMeridianContract.ts  # Contract interaction
-│       │   └── useCirclesStore.ts      # Supabase persistence
+│       │   ├── useMeridianContract.ts  # Contract interaction (create / join / settle)
+│       │   └── useCirclesStore.ts      # Supabase + localStorage persistence
 │       ├── midnight/
-│       │   ├── service.ts            # Browser deploy & prove
-│       │   └── providers.ts          # ZK config & wallet providers
+│       │   ├── service.ts              # Browser deploy, prove & settle
+│       │   ├── providers.ts            # ZK config & wallet providers
+│       │   ├── contract/index.js       # Compiled splitpool bindings
+│       │   ├── keys/                   # ZK prover / verifier artifacts
+│       │   └── zkir/                   # ZK intermediate representations
+│       ├── context/
+│       │   └── MidnightWalletContext.tsx # Wallet state + balance provider
 │       └── lib/
-│           └── supabase.ts           # Supabase client
+│           └── supabase.ts             # Supabase client
 ├── supabase/
 │   └── migrations/
-│       ├── 002_create_meridian.sql   # Circles, expenses, settlements
+│       ├── 002_create_meridian.sql     # Circles, expenses, settlements
 │       └── 003_create_recurring_pacts.sql  # Recurring pact rules
 ├── docs/
-│   ├── level4-proposal.md           # Product proposal
-│   └── level4-submission.md         # Submission package
-└── .github/workflows/ci.yml        # CI/CD pipeline
+│   ├── level4-proposal.md             # Product proposal
+│   └── level4-submission.md           # Submission package
+└── .github/workflows/ci.yml          # CI/CD pipeline
 ```
 
 ---
@@ -388,17 +415,18 @@ export circuit settle(): [] {
 
 ---
 
-## Submission Checklist
+## Level 4 Submission Checklist
 
-- [x] Fully functional dApp meaningfully using Midnight's privacy model
-- [x] 66+ tests passing (Vitest) — witnesses, netting, analytics, badges, cross-circle, pacts
-- [x] CI/CD pipeline running ([workflow](.github/workflows/ci.yml) + badge)
-- [x] Approved idea: Meridian — Confidential Group Expense Settlement
-- [x] Minimum 10 meaningful commits
-- [x] Public GitHub repository with complete README
-- [x] README privacy model section: [what an observer can and cannot learn](#privacy-model)
-- [x] Product proposal: [docs/level4-proposal.md](docs/level4-proposal.md)
-- [x] Complete submission package: [docs/level4-submission.md](docs/level4-submission.md)
+- [x] Working MVP live on Preprod (verifiable address)
+- [x] Documentation — README + setup + usage + privacy model
+- [x] CI/CD pipeline running ([workflow](.github/workflows/ci.yml) + [badge](https://github.com/Anubhab-Rakshit/midnight-project/actions/workflows/ci.yml))
+- [x] Minimum 15 meaningful commits (56 total)
+- [x] Public GitHub repository with full documentation
+- [x] Product proposal — [docs/level4-proposal.md](docs/level4-proposal.md)
+- [x] Submission package — [docs/level4-submission.md](docs/level4-submission.md)
+- [ ] Product X / Twitter profile created — [link TBD](#)
+- [ ] Live demo link deployed — [link TBD](#)
+- [ ] Demo video of the MVP — [link TBD](#)
 
 ---
 
