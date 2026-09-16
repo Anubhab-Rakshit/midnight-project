@@ -114,7 +114,7 @@ export const Monolith: React.FC<MonolithProps> = ({
             <h3 className="monolith-title" style={{ fontSize: '2rem', marginBottom: '1rem' }}>Sealed Forever</h3>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: '280px' }}>
               Your premonition is cryptographically bound to the Midnight Preprod ledger.<br/><br/>
-              <span className="text-gold">hash: {commitmentHash ? commitmentHash.slice(0, 16) + '...' + commitmentHash.slice(-4) : '0xe3b0c44298fc1...b855'}</span>
+              <span className="text-gold">hash: {commitmentHash ? commitmentHash.slice(0, 16) + '...' + commitmentHash.slice(-4) : 'pending...'}</span>
             </p>
             <Magnetic pull={0.2}>
               <button

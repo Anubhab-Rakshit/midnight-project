@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCirclesStore, useCircleExpenses, saveExpense } from '../hooks/useCirclesStore';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
+import { useMeridianContract } from '../hooks/useMeridianContract';
 import { ExpenseForm } from './ExpenseForm';
 import { MemberList } from './MemberList';
 import { EmptyState } from './EmptyState';
@@ -24,6 +25,7 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
   const { circles } = useCirclesStore(address);
   const { expenses, refetch: refetchExpenses } = useCircleExpenses(contractAddress);
   const circle = circles.find((c) => c.contractAddress === contractAddress);
+  const { settle } = useMeridianContract();
 
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
 
@@ -322,7 +324,10 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
                     splitWith: members.map((m) => m.id),
                   }))}
                   settlementPlan={settlementPlan}
-                  onSettle={async () => { console.log('Settle on-chain'); }}
+                  onSettle={async () => {
+                    if (!circle || !settlementPlan || !address) return;
+                    await settle(circle.contractAddress, circle.inviteSecret, settlementPlan);
+                  }}
                 />
               ) : (
                 <EmptyState

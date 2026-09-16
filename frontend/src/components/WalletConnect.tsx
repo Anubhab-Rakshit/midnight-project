@@ -389,59 +389,6 @@ export const WalletConnect: React.FC = () => {
                   </div>
                 )}
 
-                {/* Always-Available Demo Mode Option */}
-                <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                  <button
-                    onClick={() => connect('demo')}
-                    disabled={isConnecting}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      width: '100%',
-                      padding: '0.85rem 1.1rem',
-                      background: 'rgba(212, 175, 55, 0.03)',
-                      border: '1px solid rgba(212, 175, 55, 0.15)',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      textAlign: 'left',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(212, 175, 55, 0.08)';
-                      e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.3)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(212, 175, 55, 0.03)';
-                      e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.15)';
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div
-                        style={{
-                          width: '30px',
-                          height: '30px',
-                          borderRadius: '8px',
-                          background: 'rgba(212, 175, 55, 0.1)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Sparkles size={14} style={{ color: 'var(--accent-gold)' }} />
-                      </div>
-                      <div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#fff', fontWeight: 600 }}>
-                          Demo Sandbox Mode
-                        </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--text-muted)' }}>
-                          Instant testnet vault with 1,000 tNIGHT
-                        </div>
-                      </div>
-                    </div>
-                    <ArrowRight size={13} style={{ color: 'var(--accent-gold)' }} />
-                  </button>
-                </div>
               </div>
 
               {/* Security Badge & Privacy Guarantee */}

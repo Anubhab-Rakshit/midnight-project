@@ -151,24 +151,6 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
     setConnectingWalletId(walletId);
 
     try {
-      if (walletId === 'demo') {
-        console.log('[Midnight] Connecting to Demo Sandbox');
-        const DEMO_ADDRESS = 'mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za';
-        const mockProvider: MidnightProvider = {
-          connectedApi: null as any,
-          getAddress: async () => DEMO_ADDRESS,
-        };
-
-        const demoInfo: WalletInfo = { id: 'demo', name: 'Demo Sandbox', apiVersion: '0.0.0', isDustFree: true };
-        setSelectedWallet(demoInfo);
-        setProvider(mockProvider);
-        setAddress(DEMO_ADDRESS);
-        setBalance(1000.0);
-        setIsConnected(true);
-        setIsWalletModalOpen(false);
-        return;
-      }
-
       const matched = rawWallets.find(w => {
         const id = w.rdns || w.name.toLowerCase().replace(/\s+/g, '');
         return id === walletId;
