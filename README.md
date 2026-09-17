@@ -22,6 +22,30 @@
 
 ---
 
+## Screenshots
+
+<div align="center">
+
+**Landing Page**
+
+![Landing](images/hero.png)
+
+<br/>
+
+**Circles Dashboard** — create, join, and manage private expense circles
+
+![Circles](images/circles.png)
+
+<br/>
+
+**About Us** — privacy-first philosophy
+
+![About](images/about.png)
+
+</div>
+
+---
+
 ## What is Meridian?
 
 Meridian is **confidential group expense settlement** on Midnight Network. It solves the same problem as Splitwise — but with one critical difference: **every amount stays private**.
