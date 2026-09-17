@@ -181,14 +181,14 @@ export function MidnightWalletProvider({ children }: { children: ReactNode }) {
       }
       console.log('[Midnight] Connected to', matched.name);
 
-      // Get address
+      // Get address — prefer unshielded (public, verifiable on-chain)
       let walletAddress: string;
       try {
-        const shielded = await connectedApi.getShieldedAddresses();
-        walletAddress = shielded.shieldedAddress;
-      } catch {
         const unshielded = await connectedApi.getUnshieldedAddress();
         walletAddress = unshielded.unshieldedAddress;
+      } catch {
+        const shielded = await connectedApi.getShieldedAddresses();
+        walletAddress = shielded.shieldedAddress;
       }
 
       console.log('[Midnight] Wallet address:', walletAddress);
