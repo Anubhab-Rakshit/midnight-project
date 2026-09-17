@@ -9,7 +9,7 @@
 export function toBytes32(value: string): Uint8Array {
   const bytes = new TextEncoder().encode(value);
   if (bytes.length > 32) {
-    console.warn(`[Omen] value "${value.slice(0, 32)}…" truncated to 32 bytes`);
+    console.warn(`[Meridian] value "${value.slice(0, 32)}…" truncated to 32 bytes`);
   }
   const out = new Uint8Array(32);
   out.set(bytes.slice(0, 32));
