@@ -132,8 +132,26 @@ See [docs/architecture.md](docs/architecture.md) for detailed Mermaid diagrams:
 | Address | `772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e` |
 | Deployer | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` |
 | Deployed | Sep 17, 2026 |
+| Block | `2586714` |
+| Tx Hash | `f8a8b67fcacfb2925c5f6b0fe5bb9cca37d405d7914aa1e7b4cce9b349f740bc` |
+| Block Hash | `5b2fc8fc4cffbed6fd99a030741c2b041ab054d6a70329da522c8fd67fc9ce62` |
 
-> **Note:** The Preprod explorer has not yet indexed this contract. The contract is live and functional — verified via successful `deploy`, `join`, and `settle` transactions through the Midnight SDK.
+<details>
+<summary><strong>On-Chain Verification (click to expand)</strong></summary>
+
+The contract is verified live on-chain via the Midnight indexer API:
+
+```bash
+curl -s -X POST https://indexer.preprod.midnight.network/api/v4/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{ contractAction(address: \"772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e\") { address state transaction { hash block { height hash } } } }"}'
+```
+
+Returns: contract address, on-chain state (hex-encoded), and confirmed in block `2586714`.
+
+</details>
+
+> **Note:** The Preprod block explorer UI has not yet indexed this contract. The contract is live and verified via the indexer API and SDK transactions.
 
 ---
 
