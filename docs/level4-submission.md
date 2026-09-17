@@ -20,6 +20,7 @@ The core innovation: **programmable financial privacy**. Not "encrypted database
 |------|------|
 | Live demo | https://meridian-midnight.vercel.app |
 | GitHub repository | https://github.com/Anubhab-Rakshit/midnight-project |
+| Video demo | https://youtu.be/CFae-K52us0 |
 | CI/CD pipeline | https://github.com/Anubhab-Rakshit/midnight-project/actions |
 | Product proposal | https://github.com/Anubhab-Rakshit/midnight-project/blob/main/docs/level4-proposal.md |
 
@@ -210,6 +211,7 @@ Meridian is group expense splitting where the group is a private vault on Midnig
 
 **Links:**
 - Live demo: https://meridian-midnight.vercel.app
+- Video demo: https://youtu.be/CFae-K52us0
 - Repo: https://github.com/Anubhab-Rakshit/midnight-project
 - CI: https://github.com/Anubhab-Rakshit/midnight-project/actions
 - Proposal: https://github.com/Anubhab-Rakshit/midnight-project/blob/main/docs/level4-proposal.md
