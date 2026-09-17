@@ -3,14 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { WalletConnect } from './WalletConnect';
 
 interface NavbarProps {
-  view: 'circles' | 'about';
-  setView: (v: 'circles' | 'about') => void;
+  view: 'landing' | 'circles' | 'about';
+  setView: (v: 'landing' | 'circles' | 'about') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleNavClick = (v: 'circles' | 'about') => {
+  const handleNavClick = (v: 'landing' | 'circles' | 'about') => {
     setView(v);
     setMobileMenuOpen(false);
   };
@@ -65,7 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({ view, setView }) => {
         >
           {/* Brand */}
           <div 
-            onClick={() => handleNavClick('circles')} 
+            onClick={() => handleNavClick('landing')} 
             style={{ 
               fontFamily: 'var(--font-serif)', 
               fontSize: '1.6rem', 

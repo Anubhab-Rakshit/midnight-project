@@ -7,19 +7,39 @@ import {
   LogOut, 
   Loader2, 
   Zap, 
-  ShieldCheck, 
   ChevronDown, 
   X, 
   Copy, 
   Check, 
   ExternalLink, 
-  Sparkles, 
   RefreshCw, 
   AlertCircle, 
   ArrowRight, 
   Lock,
   Download
 } from 'lucide-react';
+
+// ==========================================
+// Custom Luxury Bespoke SVG Icons & Vectors
+// ==========================================
+const MidnightLogo = ({ size = 22, color = 'var(--accent-gold)' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12l2 2 4-4" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const LaceLogo = ({ size = 20, color = '#a78bfa' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" stroke={color} strokeWidth="1.5" strokeLinejoin="round"/>
+  </svg>
+);
+
+const WalletVector = ({ size = 20, color = '#fff' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 12V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V12ZM21 12H17C15.8954 12 15 11.1046 15 10C15 8.89543 15.8954 8 17 8H21V12Z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 export const WalletConnect: React.FC = () => {
   const {
@@ -107,17 +127,13 @@ export const WalletConnect: React.FC = () => {
               exit={{ opacity: 0, scale: 0.94, y: 16 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
+              className="glass-panel"
               style={{
                 width: '100%',
                 maxWidth: '440px',
                 maxHeight: '90vh',
                 overflowY: 'auto',
-                background: 'linear-gradient(180deg, rgba(22, 22, 28, 0.96) 0%, rgba(12, 12, 16, 0.98) 100%)',
-                border: '1px solid rgba(212, 175, 55, 0.25)',
-                borderRadius: '24px',
-                boxShadow: '0 30px 70px -10px rgba(0, 0, 0, 0.9), 0 0 40px -5px rgba(212, 175, 55, 0.12), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12)',
-                position: 'relative',
-                padding: '2rem 1.75rem',
+                padding: '2.5rem 2rem',
               }}
             >
               {/* Ambient Top Glow */}
@@ -143,10 +159,10 @@ export const WalletConnect: React.FC = () => {
                       MIDNIGHT PREPROD
                     </span>
                   </div>
-                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.85rem', color: '#fff', margin: 0, fontWeight: 400, letterSpacing: '-0.02em', fontStyle: 'italic' }}>
+                  <h3 className="feature-title" style={{ marginBottom: '0.5rem', fontSize: '2.2rem' }}>
                     Connect Wallet
                   </h3>
-                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'rgba(240, 240, 240, 0.55)', margin: '0.4rem 0 0 0', lineHeight: 1.45 }}>
+                  <p className="feature-desc">
                     Select a zero-knowledge confidential wallet to authenticate on Midnight Network.
                   </p>
                 </div>
@@ -176,7 +192,7 @@ export const WalletConnect: React.FC = () => {
               </div>
 
               {/* Wallet Options List */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', position: 'relative', zIndex: 2 }}>
+              <div className="wallet-options-list">
                 {availableWallets.length > 0 ? (
                   availableWallets.map((wallet) => {
                     const isWallet1AM = is1am(wallet.name);
@@ -190,178 +206,77 @@ export const WalletConnect: React.FC = () => {
                         whileTap={{ scale: 0.985 }}
                         onClick={() => connect(wallet.id)}
                         disabled={isConnecting}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '1rem',
-                          padding: '1.1rem 1.25rem',
-                          background: isThisConnecting 
-                            ? 'rgba(212, 175, 55, 0.08)' 
-                            : 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
-                          border: isThisConnecting 
-                            ? '1px solid rgba(212, 175, 55, 0.5)' 
-                            : '1px solid rgba(255, 255, 255, 0.08)',
-                          borderRadius: '16px',
-                          cursor: isConnecting ? 'wait' : 'pointer',
-                          transition: 'all 0.25s ease',
-                          textAlign: 'left',
-                          width: '100%',
-                          position: 'relative',
-                          boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isConnecting) {
-                            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(255,255,255,0.02) 100%)';
-                            e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.35)';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isConnecting) {
-                            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                          }
-                        }}
+                        className={`wallet-option-btn ${isThisConnecting ? 'connecting' : ''}`}
                       >
                         {/* Custom Brand Icon Container */}
-                        <div
-                          style={{
-                            width: '46px',
-                            height: '46px',
-                            borderRadius: '14px',
-                            background: isWallet1AM
-                              ? 'linear-gradient(135deg, rgba(212,175,55,0.25) 0%, rgba(212,175,55,0.05) 100%)'
-                              : isWalletLace
-                              ? 'linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(99,102,241,0.05) 100%)'
-                              : 'rgba(255, 255, 255, 0.05)',
-                            border: isWallet1AM
-                              ? '1px solid rgba(212, 175, 55, 0.4)'
-                              : isWalletLace
-                              ? '1px solid rgba(139, 92, 246, 0.35)'
-                              : '1px solid rgba(255, 255, 255, 0.1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                            boxShadow: isWallet1AM 
-                              ? '0 0 20px rgba(212,175,55,0.15)' 
-                              : isWalletLace 
-                              ? '0 0 20px rgba(139,92,246,0.15)' 
-                              : 'none',
-                          }}
-                        >
+                        <div className={`wallet-icon-container ${isWallet1AM ? 'is-1am' : isWalletLace ? 'is-lace' : 'is-default'}`}>
                           {isWallet1AM ? (
-                            <ShieldCheck size={22} style={{ color: 'var(--accent-gold)' }} />
+                            <MidnightLogo size={22} color="var(--accent-gold)" />
                           ) : isWalletLace ? (
-                            <Sparkles size={20} style={{ color: '#a78bfa' }} />
+                            <LaceLogo size={20} color="#a78bfa" />
                           ) : (
-                            <Wallet size={20} style={{ color: '#fff' }} />
+                            <WalletVector size={20} color="#fff" />
                           )}
                         </div>
 
                         {/* Wallet Information */}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: '#fff', fontWeight: 600, letterSpacing: '0.04em' }}>
+                        <div className="wallet-info">
+                          <div className="wallet-info-top">
+                            <span className="wallet-name">
                               {wallet.name}
                             </span>
 
                             {isWallet1AM && (
-                              <span style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.2rem',
-                                padding: '0.15rem 0.45rem',
-                                borderRadius: '6px',
-                                background: 'rgba(52, 211, 153, 0.1)',
-                                border: '1px solid rgba(52, 211, 153, 0.25)',
-                                color: '#34d399',
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '8.5px',
-                                fontWeight: 500,
-                                letterSpacing: '0.05em',
-                              }}>
+                              <span className="wallet-tag dust-free">
                                 <Zap size={8} /> DUST-FREE
                               </span>
                             )}
 
                             {isWalletLace && (
-                              <span style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.2rem',
-                                padding: '0.15rem 0.45rem',
-                                borderRadius: '6px',
-                                background: 'rgba(167, 139, 250, 0.1)',
-                                border: '1px solid rgba(167, 139, 250, 0.25)',
-                                color: '#c4b5fd',
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '8.5px',
-                                fontWeight: 500,
-                                letterSpacing: '0.05em',
-                              }}>
+                              <span className="wallet-tag official">
                                 OFFICIAL
                               </span>
                             )}
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.3rem' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'rgba(240, 240, 240, 0.4)' }}>
+                          <div className="wallet-info-bottom">
+                            <span className="wallet-version">
                               v{wallet.apiVersion}
                             </span>
-                            <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', color: 'rgba(240, 240, 240, 0.5)' }}>
+                            <span className="wallet-dot-divider">•</span>
+                            <span className="wallet-type">
                               {isWallet1AM ? 'Observable State Prover' : isWalletLace ? 'Shielded ZK Connector' : 'Preprod Compatible'}
                             </span>
                           </div>
                         </div>
 
                         {/* Action / Spinner */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '0.5rem' }}>
+                        <div className="wallet-action-indicator">
                           {isThisConnecting ? (
                             <Loader2 size={16} className="animate-spin" style={{ color: 'var(--accent-gold)' }} />
                           ) : (
-                            <ArrowRight size={15} style={{ color: 'rgba(255, 255, 255, 0.3)', transition: 'transform 0.2s ease' }} />
+                            <ArrowRight size={15} className="wallet-arrow" />
                           )}
                         </div>
                       </motion.button>
                     );
                   })
                 ) : (
-                  <div
-                    style={{
-                      padding: '1.5rem',
-                      borderRadius: '16px',
-                      background: 'rgba(255, 255, 255, 0.02)',
-                      border: '1px dashed rgba(255, 255, 255, 0.15)',
-                      textAlign: 'center',
-                    }}
-                  >
+                  <div className="wallet-empty-state">
                     <AlertCircle size={24} style={{ color: 'var(--accent-gold)', margin: '0 auto 0.75rem auto' }} />
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fff', fontWeight: 600, margin: '0 0 0.35rem 0' }}>
+                    <p className="wallet-empty-title">
                       No Midnight Wallets Detected
                     </p>
-                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11.5px', color: 'var(--text-muted)', margin: '0 0 1.25rem 0', lineHeight: 1.5 }}>
+                    <p className="wallet-empty-desc">
                       Install 1AM or Lace wallet extension to unlock real zero-knowledge contract interactions.
                     </p>
 
-                    <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <div className="wallet-install-links">
                       <a
                         href="https://chromewebstore.google.com/detail/1am-wallet/gkhkghbjckofpndlfcbkffjplkgcfomj"
                         target="_blank"
                         rel="noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                          padding: '0.45rem 0.9rem',
-                          borderRadius: '8px',
-                          background: 'rgba(212, 175, 55, 0.1)',
-                          border: '1px solid rgba(212, 175, 55, 0.3)',
-                          color: 'var(--accent-gold)',
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: '10px',
-                          textDecoration: 'none',
-                        }}
+                        className="wallet-install-btn btn-1am"
                       >
                         <Download size={11} /> Install 1AM
                       </a>
@@ -369,44 +284,17 @@ export const WalletConnect: React.FC = () => {
                         href="https://chromewebstore.google.com/detail/midnight-lace/hgecmdngfehpkdehblpncmhkeoelaljg"
                         target="_blank"
                         rel="noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                          padding: '0.45rem 0.9rem',
-                          borderRadius: '8px',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                          color: '#fff',
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: '10px',
-                          textDecoration: 'none',
-                        }}
+                        className="wallet-install-btn btn-lace"
                       >
                         <Download size={11} /> Install Lace
                       </a>
                     </div>
                   </div>
                 )}
-
               </div>
 
               {/* Security Badge & Privacy Guarantee */}
-              <div
-                style={{
-                  marginTop: '1.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  justifyContent: 'center',
-                  color: 'rgba(240, 240, 240, 0.35)',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '9.5px',
-                  letterSpacing: '0.03em',
-                  position: 'relative',
-                  zIndex: 2,
-                }}
-              >
+              <div className="wallet-security-badge">
                 <Lock size={11} />
                 <span>Zero-Knowledge Protected • Keys Never Leave Browser</span>
               </div>

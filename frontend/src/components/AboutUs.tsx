@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 
 // ==========================================
 // Custom Luxury Bespoke SVG Icons & Vectors
@@ -129,12 +129,6 @@ const SvgCompactCircuit: React.FC<{ size?: number }> = ({ size = 28 }) => (
   </svg>
 );
 
-const SvgArrowRight: React.FC<{ size?: number }> = ({ size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
 interface AboutUsProps {
   onLaunch: () => void;
 }
@@ -142,273 +136,136 @@ interface AboutUsProps {
 export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
   const [activeTab, setActiveTab] = useState<'contract' | 'circuits' | 'netting' | 'analytics' | 'badges'>('contract');
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  };
+
   return (
-    <div className="about-page-wrapper" style={{ width: '100%', maxWidth: '1140px', margin: '0 auto', padding: '0 1.5rem 6rem 1.5rem' }}>
+    <div className="landing-container">
       
       {/* ========================================================= */}
       {/* 1. HERO SECTION */}
       {/* ========================================================= */}
-      <section style={{ textAlign: 'center', padding: '3.5rem 0 5rem 0', position: 'relative' }}>
-        {/* Subtle Ambient Radial Shimmer */}
-        <div style={{
-          position: 'absolute',
-          top: '20%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '500px',
-          height: '300px',
-          background: 'radial-gradient(ellipse at center, rgba(212,175,55,0.12), transparent 70%)',
-          filter: 'blur(50px)',
-          pointerEvents: 'none',
-          zIndex: -1,
-        }} />
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.35rem 0.9rem', borderRadius: '999px', background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.25)', marginBottom: '1.5rem' }}
-        >
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-gold)', letterSpacing: '0.15em', fontWeight: 600 }}>
+      <motion.section 
+        className="hero-section"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <div className="hero-content">
+          <motion.div variants={itemVariants} className="trust-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
             MIDNIGHT PREPROD • ZERO-KNOWLEDGE LEDGER
-          </span>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 'clamp(3.2rem, 7vw, 5.5rem)',
-            fontStyle: 'italic',
-            fontWeight: 400,
-            lineHeight: 1.05,
-            letterSpacing: '-0.03em',
-            color: '#fff',
-            margin: '0 auto 1rem auto',
-            background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.7) 60%, rgba(212,175,55,0.9) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          Meridian.
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 'clamp(1.4rem, 3vw, 2.1rem)',
-            color: 'var(--accent-gold)',
-            fontStyle: 'italic',
-            letterSpacing: '-0.01em',
-            margin: '0 auto 1.5rem auto',
-          }}
-        >
-          Private circles. Real money. Zero exposure.
-        </motion.p>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: '15px',
-            color: 'rgba(240, 240, 240, 0.7)',
-            maxWidth: '680px',
-            margin: '0 auto 2.5rem auto',
-            lineHeight: 1.7,
-            letterSpacing: '0.01em',
-          }}
-        >
-          The first dApp on Midnight Network that lets groups share expenses, split bills, and settle debts — with every amount, balance, and identity hidden from the public ledger. Built for people who want the simplicity of Venmo with the privacy of cash.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}
-        >
-          <button
-            onClick={onLaunch}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.9rem 2rem',
-              borderRadius: '999px',
-              background: 'linear-gradient(135deg, var(--accent-gold) 0%, #a38240 100%)',
-              color: '#000',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              border: 'none',
-              cursor: 'pointer',
-              boxShadow: '0 8px 30px rgba(212,175,55,0.3)',
-              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px) scale(1.03)';
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(212,175,55,0.45)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.boxShadow = '0 8px 30px rgba(212,175,55,0.3)';
-            }}
-          >
-            LAUNCH MERIDIAN
-            <SvgArrowRight size={14} />
-          </button>
-        </motion.div>
-      </section>
+          </motion.div>
+          
+          <motion.h1 variants={itemVariants} className="hero-title">
+            Meridian.
+          </motion.h1>
+          <motion.p variants={itemVariants} className="hero-subtitle" style={{ fontSize: '1.25rem', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--accent-gold)' }}>
+            Private circles. Real money. Zero exposure.
+          </motion.p>
+          <motion.p variants={itemVariants} className="hero-subtitle">
+            The first dApp on Midnight Network that lets groups share expenses, split bills, and settle debts — with every amount, balance, and identity hidden from the public ledger. Built for people who want the simplicity of Venmo with the privacy of cash.
+          </motion.p>
+          <motion.div variants={itemVariants} className="hero-actions">
+            <button onClick={onLaunch} className="launch-btn-primary">
+              <span className="btn-text">LAUNCH MERIDIAN</span>
+              <div className="btn-glow-effect"></div>
+            </button>
+          </motion.div>
+        </div>
+      </motion.section>
 
       {/* ========================================================= */}
       {/* 2. THE PROBLEM SECTION */}
       {/* ========================================================= */}
-      <section style={{ margin: '4rem 0 6rem 0' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#f87171', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            THE STATUS QUO
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#fff', fontStyle: 'italic', margin: 0 }}>
-            The Problem With Splitting Money Today
-          </h2>
-        </div>
+      <section className="features-section">
+        <motion.div 
+          className="section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          style={{ marginBottom: '2rem', justifyContent: 'center' }}
+        >
+          <div className="section-title-line"></div>
+          <h2 className="section-title">The Status Quo</h2>
+          <div className="section-title-line"></div>
+        </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.75rem', marginBottom: '2.5rem' }}>
-          {/* Public Surveillance Card */}
-          <motion.div
-            whileHover={{ y: -4 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              padding: '2.25rem',
-              borderRadius: '20px',
-              background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.04) 0%, rgba(15, 15, 20, 0.8) 100%)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-            }}
+        <div className="features-grid">
+          <motion.div 
+            className="feature-card glass-panel"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div className="feature-icon-wrapper" style={{ background: 'rgba(239, 68, 68, 0.1)' }}>
               <SvgSurveillanceNode size={26} />
-              <h3 style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: '#f87171', margin: 0, letterSpacing: '0.08em' }}>
-                SURVEILLANCE APPS
-              </h3>
+              <div className="icon-glow" style={{ boxShadow: '0 0 20px rgba(239, 68, 68, 0.4)' }}></div>
             </div>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(240, 240, 240, 0.75)', lineHeight: 1.65, margin: '0 0 1rem 0' }}>
+            <h3 className="feature-title">Surveillance Apps</h3>
+            <p className="feature-desc">
               Every expense-splitting app — Venmo, Splitwise, SplitIt — has the same fundamental flaw: <strong style={{ color: '#fff' }}>everything is public</strong>.
-            </p>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13.5px', color: 'rgba(240, 240, 240, 0.6)', lineHeight: 1.65, margin: 0 }}>
+              <br/><br/>
               When you pay for dinner, everyone in the group sees who paid, how much, and for what. Your spending habits are an open book. Your financial relationships are exposed. Your social graph is monetized.
             </p>
+            <div className="feature-card-border"></div>
           </motion.div>
 
-          {/* Permanent Public Ledger Card */}
-          <motion.div
-            whileHover={{ y: -4 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              padding: '2.25rem',
-              borderRadius: '20px',
-              background: 'linear-gradient(180deg, rgba(212, 175, 55, 0.04) 0%, rgba(15, 15, 20, 0.8) 100%)',
-              border: '1px solid rgba(212, 175, 55, 0.2)',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-            }}
+          <motion.div 
+            className="feature-card glass-panel"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div className="feature-icon-wrapper">
               <SvgZkSeal size={26} />
-              <h3 style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--accent-gold)', margin: 0, letterSpacing: '0.08em' }}>
-                PUBLIC BLOCKCHAINS
-              </h3>
+              <div className="icon-glow"></div>
             </div>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(240, 240, 240, 0.75)', lineHeight: 1.65, margin: '0 0 1rem 0' }}>
+            <h3 className="feature-title">Public Blockchains</h3>
+            <p className="feature-desc">
               On transparent blockchains, it's worse. Every transaction is permanently recorded, visible to anyone, forever.
-            </p>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13.5px', color: 'rgba(240, 240, 240, 0.6)', lineHeight: 1.65, margin: 0 }}>
+              <br/><br/>
               Your financial history becomes an indelible dossier that can never be erased, leaking your liquidity, income bracket, and peer interactions to the entire world.
             </p>
+            <div className="feature-card-border"></div>
           </motion.div>
-        </div>
-
-        {/* Research Exposure Points */}
-        <div style={{
-          padding: '2rem 2.25rem',
-          borderRadius: '16px',
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          marginBottom: '2.5rem',
-        }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: '1.25rem' }}>
-            EMPIRICAL RESEARCH DEMONSTRATES SPENDING PATTERNS REVEAL:
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
-            {[
-              { label: 'Geolocation & Travel', desc: 'Where you eat, shop, and travel' },
-              { label: 'Social Affiliations', desc: 'Who you share bills with (roommates, partners, colleagues)' },
-              { label: 'Economic Profile', desc: 'Your income bracket and lifestyle tier' },
-              { label: 'Behavioral Schedule', desc: "When you're home and when you're not" },
-            ].map((item, idx) => (
-              <div key={idx} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f87171', marginTop: '6px', flexShrink: 0 }} />
-                <div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11.5px', color: '#fff', fontWeight: 600 }}>{item.label}</div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{item.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* The Question Monolith */}
-        <div style={{
-          textAlign: 'center',
-          padding: '2.5rem 2rem',
-          borderRadius: '20px',
-          background: 'linear-gradient(180deg, rgba(212,175,55,0.08) 0%, rgba(10,10,14,0.9) 100%)',
-          border: '1px solid rgba(212,175,55,0.3)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-        }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent-gold)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-            THE FUNDAMENTAL QUESTION
-          </span>
-          <p style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 'clamp(1.4rem, 2.8vw, 2.2rem)',
-            fontStyle: 'italic',
-            color: '#fff',
-            maxWidth: '780px',
-            margin: '0.75rem auto 0 auto',
-            lineHeight: 1.4,
-          }}>
-            "What if you could split expenses with friends, prove you paid your share, and settle debts — without anyone seeing the amounts?"
-          </p>
         </div>
       </section>
 
       {/* ========================================================= */}
-      {/* 3. THE SOLUTION SECTION */}
+      {/* 3. THE SOLUTION SECTION (How Meridian Works) */}
       {/* ========================================================= */}
-      <section style={{ margin: '6rem 0' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#34d399', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            ZERO-KNOWLEDGE ARCHITECTURE
+      <section className="features-section" style={{ marginTop: '4rem' }}>
+        <motion.div 
+          className="section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          style={{ marginBottom: '2rem', justifyContent: 'center', flexDirection: 'column' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2rem' }}>
+            <div className="section-title-line"></div>
+            <h2 className="section-title">Zero-Knowledge Architecture</h2>
+            <div className="section-title-line"></div>
           </div>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#fff', fontStyle: 'italic', margin: '0 0 1rem 0' }}>
-            How Meridian Works
-          </h2>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14.5px', color: 'rgba(240, 240, 240, 0.65)', maxWidth: '640px', margin: '0 auto', lineHeight: 1.6 }}>
-            Meridian is built on Midnight Network, a blockchain designed for <strong style={{ color: 'var(--accent-gold)' }}>selective disclosure</strong> — the ability to prove facts about your data without revealing the data itself.
+          <p className="hero-subtitle" style={{ marginTop: '1rem', fontSize: '1rem' }}>
+            Meridian is built on Midnight Network, a blockchain designed for selective disclosure — the ability to prove facts about your data without revealing the data itself.
           </p>
-        </div>
+        </motion.div>
 
-        {/* 4-Step Pipeline Flow */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', position: 'relative' }}>
+        <div className="features-grid">
           {[
             {
               step: '01',
@@ -424,140 +281,104 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
             },
             {
               step: '03',
-              title: 'Compute Balances Off-Chain',
+              title: 'Compute Balances',
               icon: <SvgNettingMatrix size={28} />,
               desc: 'The netting engine computes who owes whom using only local data. No balances are ever published to the blockchain. The math happens on your device.',
             },
             {
               step: '04',
-              title: 'Settle with Minimum Transfers',
+              title: 'Settle on-chain',
               icon: <SvgSettlementSeal size={28} />,
-              desc: 'When it’s time to settle, the on-chain settlement circuit proves that: balances are correct from committed expenses, the plan is optimal (minimum transfers), and every member nets to zero. The settlement hash is recorded on-chain; individual amounts are not.',
+              desc: 'When it’s time to settle, the on-chain settlement circuit proves that balances are correct from committed expenses, the plan is optimal, and every member nets to zero. The settlement hash is recorded on-chain.',
             },
           ].map((item, idx) => (
-            <motion.div
+            <motion.div 
               key={idx}
-              whileHover={{ y: -6, borderColor: 'rgba(212, 175, 55, 0.4)' }}
-              transition={{ duration: 0.3 }}
-              style={{
-                padding: '2rem 1.75rem',
-                borderRadius: '20px',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(12, 12, 16, 0.95) 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-              }}
+              className="feature-card glass-panel"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, delay: idx * 0.1, ease: "easeOut" }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
+                <div className="feature-icon-wrapper">
                   {item.icon}
+                  <div className="icon-glow"></div>
                 </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', color: 'rgba(212,175,55,0.4)', fontWeight: 700 }}>
-                  {item.step}
-                </span>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', color: 'var(--accent-gold)', opacity: 0.5 }}>{item.step}</div>
               </div>
-
-              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.45rem', color: '#fff', fontStyle: 'italic', margin: '0 0 0.75rem 0' }}>
-                {item.title}
-              </h3>
-
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'rgba(240, 240, 240, 0.65)', lineHeight: 1.65, margin: 0, flex: 1 }}>
-                {item.desc}
-              </p>
+              <h3 className="feature-title" style={{ fontSize: '1.5rem' }}>{item.title}</h3>
+              <p className="feature-desc">{item.desc}</p>
+              <div className="feature-card-border"></div>
             </motion.div>
           ))}
-        </div>
-
-        {/* Result Callout */}
-        <div style={{
-          marginTop: '2.5rem',
-          padding: '1.5rem 2rem',
-          borderRadius: '16px',
-          background: 'rgba(52, 211, 153, 0.04)',
-          border: '1px solid rgba(52, 211, 153, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          justifyContent: 'center',
-        }}>
-          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 10px #34d399', flexShrink: 0 }} />
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13.5px', color: '#fff', margin: 0, lineHeight: 1.5 }}>
-            <strong style={{ color: '#34d399' }}>The Result:</strong> Every member can independently verify that the group's finances are mathematically correct, without learning anyone else's private balances.
-          </p>
         </div>
       </section>
 
       {/* ========================================================= */}
       {/* 4. KEY FEATURES SECTION */}
       {/* ========================================================= */}
-      <section style={{ margin: '6rem 0' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-gold)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            PRODUCT CAPABILITIES
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#fff', fontStyle: 'italic', margin: 0 }}>
-            What You Get
-          </h2>
-        </div>
+      <section className="features-section" style={{ marginTop: '4rem' }}>
+        <motion.div 
+          className="section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          style={{ marginBottom: '2rem', justifyContent: 'center' }}
+        >
+          <div className="section-title-line"></div>
+          <h2 className="section-title">Product Capabilities</h2>
+          <div className="section-title-line"></div>
+        </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.75rem' }}>
+        <div className="features-grid">
           {[
             {
               title: 'Confidential Expense Tracking',
               icon: <SvgShieldedVault size={26} />,
-              desc: 'Every expense is stored as a cryptographic commitment. The blockchain sees a hash; you see the full details. No one else learns the amounts unless you choose to tell them.',
+              desc: 'Every expense is stored as a cryptographic commitment. The blockchain sees a hash; you see the full details. No one else learns the amounts.',
             },
             {
               title: 'Optimal Settlement Graph',
               icon: <SvgGraphOptimization size={26} />,
-              desc: 'The netting engine computes the minimum number of transfers needed to settle all debts. For a group of N people with outstanding balances, the optimal plan uses exactly N-1 transfers — the mathematical minimum. This isn’t an approximation; it’s proven.',
+              desc: 'The netting engine computes the minimum number of transfers needed to settle all debts. This isn’t an approximation; it’s proven.',
             },
             {
               title: 'Privacy-Preserving Analytics',
               icon: <SvgAnalyticsCurve size={26} />,
-              desc: 'See your circle’s spending patterns — total volume, per-member contributions, category breakdowns — all computed locally. The analytics engine produces aggregate statistics without exposing any individual member’s spending.',
+              desc: 'See your circle’s spending patterns — total volume, per-member contributions — all computed locally. The analytics engine produces aggregate statistics safely.',
             },
             {
               title: 'Recurring Pacts',
               icon: <SvgRecurringCycle size={26} />,
-              desc: 'Automate shared subscriptions. Create recurring pacts for Netflix, Spotify, rent, or any regular expense. Each pact is a commitment to a fixed amount on a fixed schedule, enforced by the circle’s smart contract.',
+              desc: 'Automate shared subscriptions. Create recurring pacts for Netflix or rent. Each pact is a commitment to a fixed amount on a fixed schedule.',
             },
             {
               title: 'Badge System',
               icon: <SvgBadgeStar size={26} />,
-              desc: 'Earn privacy-preserving badges based on your spending behavior: Fair Splitter (within 1 std dev), Top Contributor (paid above share), Settlement Champion (prompt settlement), and Circle Founder. Badges are computed locally and never published on-chain.',
+              desc: 'Earn privacy-preserving badges based on your spending behavior. Badges are computed locally and never published on-chain.',
             },
             {
               title: 'Cross-Circle Portability',
               icon: <SvgCrossCircleVenn size={26} />,
-              desc: 'Your membership proof works across circles. Join multiple groups with the same wallet, and your identity is consistent — but each circle’s finances remain completely isolated and private.',
+              desc: 'Your membership proof works across circles. Join multiple groups with the same wallet, and your identity is consistent but isolated.',
             },
           ].map((item, idx) => (
-            <motion.div
+            <motion.div 
               key={idx}
-              whileHover={{ y: -5, borderColor: 'rgba(212, 175, 55, 0.35)' }}
-              transition={{ duration: 0.25 }}
-              style={{
-                padding: '2.25rem',
-                borderRadius: '20px',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(10, 10, 14, 0.9) 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.35)',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
+              className="feature-card glass-panel"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, delay: (idx % 3) * 0.1, ease: "easeOut" }}
             >
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+              <div className="feature-icon-wrapper">
                 {item.icon}
+                <div className="icon-glow"></div>
               </div>
-              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: '#fff', fontStyle: 'italic', margin: '0 0 0.75rem 0' }}>
-                {item.title}
-              </h3>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13.5px', color: 'rgba(240, 240, 240, 0.65)', lineHeight: 1.65, margin: 0 }}>
-                {item.desc}
-              </p>
+              <h3 className="feature-title" style={{ fontSize: '1.5rem' }}>{item.title}</h3>
+              <p className="feature-desc">{item.desc}</p>
+              <div className="feature-card-border"></div>
             </motion.div>
           ))}
         </div>
@@ -566,35 +387,35 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
       {/* ========================================================= */}
       {/* 5. WHY MIDNIGHT SECTION */}
       {/* ========================================================= */}
-      <section style={{ margin: '6rem 0' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-gold)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            FOUNDATIONAL INFRASTRUCTURE
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#fff', fontStyle: 'italic', margin: '0 0 1rem 0' }}>
-            Why Midnight Network
-          </h2>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14.5px', color: 'rgba(240, 240, 240, 0.65)', maxWidth: '680px', margin: '0 auto', lineHeight: 1.6 }}>
-            Meridian isn't just "a blockchain app with privacy features." It's built on Midnight specifically because Midnight's architecture makes private dApps possible in ways other chains don't.
-          </p>
-        </div>
+      <section className="features-section" style={{ marginTop: '4rem' }}>
+        <motion.div 
+          className="section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          style={{ marginBottom: '2rem', justifyContent: 'center' }}
+        >
+          <div className="section-title-line"></div>
+          <h2 className="section-title">Foundational Infrastructure</h2>
+          <div className="section-title-line"></div>
+        </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+        <div className="features-grid">
           {[
             {
               title: 'Selective Disclosure',
               icon: <SvgSelectiveIris size={26} />,
-              desc: 'Midnight lets you prove facts about your data (e.g., "I have a positive balance in this circle") without revealing the data itself (the actual balance). This is the foundation of Meridian’s privacy model.',
+              desc: 'Midnight lets you prove facts about your data (e.g., "I have a positive balance in this circle") without revealing the data itself (the actual balance).',
             },
             {
               title: 'Compact Circuits',
               icon: <SvgCompactCircuit size={26} />,
-              desc: 'Meridian’s ZK circuits are compiled from Compact, Midnight’s native circuit language. Each circuit — join, logExpense, settle — is a small, auditable program that proves a specific statement about private data.',
+              desc: 'Meridian’s ZK circuits are compiled from Compact, Midnight’s native circuit language. Each circuit is a small, auditable program.',
             },
             {
               title: 'Wallet Integration',
               icon: <SvgShieldedVault size={26} />,
-              desc: 'Midnight wallets (1 AM, Lace) handle proving, balancing, and submission. The dApp never touches private keys. The wallet proves statements on your behalf; the blockchain verifies them.',
+              desc: 'Midnight wallets (1 AM, Lace) handle proving, balancing, and submission. The dApp never touches private keys. The wallet proves statements on your behalf.',
             },
             {
               title: 'Preprod Network',
@@ -602,25 +423,22 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
               desc: 'Meridian runs on Midnight’s Preprod testnet. All contracts, transactions, and settlements are real on-chain operations — not simulations.',
             },
           ].map((item, idx) => (
-            <div
+            <motion.div 
               key={idx}
-              style={{
-                padding: '2rem 1.75rem',
-                borderRadius: '18px',
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
+              className="feature-card glass-panel"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, delay: (idx % 2) * 0.1, ease: "easeOut" }}
             >
-              <div style={{ marginBottom: '1.25rem' }}>{item.icon}</div>
-              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', color: '#fff', fontStyle: 'italic', margin: '0 0 0.75rem 0' }}>
-                {item.title}
-              </h3>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'rgba(240, 240, 240, 0.6)', lineHeight: 1.6, margin: 0 }}>
-                {item.desc}
-              </p>
-            </div>
+              <div className="feature-icon-wrapper">
+                {item.icon}
+                <div className="icon-glow"></div>
+              </div>
+              <h3 className="feature-title" style={{ fontSize: '1.5rem' }}>{item.title}</h3>
+              <p className="feature-desc">{item.desc}</p>
+              <div className="feature-card-border"></div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -628,52 +446,42 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
       {/* ========================================================= */}
       {/* 6. TEAM / MISSION SECTION */}
       {/* ========================================================= */}
-      <section style={{
-        margin: '6rem 0',
-        padding: '4rem 2.5rem',
-        borderRadius: '24px',
-        background: 'linear-gradient(180deg, rgba(22, 22, 28, 0.95) 0%, rgba(10, 10, 14, 0.98) 100%)',
-        border: '1px solid rgba(212, 175, 55, 0.25)',
-        boxShadow: '0 30px 70px -10px rgba(0,0,0,0.8), 0 0 40px -5px rgba(212,175,55,0.08)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-gold)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-            OUR ETHOS & PURPOSE
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2.2rem, 4.5vw, 3.5rem)', color: '#fff', fontStyle: 'italic', margin: '0 0 1.75rem 0' }}>
+      <motion.section 
+        className="hero-section"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 1 }}
+        style={{ minHeight: 'auto', marginTop: '4rem', padding: '4rem 2rem' }}
+      >
+        <div className="hero-content" style={{ maxWidth: '800px' }}>
+          <h2 className="hero-title" style={{ fontSize: '3rem' }}>
             Why We Built This
           </h2>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '15.5px', color: 'rgba(240, 240, 240, 0.8)', lineHeight: 1.8, margin: '0 0 1.25rem 0' }}>
+          <p className="hero-subtitle">
             We believe financial privacy is a human right, not a luxury. Today's financial tools force a binary choice: use convenient apps that harvest your data, or use private tools that are unusable for groups.
           </p>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '15px', color: 'rgba(240, 240, 240, 0.7)', lineHeight: 1.8, margin: '0 0 1.25rem 0' }}>
+          <p className="hero-subtitle">
             Meridian eliminates that tradeoff. You get the convenience of expense-splitting with the privacy of cash. No one — not the platform, not the blockchain, not other members — learns your financial details unless you choose to share them.
           </p>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14.5px', color: 'rgba(240, 240, 240, 0.65)', lineHeight: 1.75, margin: '0 0 2rem 0' }}>
-            This is the beginning of private group finance. The smart contract layer is open. The circuits are auditable. The privacy guarantees are mathematical, not policy-based.
-          </p>
-          <div style={{ display: 'inline-block', padding: '0.75rem 1.5rem', borderRadius: '12px', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: 'var(--accent-gold)', fontStyle: 'italic' }}>
-              We're building the financial infrastructure that should have existed from the start.
-            </span>
-          </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ========================================================= */}
       {/* 7. TECHNICAL DEEP DIVE SECTION */}
       {/* ========================================================= */}
-      <section style={{ margin: '6rem 0' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-gold)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            SYSTEM SPECIFICATION
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#fff', fontStyle: 'italic', margin: 0 }}>
-            Under the Hood
-          </h2>
-        </div>
+      <section className="features-section" style={{ marginTop: '4rem' }}>
+        <motion.div 
+          className="section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          style={{ marginBottom: '2rem', justifyContent: 'center' }}
+        >
+          <div className="section-title-line"></div>
+          <h2 className="section-title">System Specification</h2>
+          <div className="section-title-line"></div>
+        </motion.div>
 
         {/* Tab Navigation */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
@@ -691,13 +499,14 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
                 fontFamily: 'var(--font-mono)',
                 fontSize: '11px',
                 padding: '0.6rem 1.25rem',
-                borderRadius: '999px',
-                border: activeTab === tab.id ? '1px solid var(--accent-gold)' : '1px solid rgba(255, 255, 255, 0.08)',
-                background: activeTab === tab.id ? 'rgba(212, 175, 55, 0.12)' : 'rgba(255, 255, 255, 0.02)',
-                color: activeTab === tab.id ? 'var(--accent-gold)' : 'var(--text-muted)',
+                borderRadius: '100px',
+                border: activeTab === tab.id ? '1px solid var(--accent-gold)' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: activeTab === tab.id ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                color: activeTab === tab.id ? 'var(--accent-gold)' : 'var(--text-primary)',
                 cursor: 'pointer',
                 letterSpacing: '0.05em',
                 transition: 'all 0.2s ease',
+                backdropFilter: 'blur(10px)',
               }}
             >
               {tab.label}
@@ -706,13 +515,7 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
         </div>
 
         {/* Tab Content Panes */}
-        <div style={{
-          padding: '2.5rem',
-          borderRadius: '20px',
-          background: 'rgba(13, 13, 17, 0.95)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
-        }}>
+        <div className="glass-panel" style={{ padding: '3rem', minHeight: '300px' }}>
           <AnimatePresence mode="wait">
             {activeTab === 'contract' && (
               <motion.div
@@ -722,16 +525,14 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <SvgCompactCircuit size={24} />
-                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.6rem', color: '#fff', fontStyle: 'italic', margin: 0 }}>
-                    Compact Smart Contract: splitpool
-                  </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div className="feature-icon-wrapper" style={{ width: '40px', height: '40px' }}><SvgCompactCircuit size={20} /></div>
+                  <h3 className="feature-title" style={{ fontSize: '2rem' }}>Compact Smart Contract: splitpool</h3>
                 </div>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(240, 240, 240, 0.7)', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-                  Meridian uses the <code style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-gold)' }}>splitpool</code> contract, compiled from Compact into ZK intermediate representations (zkir). It maintains five verified on-chain state fields:
+                <p className="feature-desc" style={{ marginBottom: '2rem' }}>
+                  Meridian uses the <code style={{ color: 'var(--accent-gold)' }}>splitpool</code> contract, compiled from Compact into ZK intermediate representations (zkir). It maintains five verified on-chain state fields:
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                <div className="features-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                   {[
                     { field: 'inviteRoot', desc: 'Commitment to the circle membership tree' },
                     { field: 'memberCount', desc: 'Verified counter of joined circle members' },
@@ -739,9 +540,9 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
                     { field: 'settlementCount', desc: 'Number of successfully finalized debt settlements' },
                     { field: 'lastSettlementHash', desc: 'Cryptographic hash of the most recent settlement plan' },
                   ].map((item, idx) => (
-                    <div key={idx} style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent-gold)', fontWeight: 600 }}>{item.field}</div>
-                      <div style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'var(--text-muted)', marginTop: '0.35rem' }}>{item.desc}</div>
+                    <div key={idx} style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent-gold)', marginBottom: '0.5rem' }}>{item.field}</div>
+                      <div className="feature-desc" style={{ fontSize: '0.85rem' }}>{item.desc}</div>
                     </div>
                   ))}
                 </div>
@@ -756,23 +557,21 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <SvgZkSeal size={24} />
-                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.6rem', color: '#fff', fontStyle: 'italic', margin: 0 }}>
-                    Auditable ZK Circuits
-                  </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div className="feature-icon-wrapper" style={{ width: '40px', height: '40px' }}><SvgZkSeal size={20} /></div>
+                  <h3 className="feature-title" style={{ fontSize: '2rem' }}>Auditable ZK Circuits</h3>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+                <div className="features-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
                   {[
                     { name: 'join', desc: 'Proves knowledge of the invite secret and increments memberCount without revealing the secret itself.' },
                     { name: 'logExpense', desc: 'Proves valid circle membership and increments expenseCount; the commitment hash is derived from the member’s private secret and salt.' },
                     { name: 'settle', desc: 'Proves membership, stores the verified settlement plan hash, and increments settlementCount to transition debt state.' },
                   ].map((c, idx) => (
-                    <div key={idx} style={{ padding: '1.25rem', borderRadius: '14px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: '#34d399', fontWeight: 600, marginBottom: '0.5rem' }}>
+                    <div key={idx} style={{ padding: '1.5rem', borderRadius: '16px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--accent-gold)', marginBottom: '1rem' }}>
                         circuit {c.name}()
                       </div>
-                      <div style={{ fontFamily: 'var(--font-sans)', fontSize: '12.5px', color: 'rgba(240, 240, 240, 0.65)', lineHeight: 1.5 }}>
+                      <div className="feature-desc" style={{ fontSize: '0.9rem' }}>
                         {c.desc}
                       </div>
                     </div>
@@ -789,14 +588,12 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <SvgNettingMatrix size={24} />
-                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.6rem', color: '#fff', fontStyle: 'italic', margin: 0 }}>
-                    Minimum-Transfer Netting Engine
-                  </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div className="feature-icon-wrapper" style={{ width: '40px', height: '40px' }}><SvgNettingMatrix size={20} /></div>
+                  <h3 className="feature-title" style={{ fontSize: '2rem' }}>Minimum-Transfer Netting Engine</h3>
                 </div>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(240, 240, 240, 0.7)', lineHeight: 1.65 }}>
-                  Computes minimum-transaction settlement plans using a greedy algorithm that matches creditors and debtors by amount. For circles with ≤20 members, exhaustive search finds the true mathematical minimum. For larger circles, the greedy approximation achieves the same optimal reduction in $O(N \log N)$ complexity.
+                <p className="feature-desc" style={{ maxWidth: '800px' }}>
+                  Computes minimum-transaction settlement plans using a greedy algorithm that matches creditors and debtors by amount. For circles with ≤20 members, exhaustive search finds the true mathematical minimum. For larger circles, the greedy approximation achieves the same optimal reduction in O(N log N) complexity.
                 </p>
               </motion.div>
             )}
@@ -809,13 +606,11 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <SvgAnalyticsCurve size={24} />
-                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.6rem', color: '#fff', fontStyle: 'italic', margin: 0 }}>
-                    Client-Side Analytics Engine
-                  </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div className="feature-icon-wrapper" style={{ width: '40px', height: '40px' }}><SvgAnalyticsCurve size={20} /></div>
+                  <h3 className="feature-title" style={{ fontSize: '2rem' }}>Client-Side Analytics Engine</h3>
                 </div>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(240, 240, 240, 0.7)', lineHeight: 1.65 }}>
+                <p className="feature-desc" style={{ maxWidth: '800px' }}>
                   Computes aggregate statistics (total volume, averages, medians, standard deviations, distribution fairness) entirely from raw local expense data. All computation is performed client-side; only aggregated results are displayed in the dashboard.
                 </p>
               </motion.div>
@@ -829,13 +624,11 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <SvgBadgeStar size={24} />
-                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.6rem', color: '#fff', fontStyle: 'italic', margin: 0 }}>
-                    Statistical Badge System
-                  </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div className="feature-icon-wrapper" style={{ width: '40px', height: '40px' }}><SvgBadgeStar size={20} /></div>
+                  <h3 className="feature-title" style={{ fontSize: '2rem' }}>Statistical Badge System</h3>
                 </div>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'rgba(240, 240, 240, 0.7)', lineHeight: 1.65 }}>
+                <p className="feature-desc" style={{ maxWidth: '800px' }}>
                   Evaluates spending behavior against statistical thresholds and assigns local badges (Fair Splitter, Top Contributor, Settlement Champion, Circle Founder). No on-chain transaction is needed — badges are computed in your browser and stored in local state.
                 </p>
               </motion.div>
@@ -847,71 +640,27 @@ export const AboutUs: React.FC<AboutUsProps> = ({ onLaunch }) => {
       {/* ========================================================= */}
       {/* 8. CALL TO ACTION SECTION */}
       {/* ========================================================= */}
-      <section style={{
-        textAlign: 'center',
-        padding: '5rem 2rem',
-        borderRadius: '28px',
-        background: 'linear-gradient(180deg, rgba(212,175,55,0.12) 0%, rgba(12,12,16,0.95) 100%)',
-        border: '1px solid rgba(212,175,55,0.3)',
-        boxShadow: '0 30px 80px rgba(0,0,0,0.8), 0 0 50px rgba(212,175,55,0.15)',
-        position: 'relative',
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: '-20%',
-          left: '30%',
-          right: '30%',
-          height: '150px',
-          background: 'radial-gradient(ellipse at center, rgba(212,175,55,0.2), transparent 70%)',
-          filter: 'blur(40px)',
-          pointerEvents: 'none',
-        }} />
-
-        <div style={{ position: 'relative', zIndex: 2 }}>
-          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
-            <SvgShieldedVault size={30} />
+      <section className="footer-cta-section" style={{ marginTop: '4rem' }}>
+        <motion.div
+          className="cta-card glass-panel"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <div className="cta-background-glow"></div>
+          <div className="feature-icon-wrapper" style={{ margin: '0 auto 1.5rem auto' }}>
+            <SvgShieldedVault size={26} />
+            <div className="icon-glow"></div>
           </div>
-
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', color: '#fff', fontStyle: 'italic', margin: '0 0 1rem 0' }}>
-            Start Your First Circle
-          </h2>
-
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '15px', color: 'rgba(240, 240, 240, 0.7)', maxWidth: '520px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
+          <h2 className="cta-title">Start Your First Circle</h2>
+          <p className="hero-subtitle" style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>
             Connect your Midnight wallet. Deploy a privacy vault. Split your first expense — confidentially.
           </p>
-
-          <button
-            onClick={onLaunch}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '1.1rem 2.75rem',
-              borderRadius: '999px',
-              background: 'linear-gradient(135deg, var(--accent-gold) 0%, #a38240 100%)',
-              color: '#000',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '12px',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              border: 'none',
-              cursor: 'pointer',
-              boxShadow: '0 10px 40px rgba(212,175,55,0.35)',
-              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px) scale(1.03)';
-              e.currentTarget.style.boxShadow = '0 15px 50px rgba(212,175,55,0.5)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.boxShadow = '0 10px 40px rgba(212,175,55,0.35)';
-            }}
-          >
+          <button onClick={onLaunch} className="launch-btn-secondary">
             LAUNCH MERIDIAN
-            <SvgArrowRight size={16} />
           </button>
-        </div>
+        </motion.div>
       </section>
 
     </div>

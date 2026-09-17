@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Lenis from 'lenis';
+import { Lock } from 'lucide-react';
 
 import { Preloader } from './components/Preloader';
 import { AboutUs } from './components/AboutUs';
@@ -11,16 +12,17 @@ import { LiquidAura } from './components/LiquidAura';
 import { MidnightWalletProvider, useMidnightWallet } from './context/MidnightWalletContext';
 import { ToastProvider } from './components/TransactionToast';
 
+import { LandingPage } from './components/LandingPage';
 import { CircleList } from './components/CircleList';
 import { CircleDetail } from './components/CircleDetail';
 import { CreateCircleForm } from './components/CreateCircleForm';
 
 function AppContent() {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [view, setView] = useState<'circles' | 'about'>('circles');
+  const [view, setView] = useState<'landing' | 'circles' | 'about'>('landing');
   const [activeCircle, setActiveCircle] = useState<string | null>(null);
 
-  useMidnightWallet();
+  const { isConnected, openWalletModal } = useMidnightWallet();
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -65,7 +67,18 @@ function AppContent() {
           <div className="omen-layout">
             <main className="omen-content" style={{ marginTop: '120px' }}>
               <AnimatePresence mode="wait">
-                {view === 'circles' ? (
+                {view === 'landing' ? (
+                  <motion.div 
+                    key="landing-view" 
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ width: '100%' }}
+                  >
+                    <LandingPage onLaunch={() => { setView('circles'); setActiveCircle(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+                  </motion.div>
+                ) : view === 'circles' ? (
                   <motion.div 
                     key="circles-view" 
                     initial={{ opacity: 0, y: 15 }}
@@ -74,7 +87,25 @@ function AppContent() {
                     transition={{ duration: 0.3 }}
                     style={{ width: '100%' }}
                   >
-                    {activeCircle === 'new' ? (
+                    {!isConnected ? (
+                      <div className="landing-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+                        <div className="cta-card glass-panel" style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '500px', width: '100%' }}>
+                          <div className="cta-background-glow"></div>
+                          <div className="feature-icon-wrapper" style={{ margin: '0 auto 1.5rem auto' }}>
+                            <Lock size={28} style={{ color: 'var(--accent-gold)' }} />
+                            <div className="icon-glow"></div>
+                          </div>
+                          <h2 className="cta-title" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Wallet Required</h2>
+                          <p className="hero-subtitle" style={{ fontSize: '1rem', marginBottom: '2rem' }}>
+                            Please connect your Midnight wallet to view your circles, log expenses, and settle debts privately.
+                          </p>
+                          <button onClick={openWalletModal} className="launch-btn-primary">
+                            <span className="btn-text">CONNECT WALLET</span>
+                            <div className="btn-glow-effect"></div>
+                          </button>
+                        </div>
+                      </div>
+                    ) : activeCircle === 'new' ? (
                       <CreateCircleForm 
                         onBack={() => setActiveCircle(null)} 
                         onCreated={(addr) => setActiveCircle(addr)}

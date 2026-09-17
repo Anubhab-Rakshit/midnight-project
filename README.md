@@ -14,7 +14,7 @@
 
 <br/>
 
-**[GitHub repo](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d)** · **[Live Demo](https://meridian-midnight.vercel.app/)** · **[X / Twitter](https://x.com/anubhab_26/status/2100218988907421779?s=20)**
+**[GitHub repo](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Contract on Preprod](https://explorer.preprod.midnight.network/address/772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e)** · **[Live Demo](https://meridian-midnight.vercel.app/)** · **[X / Twitter](https://x.com/anubhab_26/status/2100218988907421779?s=20)**
 
 <br/>
 
@@ -263,7 +263,7 @@ All contracts are live on **Midnight Preprod**.
 
 | Contract | Network | Address | Deployer | Date |
 |----------|---------|---------|----------|------|
-| `splitpool` | Preprod | [`2eff47c4...f7896d`](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d) | [`mn_addr_preprod...tqdt24za`](https://explorer.preprod.midnight.network/address/mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za) | Sep 11, 2026 |
+| `splitpool` | Preprod | [`772cd2e0...f63e`](https://explorer.preprod.midnight.network/address/772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e) | [`mn_addr_preprod...tqdt24za`](https://explorer.preprod.midnight.network/address/mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za) | Sep 17, 2026 |
 
 </div>
 
@@ -272,12 +272,12 @@ All contracts are live on **Midnight Preprod**.
 
 | Field | Value |
 |-------|-------|
-| **Contract Address** | `2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d` |
+| **Contract Address** | `772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e` |
 | **Deployer Address** | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` |
-| **Invite Secret** | `eac549ce2e8f4ce794f1a1317fcaf6a1` |
-| **Deployed At** | Sep 11, 2026 |
+| **Invite Secret** | `1260db504e354bc7a5c58784eeded4b5` |
+| **Deployed At** | Sep 17, 2026 |
 | **Network** | Midnight Preprod |
-| **Explorer** | [View on Explorer](https://explorer.preprod.midnight.network/address/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d) |
+| **Explorer** | [View on Explorer](https://explorer.preprod.midnight.network/address/772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e) |
 
 </details>
 
