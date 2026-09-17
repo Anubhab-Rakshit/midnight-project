@@ -14,7 +14,7 @@
 
 <br/>
 
-**[GitHub](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Live Demo](https://meridian-midnight.vercel.app/)** · **[Video Demo](https://youtu.be/CFae-K52us0)** · **[Contract](https://explorer.preprod.midnight.network/address/772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e)** · **[X](https://x.com/anubhab_26/status/2100218988907421779?s=20)**
+**[GitHub](https://github.com/Anubhab-Rakshit/midnight-project)** · **[Live Demo](https://meridian-midnight.vercel.app/)** · **[Video Demo](https://youtu.be/CFae-K52us0)** · **[X](https://x.com/anubhab_26/status/2100218988907421779?s=20)**
 
 <br/>
 
@@ -66,6 +66,7 @@ When you log an expense, only a zero-knowledge commitment hash appears on-chain.
 | CI/CD | https://github.com/Anubhab-Rakshit/midnight-project/actions |
 | Product Proposal | [docs/level4-proposal.md](docs/level4-proposal.md) |
 | Architecture | [docs/architecture.md](docs/architecture.md) |
+| X / Twitter | https://x.com/anubhab_26/status/2100218988907421779?s=20 |
 
 ---
 
@@ -128,9 +129,11 @@ See [docs/architecture.md](docs/architecture.md) for detailed Mermaid diagrams:
 |-------|-------|
 | Network | Midnight Preprod |
 | Contract | `splitpool` |
-| Address | [`772cd2e0...f63e`](https://explorer.preprod.midnight.network/address/772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e) |
-| Deployer | [`mn_addr_preprod...tqdt24za`](https://explorer.preprod.midnight.network/address/mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za) |
+| Address | `772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e` |
+| Deployer | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` |
 | Deployed | Sep 17, 2026 |
+
+> **Note:** The Preprod explorer has not yet indexed this contract. The contract is live and functional — verified via successful `deploy`, `join`, and `settle` transactions through the Midnight SDK.
 
 ---
 
