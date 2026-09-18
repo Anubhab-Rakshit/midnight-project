@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { X, Hash, Loader2 } from 'lucide-react';
+import { X, Hash, Loader2, Circle } from 'lucide-react';
 import { useToast } from './TransactionToast';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
 import { saveCircle } from '../hooks/useCirclesStore';
@@ -13,6 +13,7 @@ interface JoinCircleFormProps {
 export const JoinCircleForm: React.FC<JoinCircleFormProps> = ({ onClose }) => {
   const [contractAddress, setContractAddress] = useState('');
   const [inviteSecret, setInviteSecret] = useState('');
+  const [circleName, setCircleName] = useState('');
   const [isJoining, setIsJoining] = useState(false);
 
   const { addToast, updateToast } = useToast();
@@ -27,7 +28,7 @@ export const JoinCircleForm: React.FC<JoinCircleFormProps> = ({ onClose }) => {
     try {
       await saveCircle({
         walletAddress: address,
-        circleName: `Circle ${contractAddress.slice(0, 8)}...`,
+        circleName: circleName.trim() || `Circle ${contractAddress.slice(0, 8)}...`,
         contractAddress: contractAddress.trim(),
         inviteSecret: inviteSecret.trim(),
       });
@@ -91,6 +92,32 @@ export const JoinCircleForm: React.FC<JoinCircleFormProps> = ({ onClose }) => {
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div>
+            <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent-gold)', letterSpacing: '0.2em', display: 'block', marginBottom: '0.75rem' }}>
+              CIRCLE NAME
+            </label>
+            <div style={{ position: 'relative' }}>
+              <Circle size={14} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
+              <input
+                type="text"
+                value={circleName}
+                onChange={(e) => setCircleName(e.target.value)}
+                placeholder="e.g. Weekend Squad (optional)"
+                style={{
+                  width: '100%',
+                  padding: '1rem 1rem 1rem 2.5rem',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '12px',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  outline: 'none',
+                }}
+              />
+            </div>
+          </div>
+
           <div>
             <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent-gold)', letterSpacing: '0.2em', display: 'block', marginBottom: '0.75rem' }}>
               CONTRACT ADDRESS
