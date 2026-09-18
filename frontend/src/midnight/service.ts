@@ -183,12 +183,13 @@ async function buildProviders(
   };
 }
 
-function makeCompiledContract(inviteSecret: string, salt: Uint8Array, planHash?: Uint8Array): any {
+function makeCompiledContract(inviteSecret: string, salt: Uint8Array, planHash?: Uint8Array, expenseCommitment?: Uint8Array): any {
   let compiled: any = CompiledContract.make('splitpool', MeridianContract);
   compiled = CompiledContract.withWitnesses<any, any, any>(compiled, {
     localSecret: (ctx: any) => [ctx.privateState, toBytes32(inviteSecret)],
     localSalt: (ctx: any) => [ctx.privateState, salt],
     settlementHash: (ctx: any) => [ctx.privateState, planHash ?? new Uint8Array(32)],
+    expenseCommitment: (ctx: any) => [ctx.privateState, expenseCommitment ?? new Uint8Array(32)],
   } as any);
   compiled = CompiledContract.withCompiledFileAssets<any, any, any>(compiled, '' as any);
   return compiled;
@@ -244,10 +245,11 @@ async function findContract(
   connectedApi: ConnectedAPI,
   contractAddress: string,
   inviteSecret: string,
+  expenseCommitment?: Uint8Array,
 ) {
   const { providers, privateStateProvider } = await buildProviders(connectedApi, contractAddress);
   const salt = crypto.getRandomValues(new Uint8Array(32));
-  const compiledContract = makeCompiledContract(inviteSecret, salt);
+  const compiledContract = makeCompiledContract(inviteSecret, salt, undefined, expenseCommitment);
 
   const found = await findDeployedContract(providers as any, {
     compiledContract,
@@ -291,7 +293,12 @@ export async function logExpense(
   inviteSecret: string,
   commitmentHash: string,
 ): Promise<LogExpenseResult> {
-  const { found } = await findContract(connectedApi, contractAddress, inviteSecret);
+  // Convert hex commitment hash to Uint8Array for the ZK witness
+  const commitmentBytes = new Uint8Array(
+    commitmentHash.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)),
+  );
+
+  const { found } = await findContract(connectedApi, contractAddress, inviteSecret, commitmentBytes);
 
   const result = await found.callTx.logExpense();
   const txData = result?.public ?? (result as any)?.txData?.public ?? {};

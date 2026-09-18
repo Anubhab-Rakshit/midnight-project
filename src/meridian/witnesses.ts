@@ -17,6 +17,7 @@ import type { CirclePrivateState } from './private-state';
 export interface CircleWitnessContext {
   privateState: CirclePrivateState;
   settlementPlanHash?: Uint8Array;
+  expenseCommitmentHash?: Uint8Array;
 }
 
 // ─── Witness Return Types ───────────────────────────────────────────────────
@@ -88,10 +89,33 @@ export function settlementHash({
   return [privateState, settlementPlanHash];
 }
 
+// ─── Witness: expenseCommitment ─────────────────────────────────────────────
+
+/**
+ * Returns the commitment hash of an expense as Bytes<32>.
+ * This is computed off-chain by hashing the expense amount with a salt.
+ * The hash commits to the expense without revealing the amount.
+ *
+ * TypeScript: Uint8Array → Compact: Bytes<32>
+ * Private state is unchanged.
+ */
+export function expenseCommitment({
+  privateState,
+  expenseCommitmentHash,
+}: CircleWitnessContext): WitnessResult<Uint8Array> {
+  if (!expenseCommitmentHash || expenseCommitmentHash.length !== 32) {
+    throw new Error(
+      'expenseCommitment witness requires a 32-byte commitment hash',
+    );
+  }
+  return [privateState, expenseCommitmentHash];
+}
+
 // ─── Witness Map (for SDK registration) ────────────────────────────────────
 
 export const witnesses = {
   localSecret,
   localSalt,
   settlementHash,
+  expenseCommitment,
 };

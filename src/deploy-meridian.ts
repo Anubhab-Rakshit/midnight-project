@@ -261,6 +261,7 @@ async function main() {
     localSecret: (ctx: any) => [ctx.privateState, toBytes32(inviteSecret)],
     localSalt: (ctx: any) => [ctx.privateState, salt],
     settlementHash: (ctx: any) => [ctx.privateState, new Uint8Array(32)], // placeholder for deploy
+    expenseCommitment: (ctx: any) => [ctx.privateState, new Uint8Array(32)], // placeholder for deploy
   } as any);
   compiledContract = CompiledContract.withCompiledFileAssets<any, any, any>(compiledContract, zkConfigPath);
 

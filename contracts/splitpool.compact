@@ -19,11 +19,13 @@ export ledger memberCount: Counter;
 export ledger expenseCount: Counter;
 export ledger settlementCount: Counter;
 export ledger lastSettlementHash: Bytes<32>;
+export ledger lastExpenseCommitment: Bytes<32>;
 
 // Private witnesses — never leave the client
 witness localSecret(): Bytes<32>;
 witness localSalt(): Bytes<32>;
 witness settlementHash(): Bytes<32>;
+witness expenseCommitment(): Bytes<32>;
 
 // ============================================================
 // Helper: domain-separated commitment hash
@@ -63,6 +65,7 @@ export circuit join(): [] {
 // ============================================================
 // logExpense — commit an expense on-chain
 // Proves the caller is a member without revealing which one
+// Stores the commitment hash on-chain for auditability
 // ============================================================
 export circuit logExpense(): [] {
     const s = localSecret();
@@ -70,6 +73,11 @@ export circuit logExpense(): [] {
 
     // Verify membership (caller knows the shared invite secret)
     assert(inviteRoot == commitSecret(s, salt), "Not a circle member");
+
+    // Store the expense commitment hash on-chain
+    // The actual amount is kept private — only the hash is disclosed
+    const commitment = expenseCommitment();
+    lastExpenseCommitment = disclose(commitment);
 
     expenseCount.increment(1);
 }
