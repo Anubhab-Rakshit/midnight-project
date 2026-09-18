@@ -68,6 +68,9 @@ export class Contract {
     if (typeof(witnesses_0.settlementHash) !== 'function') {
       throw new __compactRuntime.CompactError('first (witnesses) argument to Contract constructor does not contain a function-valued field named settlementHash');
     }
+    if (typeof(witnesses_0.expenseCommitment) !== 'function') {
+      throw new __compactRuntime.CompactError('first (witnesses) argument to Contract constructor does not contain a function-valued field named expenseCommitment');
+    }
     this.witnesses = witnesses_0;
     this.circuits = {
       join: (...args_1) => {
@@ -78,7 +81,7 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('join',
                                      'argument 1 (as invoked from Typescript)',
-                                     'splitpool.compact line 53 char 1',
+                                     'splitpool.compact line 55 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
@@ -101,7 +104,7 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('logExpense',
                                      'argument 1 (as invoked from Typescript)',
-                                     'splitpool.compact line 67 char 1',
+                                     'splitpool.compact line 70 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
@@ -124,7 +127,7 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('settle',
                                      'argument 1 (as invoked from Typescript)',
-                                     'splitpool.compact line 81 char 1',
+                                     'splitpool.compact line 89 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
@@ -170,6 +173,7 @@ export class Contract {
     }
     const state_0 = new __compactRuntime.ContractState();
     let stateValue_0 = __compactRuntime.StateValue.newArray();
+    stateValue_0 = stateValue_0.arrayPush(__compactRuntime.StateValue.newNull());
     stateValue_0 = stateValue_0.arrayPush(__compactRuntime.StateValue.newNull());
     stateValue_0 = stateValue_0.arrayPush(__compactRuntime.StateValue.newNull());
     stateValue_0 = stateValue_0.arrayPush(__compactRuntime.StateValue.newNull());
@@ -236,6 +240,16 @@ export class Contract {
                                                  value: __compactRuntime.StateValue.newCell({ value: _descriptor_0.toValue(new Uint8Array(32)),
                                                                                               alignment: _descriptor_0.alignment() }).encode() } },
                                        { ins: { cached: false, n: 1 } }]);
+    __compactRuntime.queryLedgerState(context,
+                                      partialProofData,
+                                      [
+                                       { push: { storage: false,
+                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_8.toValue(5n),
+                                                                                              alignment: _descriptor_8.alignment() }).encode() } },
+                                       { push: { storage: true,
+                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_0.toValue(new Uint8Array(32)),
+                                                                                              alignment: _descriptor_0.alignment() }).encode() } },
+                                       { ins: { cached: false, n: 1 } }]);
     const s_0 = this._localSecret_0(context, partialProofData);
     const salt_0 = this._localSalt_0(context, partialProofData);
     const tmp_0 = this._commitSecret_0(s_0, salt_0);
@@ -267,7 +281,7 @@ export class Contract {
     if (!(result_0.buffer instanceof ArrayBuffer && result_0.BYTES_PER_ELEMENT === 1 && result_0.length === 32)) {
       __compactRuntime.typeError('localSecret',
                                  'return value',
-                                 'splitpool.compact line 24 char 1',
+                                 'splitpool.compact line 25 char 1',
                                  'Bytes<32>',
                                  result_0)
     }
@@ -284,7 +298,7 @@ export class Contract {
     if (!(result_0.buffer instanceof ArrayBuffer && result_0.BYTES_PER_ELEMENT === 1 && result_0.length === 32)) {
       __compactRuntime.typeError('localSalt',
                                  'return value',
-                                 'splitpool.compact line 25 char 1',
+                                 'splitpool.compact line 26 char 1',
                                  'Bytes<32>',
                                  result_0)
     }
@@ -301,7 +315,24 @@ export class Contract {
     if (!(result_0.buffer instanceof ArrayBuffer && result_0.BYTES_PER_ELEMENT === 1 && result_0.length === 32)) {
       __compactRuntime.typeError('settlementHash',
                                  'return value',
-                                 'splitpool.compact line 26 char 1',
+                                 'splitpool.compact line 27 char 1',
+                                 'Bytes<32>',
+                                 result_0)
+    }
+    partialProofData.privateTranscriptOutputs.push({
+      value: _descriptor_0.toValue(result_0),
+      alignment: _descriptor_0.alignment()
+    });
+    return result_0;
+  }
+  _expenseCommitment_0(context, partialProofData) {
+    const witnessContext_0 = __compactRuntime.createWitnessContext(ledger(context.currentQueryContext.state), context.currentPrivateState, context.currentQueryContext.address);
+    const [nextPrivateState_0, result_0] = this.witnesses.expenseCommitment(witnessContext_0);
+    context.currentPrivateState = nextPrivateState_0;
+    if (!(result_0.buffer instanceof ArrayBuffer && result_0.BYTES_PER_ELEMENT === 1 && result_0.length === 32)) {
+      __compactRuntime.typeError('expenseCommitment',
+                                 'return value',
+                                 'splitpool.compact line 28 char 1',
                                  'Bytes<32>',
                                  result_0)
     }
@@ -368,6 +399,17 @@ export class Contract {
                                                                                                                 result: undefined } }]).value),
                                           this._commitSecret_0(s_0, salt_0)),
                             'Not a circle member');
+    const commitment_0 = this._expenseCommitment_0(context, partialProofData);
+    __compactRuntime.queryLedgerState(context,
+                                      partialProofData,
+                                      [
+                                       { push: { storage: false,
+                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_8.toValue(5n),
+                                                                                              alignment: _descriptor_8.alignment() }).encode() } },
+                                       { push: { storage: true,
+                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_0.toValue(commitment_0),
+                                                                                              alignment: _descriptor_0.alignment() }).encode() } },
+                                       { ins: { cached: false, n: 1 } }]);
     const tmp_0 = 1n;
     __compactRuntime.queryLedgerState(context,
                                       partialProofData,
@@ -528,6 +570,20 @@ export function ledger(stateOrChargedState) {
                                                                                                    alignment: _descriptor_8.alignment() } }] } },
                                                                         { popeq: { cached: false,
                                                                                    result: undefined } }]).value);
+    },
+    get lastExpenseCommitment() {
+      return _descriptor_0.fromValue(__compactRuntime.queryLedgerState(context,
+                                                                       partialProofData,
+                                                                       [
+                                                                        { dup: { n: 0 } },
+                                                                        { idx: { cached: false,
+                                                                                 pushPath: false,
+                                                                                 path: [
+                                                                                        { tag: 'value',
+                                                                                          value: { value: _descriptor_8.toValue(5n),
+                                                                                                   alignment: _descriptor_8.alignment() } }] } },
+                                                                        { popeq: { cached: false,
+                                                                                   result: undefined } }]).value);
     }
   };
 }
@@ -537,7 +593,8 @@ const _emptyContext = {
 const _dummyContract = new Contract({
   localSecret: (...args) => undefined,
   localSalt: (...args) => undefined,
-  settlementHash: (...args) => undefined
+  settlementHash: (...args) => undefined,
+  expenseCommitment: (...args) => undefined
 });
 export const pureCircuits = {};
 export const contractReferenceLocations =

@@ -4,6 +4,7 @@ export type Witnesses<PS> = {
   localSecret(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, Uint8Array];
   localSalt(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, Uint8Array];
   settlementHash(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, Uint8Array];
+  expenseCommitment(context: __compactRuntime.WitnessContext<Ledger, PS>): [PS, Uint8Array];
 }
 
 export type ImpureCircuits<PS> = {
@@ -33,6 +34,7 @@ export type Ledger = {
   readonly expenseCount: bigint;
   readonly settlementCount: bigint;
   readonly lastSettlementHash: Uint8Array;
+  readonly lastExpenseCommitment: Uint8Array;
 }
 
 export type ContractReferenceLocations = any;
