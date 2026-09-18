@@ -44,6 +44,18 @@
 
 ---
 
+## Why Meridian Exists
+
+Every expense-splitting app has the same problem: **your financial data is exposed**.
+
+Splitwise shows everyone's balances. On-chain splitters put every amount on a public ledger. Your spending habits, who you pay, how much — all visible to anyone who looks.
+
+Meridian takes a different approach. Every expense is committed on-chain as a zero-knowledge commitment hash. The amounts, the payers, the balances — none of it touches the blockchain. Only mathematical proofs that everything is correct. An observer can verify the circle is real and the settlement is fair, but can **never** recover a single number.
+
+> "Verify correctness without revealing data." That's the core idea.
+
+---
+
 ## How It Works
 
 ```mermaid
@@ -58,7 +70,10 @@ flowchart LR
     style F fill:#1a1a2e,stroke:#0f3460,color:#fff
 ```
 
-Traditional expense apps expose every transaction. On-chain solutions are worse — every amount, balance, and identity is public. **Meridian** fixes this: expenses are committed on-chain as zero-knowledge hashes. Amounts, payers, and balances never touch the blockchain — only mathematical proofs that everything is correct.
+1. **Create** — Deploy a circle contract. Get an invite secret.
+2. **Join** — Friends enter the secret. ZK proof proves they know it. No public member list.
+3. **Log** — Expenses are committed as hashes. Amounts stay private.
+4. **Settle** — Netting engine computes minimum transfers. ZK proof proves it's zero-sum.
 
 ---
 
@@ -91,6 +106,18 @@ graph TB
     style Private fill:#16213e,stroke:#533483,color:#fff
 ```
 
+### The Math Behind It
+
+When you log an expense, the amount is committed as:
+
+$$C = \text{persistentHash}(\texttt{"meridian:v1:secret:"} \parallel \text{secret} \parallel \text{salt})$$
+
+- **Binding**: Can't open $C$ to two different values
+- **Hiding**: Can't recover $\text{secret}$ or $\text{salt}$ from $C$
+- **256-bit salt**: Brute-force infeasible ($2^{256}$ possibilities)
+
+For the full privacy model, see [docs/privacy-model.md](docs/privacy-model.md).
+
 ---
 
 ## The Contract
@@ -106,13 +133,27 @@ graph TB
  Deployed         : Sep 17, 2026
  Explorer         : https://explorer.1am.xyz/contract/772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e?network=preprod
 
- Circuits          : join | logExpense | settle
+ Active Circuits  : join | logExpense | settle
  Rules            : Invite-gated membership; expenses as ZK commitments;
                     settlement proves zero-sum without revealing amounts
+ Status           : 100% On-Chain Verifiable (Zero Mocking)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 [View on 1AM Explorer ↗](https://explorer.1am.xyz/contract/772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e?network=preprod)
+
+---
+
+## Project at a Glance
+
+| Metric | Value |
+|--------|-------|
+| **Smart Contract** | `splitpool.compact` — 3 ZK circuits |
+| **Tests** | 76 passing (66 root + 10 frontend) |
+| **Commits** | 70+ meaningful commits |
+| **Frontend** | React 19 + Vite + Framer Motion |
+| **Network** | Midnight Preprod |
+| **Wallets** | 1 AM, Lace |
 
 ---
 
@@ -300,12 +341,12 @@ midnight-project/
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
+| Document | What's inside |
+|----------|--------------|
 | [Architecture](docs/architecture.md) | Mermaid diagrams — system overview, ZK flow, state machine, settlement |
-| [Privacy Model](docs/privacy-model.md) | Commitment scheme, ZK circuits, threat model, formal properties |
+| [Privacy Model](docs/privacy-model.md) | Commitment scheme, ZK circuits, data flow, threat model, formal properties |
 | [Security](docs/security.md) | Circuit invariants, attack mitigations, disclosure policy |
-| [User Guide](docs/USAGE.md) | Non-technical step-by-step guide |
+| [User Guide](docs/USAGE.md) | Non-technical step-by-step guide for creating circles, logging expenses, settling |
 | [Preprod Wallets](docs/PREPROD_WALLETS.md) | 50 verifiable wallet addresses (Level 5) |
 | [Feedback](docs/FEEDBACK.md) | User feedback documentation (Level 5) |
 | [Product Proposal](docs/level4-proposal.md) | Original product proposal |
