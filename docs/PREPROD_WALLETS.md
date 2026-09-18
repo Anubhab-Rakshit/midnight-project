@@ -26,7 +26,7 @@ curl -s -X POST https://indexer.preprod.midnight.network/api/v4/graphql \
 
 | # | Wallet Address | Action | Date |
 |---|---------------|--------|------|
-| 1 | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` | Deployer | Sep 17, 2026 |
+| 1 | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` | Deployer | Sep 18, 2026 |
 | 2 | *(50 addresses to be added as users join)* | | |
 
 ---

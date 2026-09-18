@@ -126,12 +126,12 @@ For the full privacy model, see [docs/privacy-model.md](docs/privacy-model.md).
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  Meridian — splitpool.compact on Midnight Preprod
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Contract Address : 772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e
+ Contract Address : d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d
  Deployer         : mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za
  Block            : #2586714
  Tx Hash          : f8a8b67fcacfb2925c5f6b0fe5bb9cca37d405d7914aa1e7b4cce9b349f740bc
  Deployed         : Sep 17, 2026
- Explorer         : https://explorer.1am.xyz/contract/772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e?network=preprod
+ Explorer         : https://explorer.1am.xyz/contract/d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d?network=preprod
 
  Active Circuits  : join | logExpense | settle
  Rules            : Invite-gated membership; expenses as ZK commitments;
@@ -140,7 +140,7 @@ For the full privacy model, see [docs/privacy-model.md](docs/privacy-model.md).
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-[View on 1AM Explorer ↗](https://explorer.1am.xyz/contract/772cd2e005341311964fdad2fb6df79631acce35e2cfd832b1d2d8068c6ff63e?network=preprod)
+[View on 1AM Explorer ↗](https://explorer.1am.xyz/contract/d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d?network=preprod)
 
 ---
 
