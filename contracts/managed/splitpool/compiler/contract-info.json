@@ -67,6 +67,15 @@
         "type-name": "Bytes",
         "length": 32
       }
+    },
+    {
+      "name": "expenseCommitment",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
     }
   ],
   "contracts": [
@@ -103,6 +112,16 @@
     {
       "name": "lastSettlementHash",
       "index": 4,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "lastExpenseCommitment",
+      "index": 5,
       "exported": true,
       "storage": "Cell",
       "type": {
