@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useCirclesStore, useCircleExpenses, saveExpense } from '../hooks/useCirclesStore';
+import { useCirclesStore, useCircleExpenses, saveExpense, saveSettlement, markCircleExpensesSettled } from '../hooks/useCirclesStore';
 import { useMidnightWallet } from '../context/MidnightWalletContext';
 import { useMeridianContract } from '../hooks/useMeridianContract';
 import { ExpenseForm } from './ExpenseForm';
@@ -29,7 +29,10 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
 
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
 
-  // Compute real members from expenses
+  // Expenses still open in the current round (settled ones are history)
+  const unsettledExpenses = useMemo(() => expenses.filter((e) => !e.settledAt), [expenses]);
+
+  // Compute real members from all expenses (history)
   const members = useMemo(() => {
     const memberMap = new Map<string, { id: string; name: string; address: string; isCreator: boolean }>();
 
@@ -59,9 +62,10 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
     return Array.from(memberMap.values());
   }, [expenses, address]);
 
-  // Compute real balances using netting engine
+  // Compute real balances using netting engine (open expenses only)
   const balances = useMemo(() => {
-    if (expenses.length === 0 || members.length === 0) return new Map<string, number>();
+    const open = unsettledExpenses;
+    if (open.length === 0 || members.length === 0) return new Map<string, number>();
 
     const balanceMap = new Map<string, number>();
     for (const m of members) {
@@ -70,7 +74,7 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
 
     // Each expense: payer is owed (amount / members.length) by each non-payer
     const sharePerMember = members.length;
-    for (const exp of expenses) {
+    for (const exp of open) {
       const share = exp.amount / sharePerMember;
       const currentBalance = balanceMap.get(exp.walletAddress) || 0;
       balanceMap.set(exp.walletAddress, currentBalance + exp.amount - share);
@@ -84,7 +88,7 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
     }
 
     return balanceMap;
-  }, [expenses, members]);
+  }, [unsettledExpenses, members]);
 
   // Compute settlement plan
   const settlementPlan = useMemo(() => {
@@ -92,23 +96,23 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
     return computeMinimumTransfers(balances);
   }, [balances]);
 
-  // Compute analytics
+  // Compute analytics for the current open round
   const analytics = useMemo(() => {
-    if (expenses.length === 0) return null;
+    if (unsettledExpenses.length === 0) return null;
     return computeCircleAnalytics(
-      expenses.map((e) => ({
+      unsettledExpenses.map((e) => ({
         memberId: e.walletAddress,
         amount: e.amount,
         label: e.expenseLabel,
         timestamp: e.createdAt,
       }))
     );
-  }, [expenses]);
+  }, [unsettledExpenses]);
 
-  // Real totals
+  // Real totals (open round only)
   const totalSpent = useMemo(
-    () => expenses.reduce((sum, e) => sum + e.amount, 0),
-    [expenses]
+    () => unsettledExpenses.reduce((sum, e) => sum + e.amount, 0),
+    [unsettledExpenses]
   );
   const yourBalance = address ? (balances.get(address) ?? 0) : 0;
 
@@ -288,6 +292,9 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
                             </div>
                             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                               {e.expenseType} split · {new Date(e.createdAt).toLocaleDateString()}
+                              {e.settledAt && (
+                                <span style={{ color: '#34d399', marginLeft: '0.75rem' }}>✓ SETTLED {new Date(e.settledAt).toLocaleDateString()}</span>
+                              )}
                             </div>
                           </div>
                           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', color: 'var(--accent-gold)', fontWeight: 600 }}>
@@ -318,7 +325,7 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
               {settlementPlan && settlementPlan.transfers.length > 0 ? (
                 <SettlementBoard
                   members={members}
-                  expenses={expenses.map((e) => ({
+                  expenses={unsettledExpenses.map((e) => ({
                     paidBy: e.walletAddress,
                     amount: e.amount,
                     splitWith: members.map((m) => m.id),
@@ -326,7 +333,22 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
                   settlementPlan={settlementPlan}
                   onSettle={async () => {
                     if (!circle || !settlementPlan || !address) return;
-                    await settle(circle.contractAddress, circle.inviteSecret, settlementPlan);
+                    const result = await settle(circle.contractAddress, circle.inviteSecret, settlementPlan);
+                    try {
+                      await Promise.all([
+                        saveSettlement({
+                          circleAddress: circle.contractAddress,
+                          transferCount: settlementPlan.transfers.length,
+                          settlementHash: result.settlementHash,
+                          txHash: result.txHash,
+                          blockHeight: result.blockHeight,
+                        }),
+                        markCircleExpensesSettled(circle.contractAddress),
+                      ]);
+                    } catch (err) {
+                      console.warn('[Meridian] Settlement recorded on-chain but failed to update local ledger:', err);
+                    }
+                    await refetchExpenses();
                   }}
                 />
               ) : (
@@ -356,7 +378,7 @@ export const CircleDetail: React.FC<CircleDetailProps> = ({ contractAddress, onB
                 <AnalyticsDashboard
                   analytics={analytics}
                   currentMemberId={address || ''}
-                  expenses={expenses.map((e) => ({
+                  expenses={unsettledExpenses.map((e) => ({
                     memberId: e.walletAddress,
                     amount: e.amount,
                     label: e.expenseLabel,

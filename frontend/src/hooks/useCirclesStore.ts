@@ -48,6 +48,7 @@ export interface ExpenseRecord {
   commitmentHash: string;
   txHash: string | null;
   blockHeight: number | null;
+  settledAt: string | null;
   createdAt: string;
 }
 
@@ -61,6 +62,7 @@ interface ExpenseRow {
   commitment_hash: string;
   tx_hash: string | null;
   block_height: number | null;
+  settled_at: string | null;
   created_at: string;
 }
 
@@ -70,6 +72,7 @@ export interface SettlementRecord {
   id: string;
   circleAddress: string;
   transferCount: number;
+  settlementHash: string | null;
   txHash: string | null;
   blockHeight: number | null;
   createdAt: string;
@@ -79,6 +82,7 @@ interface SettlementRow {
   id: string;
   circle_address: string;
   transfer_count: number;
+  settlement_hash: string | null;
   tx_hash: string | null;
   block_height: number | null;
   created_at: string;
@@ -158,6 +162,7 @@ function mapExpenseRow(row: ExpenseRow): ExpenseRecord {
     commitmentHash: row.commitment_hash,
     txHash: row.tx_hash,
     blockHeight: row.block_height,
+    settledAt: row.settled_at,
     createdAt: row.created_at,
   };
 }
@@ -167,6 +172,7 @@ function mapSettlementRow(row: SettlementRow): SettlementRecord {
     id: row.id,
     circleAddress: row.circle_address,
     transferCount: row.transfer_count,
+    settlementHash: row.settlement_hash,
     txHash: row.tx_hash,
     blockHeight: row.block_height,
     createdAt: row.created_at,
@@ -243,15 +249,33 @@ export async function saveExpense(input: {
   if (error) throw new Error(`Failed to save expense: ${error.message}`);
 }
 
+/**
+ * Closes the current settlement round: marks every open expense of the
+ * circle as settled so balances recompute to zero. Returns the number of
+ * expenses marked.
+ */
+export async function markCircleExpensesSettled(circleAddress: string): Promise<number> {
+  const { data, error } = await supabase
+    .from('expenses')
+    .update({ settled_at: new Date().toISOString() })
+    .eq('circle_address', circleAddress)
+    .is('settled_at', null)
+    .select('id');
+  if (error) throw new Error(`Failed to close settlement round: ${error.message}`);
+  return data?.length ?? 0;
+}
+
 export async function saveSettlement(input: {
   circleAddress: string;
   transferCount: number;
+  settlementHash?: string;
   txHash?: string;
   blockHeight?: number;
 }): Promise<void> {
   const { error } = await supabase.from('settlements').insert({
     circle_address: input.circleAddress,
     transfer_count: input.transferCount,
+    settlement_hash: input.settlementHash ?? null,
     tx_hash: input.txHash ?? null,
     block_height: input.blockHeight ?? null,
   });
