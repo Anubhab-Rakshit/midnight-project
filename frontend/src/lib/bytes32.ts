@@ -15,3 +15,14 @@ export function toBytes32(value: string): Uint8Array {
   out.set(bytes.slice(0, 32));
   return out;
 }
+
+/**
+ * Deterministically derive a 32-byte salt from the invite secret.
+ * Both the deploy script and the frontend MUST use the same derivation
+ * so that commitSecret(secret, salt) matches the on-chain inviteRoot.
+ */
+export async function deriveSalt(inviteSecret: string): Promise<Uint8Array> {
+  const data = new TextEncoder().encode(`meridian-salt:${inviteSecret}`);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return new Uint8Array(hash);
+}

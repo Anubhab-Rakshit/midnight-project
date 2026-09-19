@@ -22,7 +22,7 @@ import {
   BrowserWalletProvider,
   getWalletProvingProvider,
 } from '../midnight/providers';
-import { toBytes32 } from '../lib/bytes32';
+import { toBytes32, deriveSalt } from '../lib/bytes32';
 import { computeSettlementHash } from '@meridian/netting';
 import type { SettlementPlan } from '@meridian/netting';
 
@@ -248,7 +248,7 @@ async function findContract(
   expenseCommitment?: Uint8Array,
 ) {
   const { providers, privateStateProvider } = await buildProviders(connectedApi, contractAddress);
-  const salt = crypto.getRandomValues(new Uint8Array(32));
+  const salt = await deriveSalt(inviteSecret);
   const compiledContract = makeCompiledContract(inviteSecret, salt, undefined, expenseCommitment);
 
   const found = await findDeployedContract(providers as any, {

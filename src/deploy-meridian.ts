@@ -11,6 +11,7 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { WebSocket } from 'ws';
 import * as Rx from 'rxjs';
@@ -31,6 +32,11 @@ function toBytes32(value: string): Uint8Array {
   const out = new Uint8Array(32);
   out.set(bytes.slice(0, 32));
   return out;
+}
+
+function deriveSalt(inviteSecret: string): Uint8Array {
+  const hash = crypto.createHash('sha256').update(`meridian-salt:${inviteSecret}`).digest();
+  return new Uint8Array(hash);
 }
 
 // @ts-expect-error Required for wallet sync
@@ -247,7 +253,7 @@ async function main() {
 
   // Generate or use provided invite secret
   const inviteSecret = parseInviteSecret(process.argv) ?? crypto.randomUUID().replace(/-/g, '');
-  const salt = crypto.getRandomValues(new Uint8Array(32));
+  const salt = deriveSalt(inviteSecret);
 
   console.log(`  Invite secret: ${inviteSecret}`);
   console.log('  ⚠  Share this secret with circle members — they need it to join.\n');
