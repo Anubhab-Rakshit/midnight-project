@@ -12,7 +12,7 @@
 
 <br/>
 
-**[Live Demo](https://meridian-midnight.vercel.app/)** · **[3-Min Video](https://youtu.be/CFae-K52us0)** · **[Architecture](docs/architecture.md)** · **[X](https://x.com/anubhab_26/status/2100218988907421779?s=20)**
+**[Live Demo](https://meridian-midnight.vercel.app/)** · **[3-Min Video](https://youtu.be/CFae-K52us0)** · **[Architecture](docs/architecture.md)** · **[X](https://x.com/anubhab_26/status/2100218988907421779?s=20)** · **[Feedback Form](https://forms.gle/hCDimFx3mNSBUo1e7)** · **[Responses](https://docs.google.com/spreadsheets/d/1zyc14ihbuKbWa3QTvLeydI8nc6QvWfSaSG8ie6bCbLU/edit?usp=sharing)**
 
 <br/>
 
@@ -149,6 +149,26 @@ For the full privacy model, see [docs/privacy-model.md](docs/privacy-model.md).
 | **v2** | `d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d` | Expense commitment hashes written on-chain | [1AM ↗](https://explorer.1am.xyz/contract/d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d?network=preprod) |
 | **v1** | `2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d` | First Preprod deployment — invite-gated membership, expense logs, minimum-transfer settlement | [1AM ↗](https://explorer.1am.xyz/contract/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d?network=preprod) |
 
+### Transaction History
+
+Every contract call — deploy, join, log expense, settle — was a separate on-chain transaction. Multiple contract versions were deployed as the code evolved, so transactions map to different addresses.
+
+| # | Tx Hash | Explorer |
+|---|---------|----------|
+| 1 | `f3b9d2c314dbb8b1e878f43af7037a7d22c0dcf584da52d5452a8e66295a7ea0` | [Night Scan ↗](https://explorer.preprod.midnight.network/transactions/f3b9d2c314dbb8b1e878f43af7037a7d22c0dcf584da52d5452a8e66295a7ea0) |
+| 2 | `8d1fd961376ce65e1647df41cccc52d6716e4ac94f66ad88c8f5c14735de7950` | [1AM ↗](https://explorer.1am.xyz/tx/8d1fd961376ce65e1647df41cccc52d6716e4ac94f66ad88c8f5c14735de7950?network=preprod) |
+| 3 | `20300e1e437fda967b91434def7174c071369b73832bdf983ad993067d710b36` | [1AM ↗](https://explorer.1am.xyz/tx/20300e1e437fda967b91434def7174c071369b73832bdf983ad993067d710b36?network=preprod) |
+| 4 | `8eb01b267ce29bb227961657cf1f4fa472e1f34dec0d0437d69b72a4fea0ce08` | [1AM ↗](https://explorer.1am.xyz/tx/8eb01b267ce29bb227961657cf1f4fa472e1f34dec0d0437d69b72a4fea0ce08?network=preprod) |
+| 5 | `1ad04ce4f18b00447fc498ce1348a0e26722815d303353ce4ee02041102018c2` | [1AM ↗](https://explorer.1am.xyz/tx/1ad04ce4f18b00447fc498ce1348a0e26722815d303353ce4ee02041102018c2?network=preprod) |
+| 6 | `50d7068908308ac886fb4d7efd0093f64534e7b44a4beb325636fc4f891b25d4` | [1AM ↗](https://explorer.1am.xyz/tx/50d7068908308ac886fb4d7efd0093f64534e7b44a4beb325636fc4f891b25d4?network=preprod) |
+| 7 | `47ff2e9cf842a3901509641e93b2138195fdd77340909c6295ba9aefc526e73f` | [1AM ↗](https://explorer.1am.xyz/tx/47ff2e9cf842a3901509641e93b2138195fdd77340909c6295ba9aefc526e73f?network=preprod) |
+| 8 | `4a369685da78d4e0101d5f880c00987e9b6594bf75b18e7bbdbd373fed70b2fd` | [1AM ↗](https://explorer.1am.xyz/tx/4a369685da78d4e0101d5f880c00987e9b6594bf75b18e7bbdbd373fed70b2fd?network=preprod) |
+| 9 | `1f1f78dfe72a5f016443a8fe088fe0244cd2e46172099baccba08baa8220b7eb` | [1AM ↗](https://explorer.1am.xyz/tx/1f1f78dfe72a5f016443a8fe088fe0244cd2e46172099baccba08baa8220b7eb?network=preprod) |
+| 10 | `a8294c6643639a5c9cea13ee9d14057791c1258136d05edcccc0314d1318b242` | [1AM ↗](https://explorer.1am.xyz/tx/a8294c6643639a5c9cea13ee9d14057791c1258136d05edcccc0314d1318b242?network=preprod) |
+| 11 | `55590bf00725ef16d038f2344c3baafe6b4685fcdb8cc7c47d12834055578864` | [1AM ↗](https://explorer.1am.xyz/tx/55590bf00725ef16d038f2344c3baafe6b4685fcdb8cc7c47d12834055578864?network=preprod) |
+
+> Contracts were redeployed as the codebase evolved (v1 → v2 → v3), so these transactions span multiple contract addresses. The final settle tx (`55590bf...`) is on the active v3 contract.
+
 ### What Changed (Based on Feedback)
 
 A feedback-driven round of fixes, focused on the two most-reported issues:
@@ -164,6 +184,44 @@ A feedback-driven round of fixes, focused on the two most-reported issues:
 - Responsive nav-pill — tabs collapse cleanly on narrow viewports
 - Floating nav spacing and top offset corrected on mobile
 - Connect-button sizing and the wallet status indicator tuned for small screens
+
+---
+
+## Public Proof Server — Deployment Strategy
+
+Settlement (and deploy/join) require a **ZK proof server**. Locally the app proves against `http://127.0.0.1:6300` (`frontend/src/midnight/providers.ts`) — perfect for development, but useless for visitors of the hosted app, whose browsers can't reach a developer's localhost. Making settlement work for *everyone* means running a **public proof server**.
+
+### The Constraint
+
+| Where the proof server runs | What happens |
+|---|---|
+| Local Docker (dev machine) | ✅ Works — proving on `127.0.0.1:6300` |
+| Vercel-hosted app | ❌ Needs a server the *visitor's* browser can reach; default points at their own localhost |
+| Any mainstream cloud VM | ❌ Oracle, AWS, GCP, Azure, Fly all require a credit card at signup |
+
+Meridian is a genuinely low-budget project — no card on file and minimal funds — so renting a VPS isn't an option *yet*. The plans below are the **free, no-credit-card** paths we intend to use to route around that.
+
+### Planned Workarounds (all $0, no card)
+
+1. **Tailscale Funnel — primary plan.** The free personal tier (email-only signup) publishes the proof server running on the dev machine as a **permanent** HTTPS URL, `https://<machine>.<tailnet>.ts.net` — no domain purchase, no inbound-port opening.
+
+   ```bash
+   docker run -d --name proof-server --restart unless-stopped \
+     -p 127.0.0.1:6300:6300 midnightntwrk/proof-server:8.1.0
+   sudo tailscale funnel 6300 on
+   ```
+
+   Then `VITE_PROOF_SERVER_URL=https://<machine>.<tailnet>.ts.net`. Caveat: serving lives on the dev machine, so it's reachable whenever development is active.
+
+2. **GitHub Codespaces — fallback host.** Free monthly core-hours, no card. A Codespace running the proof container with its forwarded port set to **public** yields a reachable HTTPS `*.app.github.dev` URL. Best for demo windows — sessions idle out and the URL rotates per session.
+
+3. **Render — container PaaS.** Free-tier web services don't require a card, but cap RAM at 512 MB — enough for small-circuit checks, likely too tight for full proof generation. Kept as a lightweight stopgap.
+
+4. **Oracle Cloud Always Free — long-term target.** Ampere A1 (up to 4 OCPU / 24 GB) is free *forever*, but still demands card verification at signup — so it stays on the roadmap for the moment a card becomes available.
+
+### Why it matters
+
+Low funds shouldn't mean "no settlement." The app intentionally defaults to the local proof server so development is never blocked, and `VITE_PROOF_SERVER_URL` is read at build time — so enabling any of the options above is a **one-line env change + redeploy**, no code changes. A future hardening step is a shared `X-Proof-Token` header so a public server can't be abused for free compute.
 
 ---
 
