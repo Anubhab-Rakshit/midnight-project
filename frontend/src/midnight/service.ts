@@ -249,6 +249,11 @@ async function findContract(
 ) {
   const { providers, privateStateProvider } = await buildProviders(connectedApi, contractAddress);
   const salt = await deriveSalt(inviteSecret);
+
+  // Clear stale localStorage state — Uint8Array fields get corrupted by
+  // JSON serialization. With deterministic salt we can always reconstruct.
+  await privateStateProvider.remove('meridianCirclePrivateState');
+
   const compiledContract = makeCompiledContract(inviteSecret, salt, undefined, expenseCommitment);
 
   const found = await findDeployedContract(providers as any, {
