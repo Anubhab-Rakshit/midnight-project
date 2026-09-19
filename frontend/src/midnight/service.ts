@@ -202,7 +202,7 @@ export async function deployCircle(
   inviteSecret: string,
 ): Promise<DeployedCircle> {
   const { providers } = await buildProviders(connectedApi);
-  const salt = crypto.getRandomValues(new Uint8Array(32));
+  const salt = await deriveSalt(inviteSecret);
   const compiledContract = makeCompiledContract(inviteSecret, salt);
 
   let deployed: any;
