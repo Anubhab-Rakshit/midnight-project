@@ -35,7 +35,7 @@ curl -s -X POST https://indexer.preprod.midnight.network/api/v4/graphql \
 |---------|---------|-------|
 | v3 (active) | `a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8` | Deterministic salt, expense commitments on-chain |
 | v2 (deprecated) | `d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d` | Expense commitments added, random salt |
-| v1 (deprecated) | `2eff47c4...` | Devnet prototype |
+| v1 (deprecated) | `2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d` | First Preprod deployment |
 
 ---
 

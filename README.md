@@ -128,7 +128,6 @@ For the full privacy model, see [docs/privacy-model.md](docs/privacy-model.md).
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  Active Contract   : a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8
  Deployer          : mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za
- Block             : (pending indexer confirmation)
  Tx Hash           : b76370710fb8cf72d2808a65e1f3ae5da8d4dcd7f264c20a92611bade75c5d56
  Deployed          : Sep 19, 2026
  Explorer          : https://explorer.1am.xyz/contract/a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8?network=preprod
@@ -137,15 +136,34 @@ For the full privacy model, see [docs/privacy-model.md](docs/privacy-model.md).
  Rules             : Invite-gated membership; expenses as ZK commitments;
                      settlement proves zero-sum without revealing amounts
  Status            : 100% On-Chain Verifiable (Zero Mocking)
-
- Previous Deployments (deprecated):
-   v1  2eff47c4...  Sep 11 — undeployed devnet
-   v2  d6030693...  Sep 18 — expense commitment hashes on-chain
-   v3  a9206339...  Sep 19 — deterministic salt (fixes settle circuit)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 [View on 1AM Explorer ↗](https://explorer.1am.xyz/contract/a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8?network=preprod)
+
+### Deployment History (v1 → v3)
+
+| Version | Contract Address | What changed | Explorer |
+|---------|------------------|--------------|----------|
+| **v3 — active** | `a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8` | Deterministic salt derivation — fixes the settle circuit (previous versions used a random salt, so the on-chain commitment check failed intermittently); expense commitments on-chain; hardened proving pipeline | [1AM ↗](https://explorer.1am.xyz/contract/a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8?network=preprod) |
+| **v2** | `d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d` | Expense commitment hashes written on-chain | [1AM ↗](https://explorer.1am.xyz/contract/d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d?network=preprod) |
+| **v1** | `2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d` | First Preprod deployment — invite-gated membership, expense logs, minimum-transfer settlement | [1AM ↗](https://explorer.1am.xyz/contract/2eff47c41ca88490d61278c27e6942ff4b758ffd4eb3e929e9cd5e0812f7896d?network=preprod) |
+
+### What Changed (Based on Feedback)
+
+A feedback-driven round of fixes, focused on the two most-reported issues:
+
+**Settlement didn't clear balances.** Pressing *Settle* committed the plan hash on-chain, but the amounts you settled stayed on screen "forever" — expenses were never marked settled, so balances recomputed from the same open rows each render. Fixed:
+
+- A successful settle now **closes the round**: every open expense is marked settled, the round is recorded in the settlement history (including its on-chain plan hash), and balances reset to zero.
+- Closed expenses carry a **✓ SETTLED** tag in the ledger instead of silently vanishing.
+- Added the missing RLS `UPDATE` policy on `expenses` (migrations `005` and `006`) — without it the round-close update silently matched zero rows.
+
+**Mobile UI errors.** Reported layout problems on small screens were fixed:
+
+- Responsive nav-pill — tabs collapse cleanly on narrow viewports
+- Floating nav spacing and top offset corrected on mobile
+- Connect-button sizing and the wallet status indicator tuned for small screens
 
 ---
 
