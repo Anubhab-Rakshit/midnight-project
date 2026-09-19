@@ -126,21 +126,26 @@ For the full privacy model, see [docs/privacy-model.md](docs/privacy-model.md).
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  Meridian — splitpool.compact on Midnight Preprod
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Contract Address : d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d
- Deployer         : mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za
- Block            : #2586714
- Tx Hash          : f8a8b67fcacfb2925c5f6b0fe5bb9cca37d405d7914aa1e7b4cce9b349f740bc
- Deployed         : Sep 17, 2026
- Explorer         : https://explorer.1am.xyz/contract/d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d?network=preprod
+ Active Contract   : a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8
+ Deployer          : mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za
+ Block             : (pending indexer confirmation)
+ Tx Hash           : b76370710fb8cf72d2808a65e1f3ae5da8d4dcd7f264c20a92611bade75c5d56
+ Deployed          : Sep 19, 2026
+ Explorer          : https://explorer.1am.xyz/contract/a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8?network=preprod
 
- Active Circuits  : join | logExpense | settle
- Rules            : Invite-gated membership; expenses as ZK commitments;
-                    settlement proves zero-sum without revealing amounts
- Status           : 100% On-Chain Verifiable (Zero Mocking)
+ Active Circuits   : join | logExpense | settle
+ Rules             : Invite-gated membership; expenses as ZK commitments;
+                     settlement proves zero-sum without revealing amounts
+ Status            : 100% On-Chain Verifiable (Zero Mocking)
+
+ Previous Deployments (deprecated):
+   v1  2eff47c4...  Sep 11 — undeployed devnet
+   v2  d6030693...  Sep 18 — expense commitment hashes on-chain
+   v3  a9206339...  Sep 19 — deterministic salt (fixes settle circuit)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-[View on 1AM Explorer ↗](https://explorer.1am.xyz/contract/d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d?network=preprod)
+[View on 1AM Explorer ↗](https://explorer.1am.xyz/contract/a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8?network=preprod)
 
 ---
 

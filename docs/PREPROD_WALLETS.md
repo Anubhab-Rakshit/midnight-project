@@ -26,8 +26,16 @@ curl -s -X POST https://indexer.preprod.midnight.network/api/v4/graphql \
 
 | # | Wallet Address | Action | Date |
 |---|---------------|--------|------|
-| 1 | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` | Deployer | Sep 18, 2026 |
+| 1 | `mn_addr_preprod13zlyk4cr9qqygx3h5swk6xl2lk80vv0ut874ze66fhx3xda0umtqdt24za` | Deployer (v3) | Sep 19, 2026 |
 | 2 | *(50 addresses to be added as users join)* | | |
+
+### Contract Addresses (Preprod)
+
+| Version | Address | Notes |
+|---------|---------|-------|
+| v3 (active) | `a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8` | Deterministic salt, expense commitments on-chain |
+| v2 (deprecated) | `d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d` | Expense commitments added, random salt |
+| v1 (deprecated) | `2eff47c4...` | Devnet prototype |
 
 ---
 

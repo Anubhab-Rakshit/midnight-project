@@ -24,7 +24,9 @@ The core innovation: **programmable financial privacy**. Not "encrypted database
 | CI/CD pipeline | https://github.com/Anubhab-Rakshit/midnight-project/actions |
 | Product proposal | https://github.com/Anubhab-Rakshit/midnight-project/blob/main/docs/level4-proposal.md |
 
-**Contract deployment note:** The splitpool contract has been compiled and its artifacts (prover/verifier keys, ZKIR, compiled bindings) are fully wired into the frontend. The contract was deployed to Preprod (address: `d603069345cbafabe723511524a0bebd7649c842667dee171522b2fe63fc0e7d`) but the Preprod explorer has not indexed it. The frontend is fully wired to deploy, join, log expenses, and settle via the real Midnight SDK — no mocks.
+**Contract deployment note:** The splitpool contract has been compiled and its artifacts (prover/verifier keys, ZKIR, compiled bindings) are fully wired into the frontend. The contract was deployed to Preprod (address: `a9206339b84565fd515c0b2a49ae86783c7a7f278ed42414723b1053d489ecb8`) but the Preprod explorer has not indexed it. The frontend is fully wired to deploy, join, log expenses, and settle via the real Midnight SDK — no mocks.
+
+**Version history:** v1 (`2eff47c4`) — devnet prototype; v2 (`d6030693`) — added expense commitment hashes on-chain; v3 (`a9206339`) — deterministic salt derivation fixing the settle circuit assertion.
 
 ---
 
