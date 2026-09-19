@@ -13,14 +13,13 @@ import { setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import { CompiledContract } from '@midnight-ntwrk/midnight-js-protocol/compact-js';
 import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
-import { createProofProvider } from '@midnight-ntwrk/midnight-js-types';
 import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 
 import { Contract } from '../midnight/contract/index.js';
 import {
   BrowserZkConfigProvider,
   BrowserWalletProvider,
-  getWalletProvingProvider,
+  getLocalProvingProvider,
 } from '../midnight/providers';
 import { toBytes32, deriveSalt } from '../lib/bytes32';
 import { computeSettlementHash } from '@meridian/netting';
@@ -163,7 +162,6 @@ async function buildProviders(
 
   const indexerUri = await walletProvider.indexerUri();
   const indexerWsUri = await walletProvider.indexerWsUri();
-  const provingProvider = await getWalletProvingProvider(connectedApi, zkConfig);
 
   const privateStateProvider = new LocalStoragePrivateStateProvider();
   if (contractAddress) {
@@ -175,7 +173,7 @@ async function buildProviders(
       privateStateProvider,
       publicDataProvider: indexerPublicDataProvider(indexerUri, indexerWsUri),
       zkConfigProvider: zkConfig as any,
-      proofProvider: createProofProvider(provingProvider as any),
+      proofProvider: getLocalProvingProvider(zkConfig),
       walletProvider: walletProvider as any,
       midnightProvider: walletProvider as any,
     } as any,
@@ -246,6 +244,7 @@ async function findContract(
   contractAddress: string,
   inviteSecret: string,
   expenseCommitment?: Uint8Array,
+  planHash?: Uint8Array,
 ) {
   const { providers, privateStateProvider } = await buildProviders(connectedApi, contractAddress);
   const salt = await deriveSalt(inviteSecret);
@@ -254,7 +253,7 @@ async function findContract(
   // JSON serialization. With deterministic salt we can always reconstruct.
   await privateStateProvider.remove('meridianCirclePrivateState');
 
-  const compiledContract = makeCompiledContract(inviteSecret, salt, undefined, expenseCommitment);
+  const compiledContract = makeCompiledContract(inviteSecret, salt, planHash, expenseCommitment);
 
   const found = await findDeployedContract(providers as any, {
     compiledContract,
@@ -323,7 +322,7 @@ export async function settleCircle(
   settlementPlan: SettlementPlan,
 ): Promise<SettledCircle> {
   const planHash = await computeSettlementHash(settlementPlan);
-  const { found } = await findContract(connectedApi, contractAddress, inviteSecret);
+  const { found } = await findContract(connectedApi, contractAddress, inviteSecret, undefined, planHash);
 
   const result = await found.callTx.settle();
   const txData = result?.public ?? (result as any)?.txData?.public ?? {};

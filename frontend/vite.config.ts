@@ -23,6 +23,14 @@ export default defineConfig({
       // Meridian shared modules (netting engine, types)
       '@meridian': resolve(__dirname, '../src/meridian'),
     },
+    dedupe: [
+      // Force ONE copy of the onchain runtime. npm nests 3.0.0 under both
+      // compact-runtime and midnight-js-protocol; two WASM instances mean two
+      // distinct StateValue classes and `new ChargedState(nextContractState)`
+      // throws "expected instance of StateValue". This dedupes them at bundle
+      // time so the circuit output and the ChargedState wrapper share one class.
+      '@midnight-ntwrk/onchain-runtime-v3',
+    ],
   },
   assetsInclude: ['**/*.prover', '**/*.verifier', '**/*.zkir', '**/*.bzkir'],
 })

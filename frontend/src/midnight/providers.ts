@@ -2,9 +2,15 @@
  * Browser Midnight providers backed by the wallet's ConnectedAPI.
  *
  * In the browser we never touch private keys directly — the wallet does:
- *   - proving  via `getProvingProvider(keyMaterialProvider)`
- *   - balancing via `balanceUnsealedTransaction(serializedTx)`
- *   - submitting via `submitTransaction(serializedTx)`
+ *   - balance via `balanceUnsealedTransaction(serializedTx)`
+ *   - submit via `submitTransaction(serializedTx)`
+ *
+ * Proving does NOT go through the wallet: the wallet extension ships its own
+ * ledger/compact SDK, which deserializes our circuit preimages with a
+ * different "midnight:"-tagged wire format ("Proving check failed: tagged
+ * data does not begin with 'midnight:'"). Instead we prove against the local
+ * proof server (docker, 8.1.0) — the exact same binary/versions the CLI
+ * deploy uses — and the wallet only balances, seals, signs and submits.
  *
  * Transactions cross the wallet boundary as base64-encoded Ledger serializations.
  */
@@ -13,9 +19,13 @@ import {
   type ConnectedAPI,
   type ProvingProvider,
 } from '@midnight-ntwrk/dapp-connector-api';
+import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import { createProverKey, createVerifierKey, createZKIR, ZKConfigProvider } from '@midnight-ntwrk/midnight-js-types';
 import { Transaction } from '@midnight-ntwrk/ledger-v8';
 import { toHex, fromHex } from '@midnight-ntwrk/midnight-js-protocol/compact-runtime';
+
+const LOCAL_PROOF_SERVER_URL =
+  (import.meta.env.VITE_PROOF_SERVER_URL as string | undefined) ?? 'http://127.0.0.1:6300';
 
 export type MeridianCircuitId = 'join' | 'logExpense' | 'settle';
 
@@ -27,13 +37,13 @@ interface AssetUrls {
 
 const joinProverUrl = new URL('../midnight/keys/join.prover', import.meta.url).href;
 const joinVerifierUrl = new URL('../midnight/keys/join.verifier', import.meta.url).href;
-const joinZkirUrl = new URL('../midnight/zkir/join.zkir', import.meta.url).href;
+const joinZkirUrl = new URL('../midnight/zkir/join.bzkir', import.meta.url).href;
 const logExpenseProverUrl = new URL('../midnight/keys/logExpense.prover', import.meta.url).href;
 const logExpenseVerifierUrl = new URL('../midnight/keys/logExpense.verifier', import.meta.url).href;
-const logExpenseZkirUrl = new URL('../midnight/zkir/logExpense.zkir', import.meta.url).href;
+const logExpenseZkirUrl = new URL('../midnight/zkir/logExpense.bzkir', import.meta.url).href;
 const settleProverUrl = new URL('../midnight/keys/settle.prover', import.meta.url).href;
 const settleVerifierUrl = new URL('../midnight/keys/settle.verifier', import.meta.url).href;
-const settleZkirUrl = new URL('../midnight/zkir/settle.zkir', import.meta.url).href;
+const settleZkirUrl = new URL('../midnight/zkir/settle.bzkir', import.meta.url).href;
 
 const ASSETS: Record<MeridianCircuitId, AssetUrls> = {
   join: { prover: joinProverUrl, verifier: joinVerifierUrl, zkir: joinZkirUrl },
@@ -191,6 +201,16 @@ export class BrowserWalletProvider {
     await this.connectedApi.submitTransaction(hex);
     return tx.identifiers()[0];
   }
+}
+
+/**
+ * ProofProvider that talks to the same proof server the CLI deploy uses
+ * (`midnightntwrk/proof-server:8.1.0`, docker). Proving through the wallet
+ * extension instead fails preimage deserialization on tag format mismatch —
+ * see the module doc comment at the top.
+ */
+export function getLocalProvingProvider(zkConfig: BrowserZkConfigProvider): any {
+  return httpClientProofProvider(LOCAL_PROOF_SERVER_URL, zkConfig);
 }
 
 export async function getWalletProvingProvider(connectedApi: ConnectedAPI, zkConfig: BrowserZkConfigProvider): Promise<ProvingProvider> {
