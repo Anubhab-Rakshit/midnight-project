@@ -69,4 +69,7 @@ midnightlevel3implementation.md
 opencode_ses.txt
 check-preprod.sh
 
+# User data (contains personal info)
+*.csv
+
 
