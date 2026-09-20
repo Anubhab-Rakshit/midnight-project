@@ -12,7 +12,7 @@
 
 <br/>
 
-**[Live Demo](https://meridian-midnight.vercel.app/)** · **[3-Min Video](https://youtu.be/CFae-K52us0)** · **[Architecture](docs/architecture.md)** · **[X](https://x.com/anubhab_26/status/2100218988907421779?s=20)** · **[Feedback Form](https://forms.gle/hCDimFx3mNSBUo1e7)** · **[Responses](https://docs.google.com/spreadsheets/d/1zyc14ihbuKbWa3QTvLeydI8nc6QvWfSaSG8ie6bCbLU/edit?usp=sharing)**
+**[Live Demo](https://meridian-midnight.vercel.app/)** · **[3-Min Video](https://youtu.be/CFae-K52us0)** · **[Architecture](docs/architecture.md)** · **[X](https://x.com/anubhab_26/status/2101745295541572002?s=20)** · **[X](https://x.com/anubhab_26/status/2101745430455603693?s=20)** · **[X](https://x.com/anubhab_26/status/2100218988907421779?s=20)** · **[Feedback Form](https://forms.gle/hCDimFx3mNSBUo1e7)** · **[Responses](https://docs.google.com/spreadsheets/d/1zyc14ihbuKbWa3QTvLeydI8nc6QvWfSaSG8ie6bCbLU/edit?usp=sharing)**
 
 <br/>
 
