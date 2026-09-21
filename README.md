@@ -14,7 +14,7 @@
 
 **[Live Demo](https://meridian-midnight.vercel.app/)** · **[3-Min Video](https://youtu.be/CFae-K52us0)** · **[Architecture](docs/architecture.md)**
 
-**[@meridian_split](https://x.com/meridian_split)** · [Post 1](https://x.com/meridian_split/status/2101929901075075315?s=20) · [Post 2](https://x.com/meridian_split/status/2101930152150384969?s=20) · [Post 3](https://x.com/meridian_split/status/2101930344828350598?s=20) · [Dev Thread](https://x.com/anubhab_26/status/2101745295541572002?s=20) · [Dev Thread](https://x.com/anubhab_26/status/2101745430455603693?s=20) · [Dev Thread](https://x.com/anubhab_26/status/2100218988907421779?s=20)
+**[@meridian_split](https://x.com/meridian_split)** · [Post 1](https://x.com/meridian_split/status/2101929901075075315?s=20) · [Post 2](https://x.com/meridian_split/status/2101930152150384969?s=20) · [Post 3](https://x.com/meridian_split/status/2101930344828350598?s=20) · [Post 4](https://x.com/meridian_split/status/2101933059205632280?s=20) · [Dev Thread](https://x.com/anubhab_26/status/2101745295541572002?s=20) · [Dev Thread](https://x.com/anubhab_26/status/2101745430455603693?s=20) · [Dev Thread](https://x.com/anubhab_26/status/2100218988907421779?s=20)
 
 **[Feedback Form](https://forms.gle/hCDimFx3mNSBUo1e7)** · **[Responses](https://docs.google.com/spreadsheets/d/1zyc14ihbuKbWa3QTvLeydI8nc6QvWfSaSG8ie6bCbLU/edit?usp=sharing)**
 
