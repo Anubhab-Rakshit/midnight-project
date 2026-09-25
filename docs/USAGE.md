@@ -3,7 +3,7 @@
 A complete, step-by-step guide for using Meridian to split expenses privately with your group.
 
 > **Live app**: [meridian-midnight.vercel.app](https://meridian-midnight.vercel.app/)
-> **Feedback**: [Google Form](https://forms.gle/hCDimFx3mNSBUo1e7) · [Responses](https://docs.google.com/spreadsheets/d/1zyc14ihbuKbWa3QTvLeydI8nc6QvWfSaSG8ie6bCbLU/edit?usp=sharing)
+> **Feedback**: [Google Form](https://forms.gle/hCDimFx3mNSBUo1e7) · [Responses](https://docs.google.com/spreadsheets/d/1DOKjU134rzaJq5stoeGXu6EfACsXkBQ9n39viYquQ9c/edit?usp=sharing)
 > **Support**: [GitHub Issues](https://github.com/Anubhab-Rakshit/midnight-project/issues) · [@meridian_split](https://x.com/meridian_split)
 
 ---
